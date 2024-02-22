@@ -4,12 +4,12 @@ class SVG
 
     static NS = "http://www.w3.org/2000/svg";
 
-    static create(opts)
+    static create(type, opts)
     {
-        let n = document.createElementNS(this.NS, opts.type);
+        let n = document.createElementNS(this.NS, type);
 
-        if(opts.attr)
-            for(const[k, v] of Object.entries(opts.attr))
+        if(opts)
+            for(const[k, v] of Object.entries(opts))
                 n.setAttribute(k, v);
 
         return n;
@@ -19,8 +19,8 @@ class SVG
     {
         let n = document.createElementNS(this.NS, "text");
 
-        if(opts.attr)
-            for(const[k, v] of Object.entries(opts.attr))
+        if(opts)
+            for(const[k, v] of Object.entries(opts))
                 n.setAttribute(k, v);
 
         n.append(document.createTextNode(opts.text));
