@@ -1,4 +1,4 @@
-body, html, h1 
+body, html, h1, h3 
 {
     margin: 0;
     padding: 0;
@@ -12,6 +12,11 @@ header
     color: white; 
     text-align: center;
     padding-bottom: 3px;
+}
+
+h3
+{
+    text-align: center;
 }
 
 .mainBody
@@ -34,8 +39,19 @@ header
 
 .controlContainer
 {
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.1em;
     width: 25%;
     height: calc(100% - 0.4em);
     padding: 0.2em;
+}
+
+.controlDiv
+{
+    border: thin solid black;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.5em;
+    padding: 1em;
 }
