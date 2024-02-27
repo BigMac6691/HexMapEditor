@@ -3,6 +3,7 @@ class SVG
     constructor()    {    }
 
     static NS = "http://www.w3.org/2000/svg";
+    static XNS = "http://www.w3.org/1999/xlink";
 
     static create(type, opts)
     {
@@ -11,6 +12,19 @@ class SVG
         if(opts)
             for(const[k, v] of Object.entries(opts))
                 n.setAttribute(k, v);
+
+        return n;
+    }
+
+    static createUse(link, opts)
+    {
+        let n = document.createElementNS(this.NS, "use");
+
+        if(opts)
+            for(const[k, v] of Object.entries(opts))
+                n.setAttribute(k, v);
+
+        n.setAttributeNS(this.XNS, "href", "#" + link);
 
         return n;
     }
