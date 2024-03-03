@@ -64,7 +64,7 @@ class HexMapEditor
         if(evt.srcElement === this.viewBoxWidth || evt.srcElement === this.viewBoxHeight)
         {
             this.hexMap.getSVG().setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
-            this.recalculatePolygon();
+            // this.recalculatePolygon();
         }
         else if(evt.srcElement === this.backgroundColour)
             this.hexMap.getSVG().style.background = evt.srcElement.value;
@@ -74,6 +74,8 @@ class HexMapEditor
 
     handleMapModelChange(evt)
     {
+        console.log("Map model change...");
+
         let c = +this.cols.value;
         let r = +this.rows.value;
         let model = this.hexMap.hexes;
@@ -98,13 +100,14 @@ class HexMapEditor
             model.forEach(row => row.push(...Array.from({length: n}, () => new Hex(this.hexMap))));
         }
 
-        if(polygonChange)
-            this.recalculatePolygon();
+        // if(polygonChange)
+        //     this.recalculatePolygon();
 
-        this.hexMap.hexagon.setAttribute("stroke", this.borderColour.value);
-        this.hexMap.hexagon.setAttribute("fill", this.defaultTerrainColour.value);
+        // this.hexMap.hexagon.setAttribute("stroke", this.borderColour.value);
+        // this.hexMap.hexagon.setAttribute("fill", this.defaultTerrainColour.value);
 
-        this.hexMap.drawMap();
+        // this.hexMap.drawMap();
+        this.hexMap.drawPolygons();
     }
 
     recalculatePolygon()
