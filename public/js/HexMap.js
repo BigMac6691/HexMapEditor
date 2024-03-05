@@ -19,13 +19,30 @@ class HexMap
         // this.hexagon = SVG.create("polygon", {id: "hexagon", points: "250,0 750,0 1000,500 750,1000 250,1000 0,500", stroke:"#000000"});
         this.defs.append(this.fade);
 
-        this.hexagonSymbol = SVG.create("symbol", {id: "hexagon", viewBox: "0 0 100 100", preserveAspectRatio: "none"});
-        this.hexagonSymbol.append(SVG.create("polygon", {points: "25,0 75,0 100,50 75,100 25,100 0,50", stroke:"#000000"}));
+        this.hexagonSymbol = SVG.create("symbol", {id: "hexagon", viewBox: "0 0 1000 1000", preserveAspectRatio: "none"});
+        this.hexagonSymbol.append(SVG.create("polygon", {points: "250,0 750,0 1000,500 750,1000 250,1000 0,500", stroke:"#000000", "stroke-width": "2"}));
         this.svg.append(this.hexagonSymbol);
 
-        // this.symbols = new Map();
-        // let top = SVG.create("symbol", {id: "symbolTop", viewBox: "0 0 100 100"});
+        this.TAN30 = Math.tan(30 * Math.PI / 180); console.log(`TAN30=${this.TAN30}`);
+        
+        this.symbols = [];
 
+        this.makeSymbol("riverTT_1", "M 355 0 L 645 0 L 692.3 100 L 307.7 100 Z");// my geometry was wrong!
+        this.makeSymbol("riverTR_1", "M 692.3 100 L 800 100 L 942 383 L 884.5 500 Z");
+        this.makeSymbol("riverBR_1", "M 692.3 900 L 800 900 L 942 617 L 884.5 500 Z");
+        this.makeSymbol("riverBB_1", "M 355 1000 L 645 1000 L 692.3 900 L 307.7 900 Z");
+        this.makeSymbol("riverBL_1", "M 200 900 L 307.7 900 L 115.5 500 L 58 617 Z");
+        this.makeSymbol("riverTL_1", "M 200 100 L 307.7 100 L 115.5 500 L 58 383 Z");
+    }
+
+    makeSymbol(id, d)
+    {
+        let s = SVG.create("symbol", {id: id, viewBox: "0 0 1000 1000", preserveAspectRatio: "none"});
+        s.append(SVG.create("path", {d: d, "stroke-width": "5"}));
+
+        this.symbols.push(s);
+        
+        this.svg.append(s);
     }
 
     getMap()
@@ -50,24 +67,31 @@ class HexMap
 
         let vb = this.svg.getAttribute("viewBox").split(/\s+|,/);
         let w = +vb[2] / (3 * this.hexes.length + 1);
-        let h = +vb[3] / (2 * this.hexes[0].length + (this.hexes.length > 1 ? 1 : 0));
+        let h = +vb[3] / (this.hexes[0].length + (this.hexes.length > 1 ? 1 : 0));
+        let xDelta = 0.2 * w * this.TAN30;
+        let rWidth = 2 * w - 2 * xDelta;
+        let width = 4 * w;
 
-        console.log(`drawPolygons w=${w}, h=${h}`);
+        console.log(`drawPolygons w=${w}, h=${h}, xDelta=${xDelta}, rWidth=${width}`);
 
         for(let col = 0; col < this.hexes.length; col++)
         {
-            let offset = this.hexes.length > 1 ? (col % 2 === this.offsetOn ? 0 : h) : 0;
+            let x = 3 * w * col;
+            let offset = this.hexes.length > 1 ? (col % 2 === this.offsetOn ? 0 : h / 2) : 0;
 
             for(let row = 0; row < this.hexes[col].length; row++)
             {
+                let y = h * row + offset;
+
                 // this.map.append(SVG.createUse("hexagon", {x: 3 * w * col, y: 2 * h * row + offset, fill: "url(#topLeftFade)"}));
-                this.map.append(SVG.createUse("hexagon", {x: 3 * w * col, y: 2 * h * row + offset, width: 4 * w, height: 2 * h, fill: "#ffffff"}));
-                // this.drawTrapezoid(w, h, col, row, offset);
+                this.map.append(SVG.createUse("hexagon", {x: x, y: y, width: width, height: h, fill: "#ffffff"}));
+
+                this.symbols.forEach(s => this.map.append(SVG.createUse(s.id, {x: x, y: y, width: width, height: h, fill: "none", stroke: "#ff0000"})));
             }
         }
     }
 
-    // w is half the width of a side, h is half the height of a side
+    // w is half the width of a side, h is half the height of a side, 2 * w = h
     // height of trapezoid is yDelta
     drawTrapezoid(w, h, col, row, offset)
     {
