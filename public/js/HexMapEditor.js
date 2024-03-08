@@ -24,7 +24,7 @@ class HexMapEditor
         this.viewBoxWidth = HTML.create("input", {type: "number", value: "1000"}, null, {change: this.boundSVGChange});
         div1.append(HTML.createLabel("View Box Width: ", this.viewBoxWidth));
 
-        this.viewBoxHeight = HTML.create("input", {type: "number", value: "1000"}, null, {change: this.boundSVGChange});
+        this.viewBoxHeight = HTML.create("input", {type: "number", value: "866"}, null, {change: this.boundSVGChange});
         div1.append(HTML.createLabel("View Box Height: ", this.viewBoxHeight));
 
         this.mapWidth = HTML.create("input", {type: "number", name: "width", value: mp.scrollWidth}, null, {change: this.boundSVGChange});

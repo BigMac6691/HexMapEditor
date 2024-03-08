@@ -2,7 +2,7 @@ class HexMap
 {
     constructor()
     {
-        this.svg = SVG.create("svg", {viewBox: "0 0 1000 1000", preserveAspectRatio: "none", style: "background-color:blue"});
+        this.svg = SVG.create("svg", {viewBox: "0 0 1000 866", preserveAspectRatio: "none", style: "background-color:blue"});
         this.hexes = [[new Hex(this)]];
         this.offsetOn = 0;
 
@@ -19,25 +19,25 @@ class HexMap
         // this.hexagon = SVG.create("polygon", {id: "hexagon", points: "250,0 750,0 1000,500 750,1000 250,1000 0,500", stroke:"#000000"});
         this.defs.append(this.fade);
 
-        this.hexagonSymbol = SVG.create("symbol", {id: "hexagon", viewBox: "0 0 1000 1000", preserveAspectRatio: "none"});
-        this.hexagonSymbol.append(SVG.create("polygon", {points: "250,0 750,0 1000,500 750,1000 250,1000 0,500", stroke:"#000000", "stroke-width": "2"}));
+        this.hexagonSymbol = SVG.create("symbol", {id: "hexagon", viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
+        this.hexagonSymbol.append(SVG.create("polygon", {points: "250,0 750,0 1000,433 750,866 250,866 0,433", stroke:"#000000", "stroke-width": "2"}));
         this.svg.append(this.hexagonSymbol);
 
         this.TAN30 = Math.tan(30 * Math.PI / 180); console.log(`TAN30=${this.TAN30}`);
         
         this.symbols = [];
 
-        this.makeSymbol("riverTT_1", "M 355 0 L 645 0 L 692.3 100 L 307.7 100 Z");// my geometry was wrong!
-        this.makeSymbol("riverTR_1", "M 692.3 100 L 800 100 L 942 383 L 884.5 500 Z");
-        this.makeSymbol("riverBR_1", "M 692.3 900 L 800 900 L 942 617 L 884.5 500 Z");
-        this.makeSymbol("riverBB_1", "M 355 1000 L 645 1000 L 692.3 900 L 307.7 900 Z");
-        this.makeSymbol("riverBL_1", "M 200 900 L 307.7 900 L 115.5 500 L 58 617 Z");
-        this.makeSymbol("riverTL_1", "M 200 100 L 307.7 100 L 115.5 500 L 58 383 Z");
+        this.makeSymbol("riverTT_1", "M 365.5 0 L 634.5 0 L 692.3 100 L 307.7 100 Z");
+        this.makeSymbol("riverTR_1", "M 692.3 100 L 807.7 100 L 942 333 L 884.5 433 Z");
+        this.makeSymbol("riverBR_1", "M 884.5 433 L 942 533 L 807.7 766 L 692.3 766 Z");
+        this.makeSymbol("riverBB_1", "M 692.3 766 L 634.5 866 L 365.5 866 L 307.7 766 Z");
+        this.makeSymbol("riverBL_1", "M 307.7 766 L 192.3 766 L 57.7 533 L 115.5 433 Z");
+        this.makeSymbol("riverTL_1", "M 115.5 433 L 57.7 333 L 192.3 100 L 307.7 100 Z");
     }
 
     makeSymbol(id, d)
     {
-        let s = SVG.create("symbol", {id: id, viewBox: "0 0 1000 1000", preserveAspectRatio: "none"});
+        let s = SVG.create("symbol", {id: id, viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
         s.append(SVG.create("path", {d: d, "stroke-width": "5"}));
 
         this.symbols.push(s);
@@ -67,12 +67,10 @@ class HexMap
 
         let vb = this.svg.getAttribute("viewBox").split(/\s+|,/);
         let w = +vb[2] / (3 * this.hexes.length + 1);
-        let h = +vb[3] / (this.hexes[0].length + (this.hexes.length > 1 ? 1 : 0));
-        let xDelta = 0.2 * w * this.TAN30;
-        let rWidth = 2 * w - 2 * xDelta;
+        let h = +vb[3] / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0));
         let width = 4 * w;
 
-        console.log(`drawPolygons w=${w}, h=${h}, xDelta=${xDelta}, rWidth=${width}`);
+        console.log(`drawPolygons w=${w}, h=${h}`);
 
         for(let col = 0; col < this.hexes.length; col++)
         {
@@ -89,44 +87,6 @@ class HexMap
                 this.symbols.forEach(s => this.map.append(SVG.createUse(s.id, {x: x, y: y, width: width, height: h, fill: "none", stroke: "#ff0000"})));
             }
         }
-    }
-
-    // w is half the width of a side, h is half the height of a side, 2 * w = h
-    // height of trapezoid is yDelta
-    drawTrapezoid(w, h, col, row, offset)
-    {
-        let height = 2 * w / 10; // 10% of the side of the hexagon
-        let x1 = 3 * w * col;
-        let y1 = 2 * h * row + h + offset;
-
-        let xDelta = height / 2;
-        let yDelta = height * Math.sqrt(3) / 2;
-        let midLen = 2 * w - 2 * height + xDelta;
-
-        let ptsTop = `M ${x1 + w + height} ${y1 - h} ` + 
-                     `L ${x1 + 3 * w - height} ${y1 - h} ` +
-                     `L ${x1 + 3 * w - height + xDelta / 2} ${y1 - h + yDelta / 2} ` +
-                     `l -50 10 ` +
-                     `l -75 -15 ` +
-                     `l -270 25 ` +
-                     `L ${x1 + w + height - xDelta / 2} ${y1 - h + yDelta / 2} Z`;
-
-        console.log(`w=${w}, h=${h}, col=${col}, row=${row}, offset=${offset}, xDelta=${xDelta}, yDelta=${yDelta}, midLen=${midLen}`);
-
-        // let t1 = SVG.create("polygon", {points: `${x1},${y1} ${x2},${y2} ${x2 + xDelta},${y2 + yDelta} ${x1 + height},${y1}`, fill: "url(#topLeftFade)", stroke: "red"});
-        let t2 = SVG.create("polygon", {points: `${x1 + w + height},${y1 - h} ${x1 + 3 * w - height},${y1 - h} ${x1 + 3 * w + xDelta - height},${y1 - h + yDelta} ${x1 + w + height - xDelta},${y1 - h + yDelta}`, fill: "url(#topLeftFade)", stroke: "orange"});
-        let t1 = SVG.create("polygon", {points: `${x1 + xDelta},${y1 - yDelta} ${x1 + w - xDelta},${y1 - h + yDelta} ${x1 + w + xDelta},${y1 - h + yDelta} ${x1 + height},${y1}`, fill: "url(#topLeftFade)", stroke: "blue"});
-
-        let river = SVG.create("path", {d: ptsTop, fill: "#0000ff"});
-
-        // let t1 = SVG.create("polygon", {points: `${x1},${y1} ${x1 + w},${y1 - h} ${x1 + w + xDelta},${y1 - h + yDelta} ${x1 + Math.sqrt(xDelta * xDelta + yDelta * yDelta)},${y1}`, fill: "url(#topLeftFade)", stroke: "blue"});
-        
-        // let t3 = SVG.create("polygon", {points: `${x1},${y1} ${x2},${y2} ${x2 + xDelta},${y2 + yDelta} ${x1 + height},${y1}`, fill: "yellow", stroke: "red"});
-        // let t4 = SVG.create("polygon", {points: `${x1},${y1} ${x2},${y2} ${x2 + xDelta},${y2 + yDelta} ${x1 + height},${y1}`, fill: "purple", stroke: "red"});
-        // let t5 = SVG.create("polygon", {points: `${x1},${y1} ${x2},${y2} ${x2 + xDelta},${y2 + yDelta} ${x1 + height},${y1}`, fill: "orange", stroke: "red"});
-        // let t6 = SVG.create("polygon", {points: `${x1},${y1} ${x2},${y2} ${x2 + xDelta},${y2 + yDelta} ${x1 + height},${y1}`, fill: "gray", stroke: "red"});
-        this.map.append(t1, t2);//, river);//, t3, t4, t5, t6);
-        // this.map.append(t2);//, t3, t4, t5, t6);
     }
 
     drawMap()
