@@ -1,62 +1,22 @@
 class Hex
 {
-    constructor(m)
+    constructor(m, col, row, opts)
     {
         this.hexMap = m;
+        this.col = col;
+        this.row = row;
+        this.opts = opts;
+
+        this.use = SVG.createUse("hexagon", {id: `${col},${row}`, stroke: this.hexMap.borderColour, fill: opts?.hexFill ? opts.hexFill : this.hexMap.defaultHexFill});
+
+        this.hexMap.map.append(this.use);
     }
 
-    drawPolygon()
+    drawHex(x, y, w, h)
     {
-
-    }
-
-    drawHex(w, h, col, row, offset)
-    {
-        const borderColour = this.hexMap.borderColour;
-        const map = this.hexMap.getMap();
-
-        if(w > 0)
-            return;
-
-        let x1 = 3 * w * col + w;
-        let y1 = 2 * h * row + offset; // all following y values are relative to this so only offset here
-        let x2 = x1 + 2 * w;
-        let y2 = y1;
-        map.append(SVG.create("line", {"x1" : x1, "y1": y1, "x2": x2, "y2": y2, stroke: borderColour}));
-
-        x1 = x2;
-        y1 = y2;
-        x2 = x1 + w;
-        y2 = y1 + h;
-        map.append(SVG.create("line", {"x1" : x1, "y1": y1, "x2": x2, "y2": y2, stroke: borderColour}));
-
-        x1 = x2;
-        y1 = y2;
-        x2 = x1 - w;
-        y2 = y1 + h;
-        map.append(SVG.create("line", {"x1" : x1, "y1": y1, "x2": x2, "y2": y2, stroke: borderColour}));
-
-        x1 = x2;
-        y1 = y2;
-        x2 = x1 - 2 * w;
-        y2 = y1;
-        map.append(SVG.create("line", {"x1" : x1, "y1": y1, "x2": x2, "y2": y2, stroke: borderColour}));
-
-        x1 = x2;
-        y1 = y2;
-        x2 = x1 - w;
-        y2 = y1 - h;
-        map.append(SVG.create("line", {"x1" : x1, "y1": y1, "x2": x2, "y2": y2, stroke: borderColour}));
-
-        x1 = x2;
-        y1 = y2;
-        x2 = x1 + w;
-        y2 = y1 - h;
-        map.append(SVG.create("line", {"x1" : x1, "y1": y1, "x2": x2, "y2": y2, stroke: borderColour}));
-    }
-
-    updateHex()
-    {
-
+        this.use.setAttribute("x", x);
+        this.use.setAttribute("y", y);
+        this.use.setAttribute("width", w);
+        this.use.setAttribute("height", h);
     }
 }
