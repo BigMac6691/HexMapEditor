@@ -65,7 +65,7 @@ class HexMap
         let width = 4 * w;
         let offset = this.hexes.length > 1 ? (this.cursor.x % 2 === this.offsetOn ? 0 : h / 2) : 0;
         
-        this.map.removeChild(this.cursorHex);
+        this.map.removeChild(this.cursorHex); // the cursor has to be added last to be the topmost element or it won't appear.
 
         this.cursorHex.setAttribute("x", 3 * w * this.cursor.x);
         this.cursorHex.setAttribute("y", h * this.cursor.y + offset);
@@ -73,8 +73,6 @@ class HexMap
         this.cursorHex.setAttribute("height", h);
 
         this.map.append(this.cursorHex);
-
-        console.log(this.cursor);
     }
 
     makeSymbol(id, d)

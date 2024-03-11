@@ -29,7 +29,7 @@ class SVG
         return n;
     }
 
-    static createText(opts)
+    static createText(text, opts)
     {
         let n = document.createElementNS(this.NS, "text");
 
@@ -37,7 +37,7 @@ class SVG
             for(const[k, v] of Object.entries(opts))
                 n.setAttribute(k, v);
 
-        n.append(document.createTextNode(opts.text));
+        n.append(document.createTextNode(text));
 
         return n;
     }

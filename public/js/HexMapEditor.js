@@ -13,7 +13,6 @@ class HexMapEditor
 
         this.makeUI();
         this.hexMap.drawMap();
-        // this.hexMap.drawPolygons();
     }
 
     makeUI()
@@ -88,6 +87,7 @@ class HexMapEditor
         let r = +this.rows.value;
         let model = this.hexMap.hexes;
         let modelShrink = c < model.length || r < model[0].length;
+        let modelChange = c != model.length || r != model[0].length
 
         // Handle column changes
         if(c < model.length)
@@ -110,14 +110,18 @@ class HexMapEditor
                     model[ci].push(new Hex(this.hexMap, ci, model[ci].length))
         }
 
-        // if(polygonChange)
-        //     this.he
+        if(modelChange)
+        {
+            let mapPanel = document.getElementById("mapPanel");
+            mapPanel.style.fontSize = `${100 / (this.hexMap.hexes[0].length + (this.hexMap.hexes.length > 1 ? 0.5 : 0))}px`;
+
+            console.log(`Font size: ${mapPanel.style.fontSize}`);
+        }
 
         this.hexMap.borderColour = this.borderColour.value;
         this.hexMap.defaultHexFill = this.defaultTerrainColour.value;
 
         this.hexMap.drawMap();
-        // this.hexMap.drawPolygons();
     }
 
     handleMouseMove(evt)

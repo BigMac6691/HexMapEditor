@@ -23,3 +23,10 @@ The plan is to make a tool for creating hex maps.  The map will be rendered usin
 + The entire interior of a hex is called the terrain.
 + Hexes can display units.
 + Support for decorations will be included.  The decorations can be applied to either an edge or the terrain.
+## Customizable attributes to add
++ Cursor
+  + Colour
+  + Rate - can be zero
++ Hex
+  + Render hex id
+  + Location of hex id - top, below top edge, middle, above bottom edge, bottom
