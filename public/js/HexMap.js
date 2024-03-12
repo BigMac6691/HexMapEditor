@@ -45,12 +45,20 @@ class HexMap
 
     mouseMove(evt)
     {
-        let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.svg.getScreenCTM().inverse());
+        if(!evt.target.id.includes(","))
+            return;
+
+        // let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.svg.getScreenCTM().inverse());
+
+        // console.log(`id=${evt.target.id} \t pt=${pt}`);
     }
 
     mouseClick(evt)
     {
-        let coords = evt.srcElement.id.split(",");
+        if(!evt.target.id.includes(","))
+            return;
+
+        let coords = evt.target.id.split(",");
         this.cursor.x = coords[0];
         this.cursor.y = coords[1];
 
@@ -59,18 +67,14 @@ class HexMap
 
     drawCursor()
     {
-        let vb = this.svg.getAttribute("viewBox").split(/\s+|,/);
-        let w = +vb[2] / (3 * this.hexes.length + 1);
-        let h = +vb[3] / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0));
-        let width = 4 * w;
-        let offset = this.hexes.length > 1 ? (this.cursor.x % 2 === this.offsetOn ? 0 : h / 2) : 0;
-        
+        let target = this.hexes[this.cursor.x][this.cursor.y].use;
+
         this.map.removeChild(this.cursorHex); // the cursor has to be added last to be the topmost element or it won't appear.
 
-        this.cursorHex.setAttribute("x", 3 * w * this.cursor.x);
-        this.cursorHex.setAttribute("y", h * this.cursor.y + offset);
-        this.cursorHex.setAttribute("width", width);
-        this.cursorHex.setAttribute("height", h);
+        this.cursorHex.setAttribute("x", target.x.baseVal.value);
+        this.cursorHex.setAttribute("y", target.y.baseVal.value);
+        this.cursorHex.setAttribute("width", target.width.baseVal.value);
+        this.cursorHex.setAttribute("height", target.height.baseVal.value);
 
         this.map.append(this.cursorHex);
     }

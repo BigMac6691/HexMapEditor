@@ -68,15 +68,15 @@ class HexMapEditor
 
     handleSVGChange(evt)
     {
-        if(evt.srcElement === this.viewBoxWidth || evt.srcElement === this.viewBoxHeight)
+        if(evt.target === this.viewBoxWidth || evt.target === this.viewBoxHeight)
         {
             this.hexMap.getSVG().setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
             // this.recalculatePolygon();
         }
-        else if(evt.srcElement === this.backgroundColour)
-            this.hexMap.getSVG().style.background = evt.srcElement.value;
+        else if(evt.target === this.backgroundColour)
+            this.hexMap.getSVG().style.background = evt.target.value;
         else
-            this.hexMap.getSVG().setAttribute(evt.srcElement.name, evt.srcElement.value);
+            this.hexMap.getSVG().setAttribute(evt.target.name, evt.target.value);
     }
 
     handleMapModelChange(evt)
@@ -126,30 +126,24 @@ class HexMapEditor
 
     handleMouseMove(evt)
     {
+        if(!evt.target.id.includes(","))
+            return;
+
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
-        this.mouseMove.innerHTML = `Mouse location: ${pt.x}, ${pt.y}`;
+        // let hexId = evt.target.id.split(",");
+        let x = evt.target.x.baseVal.value;
+        let y = evt.target.y.baseVal.value;
+        let w = evt.target.width.baseVal.value;
+        let h = evt.target.height.baseVal.value;
+
+        console.log(`x=${x} y=${y} w=${w} h=${h}`);
+
+        this.mouseMove.innerHTML = `Mouse location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} in hex ${evt.target.id}`;
     }
 
     handleMouseClick(evt)
     {
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
-        this.mouseClick.innerHTML = `Click location: ${pt.x}, ${pt.y} with id ${evt.srcElement.id}`;
-    }
-
-    // recalculatePolygon()
-    // {
-    //     let vb = this.hexMap.getSVG().getAttribute("viewBox").split(/\s+|,/);
-    //     let w = this.truncate(+vb[2] / (3 * this.hexMap.hexes.length + 1), Math.pow(10, vb[2].length));
-    //     let h = this.truncate(+vb[3] / (2 * this.hexMap.hexes[0].length + (this.hexMap.hexes.length > 1 ? 1 : 0)), Math.pow(10, vb[3].length));
-    //     let points = `${w},${0} ${3 * w},${0} ${4 * w},${h} ${3 * w},${2 * h} ${w},${2 * h} ${0},${h}`;
-
-    //     this.hexMap.hexagon.setAttribute("points", points);
-
-    //     this.hexMap.drawPolygons();
-    // }
-
-    truncate(n, d)
-    {
-        return Math.trunc(n * d) / d;
+        this.mouseClick.innerHTML = `Click location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} with id ${evt.target.id}`;
     }
 }

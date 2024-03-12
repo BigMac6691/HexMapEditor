@@ -19,14 +19,22 @@ The plan is to make a tool for creating hex maps.  The map will be rendered usin
 ## Parts of a hex
 + The outline of hexagon is referred to as the border.
 + Each of the six sides of a hexagon is referred to as an edge.  The top most horizontal one is referred to as index 0 and then index 1 is the next side clockwise.
-  + Each edge is a trapezoid with the long side being the side of the hexagon with a depth equal to 5% of the length of side.
+  + Each edge is a trapezoid with the short side being the side of the hexagon with a depth equal to 5% of the length of side.
+  + The trapezoid does not go the full width - at the corners there is a rhombus.
+  + The rhombus must support staying inside the hex and crossing over to the next hex or goin up into the next hex.
+  + "Nibs" are currently not allowed - a nib is where one hex rhombus just grabs a tiny bit from the neighbouring hexes.
 + The entire interior of a hex is called the terrain.
 + Hexes can display units.
 + Support for decorations will be included.  The decorations can be applied to either an edge or the terrain.
-## Customizable attributes to add
-+ Cursor
-  + Colour
-  + Rate - can be zero
-+ Hex
-  + Render hex id
-  + Location of hex id - top, below top edge, middle, above bottom edge, bottom
+## TODO
++ Create a way to edit individual hexes.
+  + Terrain, edges and borders.
++ Devise a way to easily draw borders and rivers
++ Devise a way to fill or something like that
++ Add support for customizing the following
+  + Cursor
+    + Colour
+    + Rate - can be zero
+  + Hex
+    + Render hex id
+    + Location of hex id - top, below top edge, middle, above bottom edge, bottom
