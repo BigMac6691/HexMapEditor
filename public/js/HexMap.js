@@ -40,17 +40,12 @@ class HexMap
         this.hexes = [[new Hex(this, 0, 0)]];
         this.cursor = new DOMPoint(0, 0);
         this.cursorHex = SVG.createUse("hexagon", {id: "cursor", stroke: "#ff0000", fill: "none", style: "animation: cursor 3s infinite;"});
-        this.map.append(this.cursorHex);
     }
 
     mouseMove(evt)
     {
         if(!evt.target.id.includes(","))
             return;
-
-        // let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.svg.getScreenCTM().inverse());
-
-        // console.log(`id=${evt.target.id} \t pt=${pt}`);
     }
 
     mouseClick(evt)
@@ -65,11 +60,27 @@ class HexMap
         this.drawCursor();
     }
 
+    getHexFromId(id)
+    {
+        let hex = null;
+
+        if(id.includes(","))
+        {
+            let pt = id.split(",");
+
+            if(pt[0] < this.hexes.length && pt[1] < this.hexes[0].length)
+                hex = this.hexes[pt[0]][pt[1]];
+        }
+
+        return hex;
+    }
+
     drawCursor()
     {
         let target = this.hexes[this.cursor.x][this.cursor.y].use;
 
-        this.map.removeChild(this.cursorHex); // the cursor has to be added last to be the topmost element or it won't appear.
+        if(this.map.contains(this.cursorHex))
+            this.map.removeChild(this.cursorHex); // the cursor has to be added last to be the topmost element or it won't appear.
 
         this.cursorHex.setAttribute("x", target.x.baseVal.value);
         this.cursorHex.setAttribute("y", target.y.baseVal.value);
@@ -105,7 +116,7 @@ class HexMap
             this.map.removeChild(this.map.firstChild);
     }
 
-    drawPolygons()
+    initMap()
     {
         this.clearMap();
 
@@ -113,8 +124,6 @@ class HexMap
         let w = +vb[2] / (3 * this.hexes.length + 1);
         let h = +vb[3] / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0));
         let width = 4 * w;
-
-        console.log(`drawPolygons w=${w}, h=${h}`);
 
         for(let col = 0; col < this.hexes.length; col++)
         {
@@ -125,23 +134,15 @@ class HexMap
             {
                 let y = h * row + offset;
 
-                // this.map.append(SVG.createUse("hexagon", {x: 3 * w * col, y: 2 * h * row + offset, fill: "url(#topLeftFade)"}));
-                this.map.append(SVG.createUse("hexagon", {id: `${col},${row}`, x: x, y: y, width: width, height: h, fill: "#ffffff"}));
-
-                this.symbols.forEach(s => this.map.append(SVG.createUse(s.id, {x: x, y: y, width: width, height: h, fill: "none", stroke: "#ff0000"})));
+                this.hexes[col][row].addToMap(this.map).drawHex(x, y, width, h)
             }
         }
-    }
 
-    initMap()
-    {
-        this.clearMap();
+        this.drawCursor();
     }
 
     drawMap()
     {
-        // this.clearMap();
-
         let vb = this.svg.getAttribute("viewBox").split(/\s+|,/);
         let w = +vb[2] / (3 * this.hexes.length + 1);
         let h = +vb[3] / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0));

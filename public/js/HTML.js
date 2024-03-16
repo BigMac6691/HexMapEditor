@@ -10,6 +10,15 @@ class HTML
         return n;
     }
 
+    static createSelect(map, opts, clazz, listeners)
+    {
+        let select = this.create("select", opts, clazz, listeners);
+
+        map.forEach((v, k) => select.append(HTML.create("option", {text: v.label, value: k})));
+
+        return select;
+    }
+
     static create(type, opts, clazz, listeners)
     {
         const n = document.createElement(type);
@@ -26,5 +35,13 @@ class HTML
                 n.addEventListener(k, v);
 
         return n;
+    }
+
+    static addOptions(select, opts)
+    {
+        opts.forEach(opt =>
+        {
+            select.append(HTML.create("option", opt));
+        });
     }
 }
