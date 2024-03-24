@@ -14,7 +14,7 @@ class HTML
     {
         let select = this.create("select", opts, clazz, listeners);
 
-        map.forEach((v, k) => select.append(HTML.create("option", {text: v.label, value: k})));
+        map.forEach((v, k) => select.append(HTML.create("option", {text: k, value: k})));
 
         return select;
     }

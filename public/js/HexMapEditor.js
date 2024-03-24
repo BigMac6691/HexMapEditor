@@ -23,18 +23,9 @@ class HexMapEditor
         this.hexMap.svg.addEventListener("mouseleave", () => 
         {
             this.hexMap.svg.style.cursor = "default";
+            this.painting = false;
             document.removeEventListener("keydown", this.boundKeypress);
         });
-
-        this.terrain = new Map();
-        [
-            {type: "clear", label: "Plains", fill: "#ffffff"},
-            {type: "forest", label: "Forest", fill: "#00ff00"},
-            {type: "hills", label: "Hills", fill: "#e06500"},
-            {type: "mountains", label: "Mountain", fill: "#888888"},
-            {type: "Desert", label: "Desert", fill: "#e9ec18"},
-            {type: "Water", label: "Water", fill: "#0000ff"}
-        ].forEach(t => this.terrain.set(t.type, t));
 
         this.makeUI();
         this.hexMap.initMap();
@@ -121,11 +112,23 @@ class HexMapEditor
         div.append(this.mouseMove, this.mouseClick);
 
         this.paintSelect = HTML.create("select");
-        HTML.addOptions(this.paintSelect, [{text: "None", value: "none"}, {text: "Terrain", value: "terrain"}]);
-        div.append(HTML.createLabel("Paint with: ", this.paintSelect));
+        HTML.addOptions(this.paintSelect, 
+            [
+                {text: "None", value: "none"}, 
+                {text: "Terrain", value: "terrain"},
+                {text: "Edges", value: "edges"},
+                {text: "Connectors", value: "connectors"},
+                {text: "Jumps", value: "jumps"},
+                {text: "Meta", value: "meta"},
+                {text: "Content", value: "content"}
+            ]);
+        div.append(HTML.createLabel("Paint: ", this.paintSelect));
 
-        this.terrainSelect = HTML.createSelect(this.terrain);
+        this.terrainSelect = HTML.createSelect(this.hexMap.terrain);
         div.append(HTML.createLabel("Terrain: ", this.terrainSelect));
+
+        this.edgeSelect = HTML.createSelect(this.hexMap.edges);
+        div.append(HTML.createLabel("Edge: ", this.edgeSelect));
 
         return div;
     }
@@ -208,22 +211,45 @@ class HexMapEditor
             return;
 
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
-
         this.mouseMove.innerHTML = `Mouse location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} in hex ${evt.target.id}`;
 
         if(this.painting)
-        {
-            let hex = this.hexMap.getHexFromId(evt.target.id);
-            let terrain = this.terrainSelect.value;
-            hex.terrain = this.terrain.get(terrain);
-            // hex.drawHex(evt.target.x.baseVal.value, evt.target.y.baseVal.value, evt.target.width.baseVal.value, target.height.baseVal.value);
-            hex.drawHex();
-        }
+            this.updateHex(evt.target.id);
     }
 
     handleMouseClick(evt)
     {
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
         this.mouseClick.innerHTML = `Click location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} with id ${evt.target.id}`;
+
+        this.updateHex(evt.target.id);
+    }
+
+    updateHex(id)
+    {
+        if(this.paintSelect.value === "none")
+            return;
+
+        let hex = this.hexMap.getHexFromId(id);
+
+        if(this.paintSelect.value === "terrain")
+            hex.terrain = this.hexMap.terrain.get(this.terrainSelect.value);
+
+        if(this.paintSelect.value === "edges")
+            hex.terrain = this.terrain.get(this.terrainSelect.value);
+        
+        if(this.paintSelect.value === "connectors")
+            hex.terrain = this.terrain.get(this.terrainSelect.value);
+
+        if(this.paintSelect.value === "meta")
+            hex.terrain = this.terrain.get(this.terrainSelect.value);
+
+        if(this.paintSelect.value === "content")
+            hex.terrain = this.terrain.get(this.terrainSelect.value);
+
+        if(this.paintSelect.value === "jumps")
+            hex.terrain = this.terrain.get(this.terrainSelect.value);
+
+        hex.drawHex();
     }
 }

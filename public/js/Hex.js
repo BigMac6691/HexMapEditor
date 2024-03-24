@@ -8,16 +8,20 @@ class Hex
         this.opts = opts;
 
         this.terrain = null;
+        this.edges = null;
+        this.connectors = null;
+        this.meta = new Map();
+        this.content = null;
 
         let id = `${col},${row}`;
 
         this.hexId = SVG.createText(id, {x: 500, y: 110, "font-size": "1em", "text-anchor": "middle", "alignment-baseline": "middle"});
-        this.use = SVG.createUse("hexagon", {id: id, stroke: this.hexMap.borderColour, "stroke-width": "2", fill: opts?.hexFill ? opts.hexFill : this.hexMap.defaultHexFill});
+        this.hexTerrain = SVG.createUse("hexagon", {id: id, stroke: this.hexMap.borderColour, "stroke-width": "2", fill: opts?.hexFill ? opts.hexFill : this.hexMap.defaultHexFill});
     }
 
     addToMap(map)
     {
-        map.append(this.use, this.hexId);
+        map.append(this.hexTerrain, this.hexId);
 
         return this;
     }
@@ -26,13 +30,13 @@ class Hex
     {
         if(arguments.length == 4)
         {
-            this.use.setAttribute("x", x);
-            this.use.setAttribute("y", y);
-            this.use.setAttribute("width", w);
-            this.use.setAttribute("height", h);
+            this.hexTerrain.setAttribute("x", x);
+            this.hexTerrain.setAttribute("y", y);
+            this.hexTerrain.setAttribute("width", w);
+            this.hexTerrain.setAttribute("height", h);
         }
 
-        this.use.setAttribute("fill", this.terrain ? this.terrain.fill : this.hexMap.defaultHexFill);
+        this.hexTerrain.setAttribute("fill", this.terrain?.data ? this.terrain.data.fill : this.hexMap.defaultHexFill);
 
         if(arguments.length == 4)
             this.drawId(x, y, w, h);

@@ -27,6 +27,8 @@ The plan is to make a tool for creating hex maps.  The map will be rendered usin
 + Hexes can display units.
 + Support for decorations will be included.  The decorations can be applied to either an edge or the terrain.
 ## TODO
++ Should I want/need security in the future look at DOMPurify.
+  + The editor is for game creators not game players so I don't see a need for security at this point.  If you can't trust yourself who can you trust?
 + Create a way to edit individual hexes.
   + Terrain, edges and borders.
 + Devise a way to easily draw borders and rivers

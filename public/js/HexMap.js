@@ -14,32 +14,64 @@ class HexMap
         this.svg.addEventListener("mousemove", evt => this.mouseMove(evt));
         this.svg.addEventListener("click", evt => this.mouseClick(evt));
 
-        this.fade = SVG.create("linearGradient", {id: "topLeftFade", x1: "0", y1: "0", x2: "0", y2: 1});
-        this.fade.append(SVG.create("stop", {offset: "0%", "stop-color": "#ff0000"}));
-        this.fade.append(SVG.create("stop", {offset: "10%", "stop-color": "#ff0000", "stop-opacity": "0.5"}));
-        this.fade.append(SVG.create("stop", {offset: "20%", "stop-color": "#ff0000", "stop-opacity": "0.2"}));
-        this.fade.append(SVG.create("stop", {offset: "100%", "stop-color": "#ff0000", "stop-opacity": "0"}));
-
-        this.defs.append(this.fade);
-
+        
         this.hexagonSymbol = SVG.create("symbol", {id: "hexagon", viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
         this.hexagonSymbol.append(SVG.create("polygon", {points: "250,0 750,0 1000,433 750,866 250,866 0,433"}));
         this.svg.append(this.hexagonSymbol);
 
-        this.TAN30 = Math.tan(30 * Math.PI / 180); console.log(`TAN30=${this.TAN30}`);
-        
-        this.symbols = [];
+        this.loadData();
 
-        this.makeSymbol("riverTT_1", "M 365.5 0 L 634.5 0 L 692.3 100 L 307.7 100 Z");
-        this.makeSymbol("riverTR_1", "M 692.3 100 L 807.7 100 L 942 333 L 884.5 433 Z");
-        this.makeSymbol("riverBR_1", "M 884.5 433 L 942 533 L 807.7 766 L 692.3 766 Z");
-        this.makeSymbol("riverBB_1", "M 692.3 766 L 634.5 866 L 365.5 866 L 307.7 766 Z");
-        this.makeSymbol("riverBL_1", "M 307.7 766 L 192.3 766 L 57.7 533 L 115.5 433 Z");
-        this.makeSymbol("riverTL_1", "M 115.5 433 L 57.7 333 L 192.3 100 L 307.7 100 Z");
+        this.labels = null;
 
         this.hexes = [[new Hex(this, 0, 0)]];
         this.cursor = new DOMPoint(0, 0);
         this.cursorHex = SVG.createUse("hexagon", {id: "cursor", stroke: "#ff0000", fill: "none", style: "animation: cursor 3s infinite;"});
+    }
+
+    loadData(f)
+    {
+        // eventually replace this with a recursive function
+        DATA.defs.forEach(def =>
+        {
+            let n = SVG.create(def.type, def.data);
+
+            def.children.forEach(child =>
+            {
+                n.append(SVG.create(child.type, child.data));
+            });
+
+            this.defs.append(n);
+        });
+
+        this.terrain = new Map();
+        DATA.terrain.forEach(t =>
+        {
+            this.terrain.set(t.label, t);
+        });
+        console.log(this.terrain);
+    
+        this.edges = new Map();
+        DATA.edges.forEach(edge =>
+        {
+            this.edges.set(edge.label, []);
+        
+            for(let e = 0; e < 6; e++)
+            {
+                let vArray = [];
+        
+                edge.data[e].forEach(v =>
+                {
+                    let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
+                    n.append(SVG.create("path", v.svg));
+        
+                    this.svg.append(n);
+                    vArray.push({id: v.id, svg: n});
+                });
+        
+                this.edges.get(edge.label).push(vArray);
+            }
+        });
+        console.log(this.edges);
     }
 
     mouseMove(evt)
@@ -77,7 +109,7 @@ class HexMap
 
     drawCursor()
     {
-        let target = this.hexes[this.cursor.x][this.cursor.y].use;
+        let target = this.hexes[this.cursor.x][this.cursor.y].hexTerrain;
 
         if(this.map.contains(this.cursorHex))
             this.map.removeChild(this.cursorHex); // the cursor has to be added last to be the topmost element or it won't appear.
@@ -88,16 +120,6 @@ class HexMap
         this.cursorHex.setAttribute("height", target.height.baseVal.value);
 
         this.map.append(this.cursorHex);
-    }
-
-    makeSymbol(id, d)
-    {
-        let s = SVG.create("symbol", {id: id, viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
-        s.append(SVG.create("path", {d: d, "stroke-width": "5"}));
-
-        this.symbols.push(s);
-        
-        this.svg.append(s);
     }
 
     getMap()
