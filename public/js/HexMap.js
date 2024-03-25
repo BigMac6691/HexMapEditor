@@ -13,7 +13,6 @@ class HexMap
 
         this.svg.addEventListener("mousemove", evt => this.mouseMove(evt));
         this.svg.addEventListener("click", evt => this.mouseClick(evt));
-
         
         this.hexagonSymbol = SVG.create("symbol", {id: "hexagon", viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
         this.hexagonSymbol.append(SVG.create("polygon", {points: "250,0 750,0 1000,433 750,866 250,866 0,433"}));
@@ -21,9 +20,6 @@ class HexMap
 
         this.loadData();
 
-        this.labels = null;
-
-        this.hexes = [[new Hex(this, 0, 0)]];
         this.cursor = new DOMPoint(0, 0);
         this.cursorHex = SVG.createUse("hexagon", {id: "cursor", stroke: "#ff0000", fill: "none", style: "animation: cursor 3s infinite;"});
     }
@@ -48,7 +44,6 @@ class HexMap
         {
             this.terrain.set(t.label, t);
         });
-        console.log(this.terrain);
     
         this.edges = new Map();
         DATA.edges.forEach(edge =>
@@ -71,7 +66,21 @@ class HexMap
                 this.edges.get(edge.label).push(vArray);
             }
         });
-        console.log(this.edges);
+
+        // Map data begins here!
+        this.hexes = [];
+        for(let col = 0; col < DATA.metadata.columns; col++)
+        {
+            let rows = [];
+
+            for(let row = 0; row < DATA.metadata.rows; row++)
+                rows.push(new Hex(this, col, row));
+            
+            this.hexes.push(rows);
+        }
+
+        let mapPanel = document.getElementById("mapPanel");
+        mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
     }
 
     mouseMove(evt)
@@ -156,7 +165,8 @@ class HexMap
             {
                 let y = h * row + offset;
 
-                this.hexes[col][row].addToMap(this.map).drawHex(x, y, width, h)
+                this.map.append(this.hexes[col][row].svg);
+                this.hexes[col][row].drawHex(x, y, width, h);
             }
         }
 

@@ -1,5 +1,10 @@
 let DATA = 
 {
+    "metadata" :
+    {
+        "columns" : 15,
+        "rows" : 15
+    },
     "defs" :
     [
         {
@@ -92,37 +97,37 @@ let DATA =
                 [ // top edge
                     { // variant 1
                         "id" : "riverTT_1",
-                        "svg" : {"d" : "M 365.5 0 L 634.5 0 L 692.3 100 L 307.7 100 Z", "stroke-width": "5"}
+                        "svg" : {"d" : "M 365.5 0 L 634.5 0 L 692.3 100 L 307.7 100 Z", "fill": "#0000ff"}
                     }
                 ],
                 [ // top right edge
                     { // variant 1
                         "id" : "riverTR_1",
-                        "svg" : {"d" : "M 692.3 100 L 807.7 100 L 942 333 L 884.5 433 Z", "stroke-width": "5"}
+                        "svg" : {"d" : "M 692.3 100 L 807.7 100 L 942 333 L 884.5 433 Z", "fill": "#0000ff"}
                     }
                 ],
                 [ // bottom right edge
                     { // variant 1
                         "id" : "riverBR_1",
-                        "svg" : {"d" : "M 884.5 433 L 942 533 L 807.7 766 L 692.3 766 Z", "stroke-width": "5"}
+                        "svg" : {"d" : "M 884.5 433 L 942 533 L 807.7 766 L 692.3 766 Z", "fill": "#0000ff"}
                     }
                 ],
                 [ // bottom edge
                     { // variant 1
                         "id" : "riverBB_1",
-                        "svg" : {"d" : "M 692.3 766 L 634.5 866 L 365.5 866 L 307.7 766 Z", "stroke-width": "5"}
+                        "svg" : {"d" : "M 692.3 766 L 634.5 866 L 365.5 866 L 307.7 766 Z", "fill": "#0000ff"}
                     }
                 ],
                 [ // bottom left edge
                     { // variant 1
                         "id" : "riverBL_1",
-                        "svg" : {"d" : "M 307.7 766 L 192.3 766 L 57.7 533 L 115.5 433 Z", "stroke-width": "5"}
+                        "svg" : {"d" : "M 307.7 766 L 192.3 766 L 57.7 533 L 115.5 433 Z", "fill": "#0000ff"}
                     }
                 ],
                 [ // top left edge
                     { // variant 1
                         "id" : "riverTL_1",
-                        "svg" : {"d" : "M 115.5 433 L 57.7 333 L 192.3 100 L 307.7 100 Z", "stroke-width": "5"}
+                        "svg" : {"d" : "M 115.5 433 L 57.7 333 L 192.3 100 L 307.7 100 Z", "fill": "#0000ff"}
                     }
                 ]
             ]

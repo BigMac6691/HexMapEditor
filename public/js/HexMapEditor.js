@@ -30,10 +30,10 @@ class HexMapEditor
         this.makeUI();
         this.hexMap.initMap();
 
-        // for testing purposes only make the map 15 X 15
-        this.cols.value = 15;
-        this.rows.value = 15;
-        this.handleMapModelChange(null);
+        // // for testing purposes only make the map 15 X 15
+        // this.cols.value = 15;
+        // this.rows.value = 15;
+        // this.handleMapModelChange(null);
     }
 
     makeUI()
@@ -214,29 +214,50 @@ class HexMapEditor
         this.mouseMove.innerHTML = `Mouse location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} in hex ${evt.target.id}`;
 
         if(this.painting)
-            this.updateHex(evt.target.id);
+            this.updateHex(evt.target.id, pt);
     }
 
     handleMouseClick(evt)
     {
+        if(!evt.target.id.includes(","))
+            return;
+
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
         this.mouseClick.innerHTML = `Click location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} with id ${evt.target.id}`;
 
-        this.updateHex(evt.target.id);
+        this.updateHex(evt.target.id, pt);
     }
 
-    updateHex(id)
+    updateHex(id, pt)
     {
         if(this.paintSelect.value === "none")
             return;
 
         let hex = this.hexMap.getHexFromId(id);
 
+        console.log(hex.svg.innerHTML);
+        console.log(hex.svg.outerHTML);
+
         if(this.paintSelect.value === "terrain")
-            hex.terrain = this.hexMap.terrain.get(this.terrainSelect.value);
+            hex.setTerrain(this.hexMap.terrain.get(this.terrainSelect.value));
 
         if(this.paintSelect.value === "edges")
-            hex.terrain = this.terrain.get(this.terrainSelect.value);
+        {
+            let x = +hex.hexTerrain.x.baseVal.value;
+            let y = +hex.hexTerrain.y.baseVal.value;
+            let w = hex.hexTerrain.width.baseVal.value / 4;
+            let h = hex.hexTerrain.height.baseVal.value / 2;
+            let edgeIndex = 0;
+
+            if(pt.x < x + w)
+                edgeIndex = pt.y < y + h ? 5 : 4;
+            else if(pt.x > x + 3 * w)
+                edgeIndex = pt.y < y + h ? 1 : 2;
+            else
+                 edgeIndex = pt.y < y + h ? 0 : 3;
+
+            hex.addEdge({"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0});
+        }
         
         if(this.paintSelect.value === "connectors")
             hex.terrain = this.terrain.get(this.terrainSelect.value);
@@ -249,6 +270,8 @@ class HexMapEditor
 
         if(this.paintSelect.value === "jumps")
             hex.terrain = this.terrain.get(this.terrainSelect.value);
+
+        console.log(hex);
 
         hex.drawHex();
     }
