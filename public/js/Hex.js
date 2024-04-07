@@ -9,7 +9,7 @@ class Hex
 
         this.terrain = null;
         this.edges = null;
-        this.corners = [null, null, null, null, null, null];
+        this.corners = null;
         this.connectors = null;
         this.meta = null;
         this.content = null;
@@ -28,7 +28,7 @@ class Hex
         this.hexTerrain.setAttribute("fill", this.terrain?.data ? this.terrain.data.fill : this.hexMap.defaultHexFill);
     }
 
-    addEdge(value)
+    addEdge(value) // need to be able to remove an edge too
     {
         if(this.edges === null)
             this.edges = new Map();
@@ -44,7 +44,7 @@ class Hex
         n.setAttribute("width", this.hexTerrain.width.baseVal.value);
         n.setAttribute("height", this.hexTerrain.height.baseVal.value);
 
-        this.edges.set(edge.id, [edge, n]);
+        this.edges.set(edge.id, [value, n]);
 
         this.svg.append(this.edges.get(edge.id)[1]);
 

@@ -29,11 +29,6 @@ class HexMapEditor
 
         this.makeUI();
         this.hexMap.initMap();
-
-        // // for testing purposes only make the map 15 X 15
-        // this.cols.value = 15;
-        // this.rows.value = 15;
-        // this.handleMapModelChange(null);
     }
 
     makeUI()
@@ -235,28 +230,34 @@ class HexMapEditor
 
         let hex = this.hexMap.getHexFromId(id);
 
-        console.log(hex.svg.innerHTML);
-        console.log(hex.svg.outerHTML);
+        // console.log(hex.svg.innerHTML);
+        // console.log(hex.svg.outerHTML);
 
         if(this.paintSelect.value === "terrain")
             hex.setTerrain(this.hexMap.terrain.get(this.terrainSelect.value));
 
         if(this.paintSelect.value === "edges")
         {
-            let x = +hex.hexTerrain.x.baseVal.value;
             let y = +hex.hexTerrain.y.baseVal.value;
+            let h = hex.hexTerrain.height.baseVal.value / 4;
+            let dy = pt.y - y;
+            let rh = h / 5;
+
+            let x = +hex.hexTerrain.x.baseVal.value;
             let w = hex.hexTerrain.width.baseVal.value / 4;
-            let h = hex.hexTerrain.height.baseVal.value / 2;
-            let edgeIndex = 0;
+            let dx = pt.x - x;
+            let rw = w / 5;
+            let edgeIndex = -1;
 
-            if(pt.x < x + w)
-                edgeIndex = pt.y < y + h ? 5 : 4;
-            else if(pt.x > x + 3 * w)
-                edgeIndex = pt.y < y + h ? 1 : 2;
-            else
-                 edgeIndex = pt.y < y + h ? 0 : 3;
+            if(Math.abs(w / 2 - dx) < rw) //  top left and bottom left
+                edgeIndex = Math.abs(h - dy) < rh ? 5 : (Math.abs(3 * h - dy) < rh ? 4 : -1);
+            else if(Math.abs(3 * w + w / 2 - dx) < rw) // top right and bottom right
+                edgeIndex = Math.abs(h - dy) < rh ? 1 : (Math.abs(3 * h - dy) < rh ? 2 : -1);
+            else if(Math.abs(2 * w - dx) < rw) //  top and bottom
+                 edgeIndex = dy < rh ? 0 : (Math.abs(4 * h - dy) < rh ? 3 : -1);
 
-            hex.addEdge({"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0});
+            if(edgeIndex >= 0)
+                hex.addEdge({"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0});
         }
         
         if(this.paintSelect.value === "connectors")
