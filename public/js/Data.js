@@ -91,6 +91,10 @@ let DATA =
     "edges":
     [
         {
+            "label" : "None",
+            "data" : [[],[],[],[],[],[]]
+        },
+        {
             "label" : "River",
             "data" :
             [

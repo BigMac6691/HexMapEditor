@@ -16,7 +16,7 @@ class Hex
 
         let id = `${col},${row}`;
 
-        this.hexId = SVG.createText(id, {x: 500, y: 110, "font-size": "1em", "text-anchor": "middle", "alignment-baseline": "middle"});
+        this.hexId = SVG.createText(id, {x: 500, y: 110});
         this.hexTerrain = SVG.createUse("hexagon", {id: id, stroke: this.hexMap.borderColour, "stroke-width": "2", fill: this.hexMap.defaultHexFill});
 
         this.svg.append(this.hexTerrain, this.hexId);
@@ -28,7 +28,7 @@ class Hex
         this.hexTerrain.setAttribute("fill", this.terrain?.data ? this.terrain.data.fill : this.hexMap.defaultHexFill);
     }
 
-    addEdge(value) // need to be able to remove an edge too
+    addEdge(value) // {edge (none, river), index, variant}
     {
         if(this.edges === null)
             this.edges = new Map();

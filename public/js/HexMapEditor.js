@@ -125,6 +125,18 @@ class HexMapEditor
         this.edgeSelect = HTML.createSelect(this.hexMap.edges);
         div.append(HTML.createLabel("Edge: ", this.edgeSelect));
 
+        let jumpDiv = HTML.create("div");
+        this.jumpFromCol = HTML.create("input", {type: "number", value: "0"});
+        this.jumpFromRow = HTML.create("input", {type: "number", value: "0"});
+        jumpDiv.append(HTML.createLabel("Jump from column: ", this.jumpFromCol), HTML.createLabel(", row: ", this.jumpFromRow));
+        div.append(jumpDiv);
+
+        jumpDiv = HTML.create("div");
+        this.jumpToCol = HTML.create("input", {type: "number", value: "0"});
+        this.jumpToRow = HTML.create("input", {type: "number", value: "0"});
+        jumpDiv.append(HTML.createLabel("Jump to column: ", this.jumpToCol), HTML.createLabel(", row: ", this.jumpToRow));
+        div.append(jumpDiv);
+
         return div;
     }
 
@@ -236,7 +248,7 @@ class HexMapEditor
         if(this.paintSelect.value === "terrain")
             hex.setTerrain(this.hexMap.terrain.get(this.terrainSelect.value));
 
-        if(this.paintSelect.value === "edges")
+        if(this.paintSelect.value === "edges") // need to develop a way to remove an edge, changing is easy.
         {
             let y = +hex.hexTerrain.y.baseVal.value;
             let h = hex.hexTerrain.height.baseVal.value / 4;
@@ -251,7 +263,7 @@ class HexMapEditor
 
             if(Math.abs(w / 2 - dx) < rw) //  top left and bottom left
                 edgeIndex = Math.abs(h - dy) < rh ? 5 : (Math.abs(3 * h - dy) < rh ? 4 : -1);
-            else if(Math.abs(3 * w + w / 2 - dx) < rw) // top right and bottom right
+            else if(Math.abs(3.5 * w - dx) < rw) // top right and bottom right
                 edgeIndex = Math.abs(h - dy) < rh ? 1 : (Math.abs(3 * h - dy) < rh ? 2 : -1);
             else if(Math.abs(2 * w - dx) < rw) //  top and bottom
                  edgeIndex = dy < rh ? 0 : (Math.abs(4 * h - dy) < rh ? 3 : -1);
@@ -260,20 +272,35 @@ class HexMapEditor
                 hex.addEdge({"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0});
         }
         
-        if(this.paintSelect.value === "connectors")
+        if(this.paintSelect.value === "connectors") // roads and rails
             hex.terrain = this.terrain.get(this.terrainSelect.value);
 
-        if(this.paintSelect.value === "meta")
+        if(this.paintSelect.value === "meta") // country resources 
             hex.terrain = this.terrain.get(this.terrainSelect.value);
 
-        if(this.paintSelect.value === "content")
+        if(this.paintSelect.value === "content") // units
             hex.terrain = this.terrain.get(this.terrainSelect.value);
 
         if(this.paintSelect.value === "jumps")
-            hex.terrain = this.terrain.get(this.terrainSelect.value);
+        {
+            if(!this.jumpStart)
+            {
+                let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
+                let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2
 
-        console.log(hex);
+                this.jump = SVG.create("line", {x1 : x, y1 : y, x2 : pt.x, y2 : pt.y, stroke : "#ff0000", "stroke-width" : "6"});
+                this.hexMap.map.append(this.jump);
 
-        hex.drawHex();
+                this.jumpStart = hex;
+                this.painting = true;
+
+                console.log(this.jump);
+            }
+            else
+            {
+                this.jump.setAttribute("x2", pt.x);
+                this.jump.setAttribute("y2", pt.y);
+            }
+        }
     }
 }

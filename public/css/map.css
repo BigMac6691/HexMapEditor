@@ -4,3 +4,11 @@
     50% {stroke-width: 50}
     100% {stroke-width: 5}
 }
+
+text
+{
+    pointer-events: none;
+    font-size: 1em;
+    text-anchor: middle;
+    alignment-baseline: middle; /* this is a valid SVG property */
+}

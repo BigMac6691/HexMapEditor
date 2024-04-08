@@ -50,9 +50,9 @@ class HexMap
         {
             this.edges.set(edge.label, []);
         
-            for(let e = 0; e < 6; e++)
+            for(let e = 0; e < 6; e++) // each edge
             {
-                let vArray = [];
+                let vArray = []; // array of variants for each edge
         
                 edge.data[e].forEach(v =>
                 {
@@ -78,6 +78,8 @@ class HexMap
             
             this.hexes.push(rows);
         }
+
+        this.jumps = [];
 
         let mapPanel = document.getElementById("mapPanel");
         mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
