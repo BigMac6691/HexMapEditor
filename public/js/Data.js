@@ -136,6 +136,10 @@ let DATA =
                 ]
             ]
         }
+    ],
+    "jumps":
+    [
+        {"from": "2,2", "to": "8,12"}
     ]
 /*
     Structure of edge corners array of the label/id of the corner must match the edge?
@@ -148,18 +152,6 @@ let DATA =
     {
         label : road, railroad, etc... this is what you see in drop down
         data : [0 = top, 1 = top right, etc...][variants 0..n]
-    }
-
-    Structure of terrain this is very close to the same as the others
-    {
-        label : forest, hill, mountain, etc... this is what you see in drop down
-        data : [variants 0..n]
-    }
-
-    Structure of of jumps? this is different
-    {
-        label : jump?
-        data : from and to
     }
 
     Metadata is just a list of attributes the user has defined to be of interest and importance in the game.

@@ -7,7 +7,7 @@ class HexMapEditor
         this.boundMouseMove = this.handleMouseMove.bind(this);
         this.boundMouseClick = this.handleMouseClick.bind(this);
         this.boundKeypress = this.handleKeypress.bind(this);
-
+        
         this.painting = false;
 
         this.hexMap = new HexMap();
@@ -125,16 +125,16 @@ class HexMapEditor
         this.edgeSelect = HTML.createSelect(this.hexMap.edges);
         div.append(HTML.createLabel("Edge: ", this.edgeSelect));
 
-        let jumpDiv = HTML.create("div");
-        this.jumpFromCol = HTML.create("input", {type: "number", value: "0"});
-        this.jumpFromRow = HTML.create("input", {type: "number", value: "0"});
-        jumpDiv.append(HTML.createLabel("Jump from column: ", this.jumpFromCol), HTML.createLabel(", row: ", this.jumpFromRow));
-        div.append(jumpDiv);
+        this.boundJumpChange = this.handleJumpChange.bind(this);
 
-        jumpDiv = HTML.create("div");
-        this.jumpToCol = HTML.create("input", {type: "number", value: "0"});
-        this.jumpToRow = HTML.create("input", {type: "number", value: "0"});
-        jumpDiv.append(HTML.createLabel("Jump to column: ", this.jumpToCol), HTML.createLabel(", row: ", this.jumpToRow));
+        let jumpDiv = HTML.create("div");
+        this.jumpFromCol = HTML.create("input", {type: "number", value: "0"}, ["jumpInput"], {change: this.boundJumpChange});
+        this.jumpFromRow = HTML.create("input", {type: "number", value: "0"}, ["jumpInput"], {change: this.boundJumpChange});
+        jumpDiv.append(HTML.createLabel("Jump from: ", this.jumpFromCol), HTML.createLabel(", ", this.jumpFromRow));
+
+        this.jumpToCol = HTML.create("input", {type: "number", value: "0"}, ["jumpInput"], {change: this.boundJumpChange});
+        this.jumpToRow = HTML.create("input", {type: "number", value: "0"}, ["jumpInput"], {change: this.boundJumpChange});
+        jumpDiv.append(HTML.createLabel(" to ", this.jumpToCol), HTML.createLabel(", ", this.jumpToRow));
         div.append(jumpDiv);
 
         return div;
@@ -221,7 +221,12 @@ class HexMapEditor
         this.mouseMove.innerHTML = `Mouse location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} in hex ${evt.target.id}`;
 
         if(this.painting)
-            this.updateHex(evt.target.id, pt);
+        {
+            if(this.paintSelect.value === "jumps")
+                this.updateJump(evt.target.id, false);
+            else
+                this.updateHex(evt.target.id, pt);
+        }
     }
 
     handleMouseClick(evt)
@@ -232,7 +237,49 @@ class HexMapEditor
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
         this.mouseClick.innerHTML = `Click location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} with id ${evt.target.id}`;
 
-        this.updateHex(evt.target.id, pt);
+        if(this.paintSelect.value === "jumps")
+            this.updateJump(evt.target.id, true);
+        else
+            this.updateHex(evt.target.id, pt);
+    }
+
+    updateJump(id, endPoint)
+    {
+        let coords = id.split(",");
+        let hex = this.hexMap.getHexFromId(id);
+
+        let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
+        let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2
+
+        if(this.jumpStart) // start point already selected
+        {
+            this.jumpLine.setAttribute("x2", x);
+            this.jumpLine.setAttribute("y2", y);
+            this.jumpToCol.value = coords[0];
+            this.jumpToRow.value = coords[1];
+            
+            if(endPoint) // mouse was clicked
+            {
+                this.painting = false;
+                this.jumpStart = null;
+            }
+        }
+        else
+        {
+            this.jumpLine = SVG.create("line", {x1 : x, y1 : y, x2 : x, y2 : y, stroke : "#ff0000", "stroke-width" : "6"});
+            this.hexMap.map.append(this.jumpLine);
+
+            this.jumpFromCol.value = coords[0];
+            this.jumpFromRow.value = coords[1];
+
+            this.jumpStart = hex;
+            this.painting = true;           
+        }
+    }
+
+    handleJumpChange()
+    {
+        console.log("jump change");
     }
 
     updateHex(id, pt)
@@ -280,27 +327,5 @@ class HexMapEditor
 
         if(this.paintSelect.value === "content") // units
             hex.terrain = this.terrain.get(this.terrainSelect.value);
-
-        if(this.paintSelect.value === "jumps")
-        {
-            if(!this.jumpStart)
-            {
-                let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
-                let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2
-
-                this.jump = SVG.create("line", {x1 : x, y1 : y, x2 : pt.x, y2 : pt.y, stroke : "#ff0000", "stroke-width" : "6"});
-                this.hexMap.map.append(this.jump);
-
-                this.jumpStart = hex;
-                this.painting = true;
-
-                console.log(this.jump);
-            }
-            else
-            {
-                this.jump.setAttribute("x2", pt.x);
-                this.jump.setAttribute("y2", pt.y);
-            }
-        }
     }
 }

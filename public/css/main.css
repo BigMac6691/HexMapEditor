@@ -21,7 +21,7 @@ h3
 
 input[type='number'] 
 {
-    width: 6em;
+    width: 4em;
 }
 
 .mainBody
@@ -60,4 +60,9 @@ input[type='number']
     flex-direction: column;
     row-gap: 0.5em;
     padding: 1em;
+}
+
+#controlPanel .jumpInput
+{
+    width: 4em;
 }
