@@ -79,7 +79,7 @@ class HexMap
             this.hexes.push(rows);
         }
 
-        this.jumps = [];
+        this.jumps = DATA.jumps;
 
         let mapPanel = document.getElementById("mapPanel");
         mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
@@ -171,6 +171,20 @@ class HexMap
                 this.hexes[col][row].drawHex(x, y, width, h);
             }
         }
+
+        this.jumps.forEach(j =>
+        {
+            let coords = [];
+            [this.getHexFromId(j.from), this.getHexFromId(j.to)].forEach(hex =>
+            {
+                let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
+                let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2;
+                
+                coords.push(x, y);
+            });
+
+            this.map.append(SVG.create("line", {x1 : coords[0], y1 : coords[1], x2 : coords[2], y2 : coords[3], stroke : "#ff0000", "stroke-width" : "6"}));
+        });
 
         this.drawCursor();
     }

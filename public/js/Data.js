@@ -139,7 +139,7 @@ let DATA =
     ],
     "jumps":
     [
-        {"from": "2,2", "to": "8,12"}
+        {"from": "7,1", "to": "12,7"}
     ]
 /*
     Structure of edge corners array of the label/id of the corner must match the edge?

@@ -126,6 +126,7 @@ class HexMapEditor
         div.append(HTML.createLabel("Edge: ", this.edgeSelect));
 
         this.boundJumpChange = this.handleJumpChange.bind(this);
+        this.boundJumpSelect = this.handleJumpSelect.bind(this);
 
         let jumpDiv = HTML.create("div");
         this.jumpFromCol = HTML.create("input", {type: "number", value: "0"}, ["jumpInput"], {change: this.boundJumpChange});
@@ -136,6 +137,12 @@ class HexMapEditor
         this.jumpToRow = HTML.create("input", {type: "number", value: "0"}, ["jumpInput"], {change: this.boundJumpChange});
         jumpDiv.append(HTML.createLabel(" to ", this.jumpToCol), HTML.createLabel(", ", this.jumpToRow));
         div.append(jumpDiv);
+
+        this.jumpSelect = HTML.create("select", null, null, {change: this.boundJumpSelect});
+        let data = [{text: "New Jump", value: "new"}];
+        this.hexMap.jumps.forEach(j => data.push({text: `Jump ${j.from} to ${j.to}`, value: `${j.from}-${j.to}`}));
+        HTML.addOptions(this.jumpSelect, data);
+        div.append(HTML.createLabel("Jumps: ", this.jumpSelect));
 
         return div;
     }
@@ -218,7 +225,7 @@ class HexMapEditor
             return;
 
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
-        this.mouseMove.innerHTML = `Mouse location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} in hex ${evt.target.id}`;
+        this.mouseMove.innerHTML = `Mouse location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} in hex ${evt.target.id} isPainting ${this.painting}`;
 
         if(this.painting)
         {
@@ -277,9 +284,36 @@ class HexMapEditor
         }
     }
 
-    handleJumpChange()
+    handleJumpChange(evt)
     {
-        console.log("jump change");
+        let isFrom = evt.target === this.jumpFromCol || evt.target === this.jumpFromRow;
+        let id = null;
+
+        if(isFrom)
+            id = this.jumpFromCol.value + "," + this.jumpFromRow.value;
+        else
+            id = this.jumpToCol.value + "," + this.jumpToRow.value;
+
+        let hex = this.hexMap.getHexFromId(id);
+
+        let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
+        let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2;
+
+        if(isFrom)
+        {
+            this.jumpLine.setAttribute("x1", x);
+            this.jumpLine.setAttribute("y1", y);
+        }
+        else
+        {
+            this.jumpLine.setAttribute("x2", x);
+            this.jumpLine.setAttribute("y2", y);
+        }
+    }
+
+    handleJumpSelect(evt)
+    {
+        console.log(evt.target.value);
     }
 
     updateHex(id, pt)
