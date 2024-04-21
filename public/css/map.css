@@ -12,3 +12,8 @@ text
     text-anchor: middle;
     alignment-baseline: middle; /* this is a valid SVG property */
 }
+
+.jumpLine
+{
+    pointer-events: none;
+}

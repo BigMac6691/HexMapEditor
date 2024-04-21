@@ -3,7 +3,9 @@ let DATA =
     "metadata" :
     {
         "columns" : 15,
-        "rows" : 15
+        "rows" : 15,
+        "borderColor" : "#000000",
+        "defaultHexFill" : "#ffffff"
     },
     "defs" :
     [

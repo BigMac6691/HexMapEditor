@@ -26,6 +26,9 @@ class HexMap
 
     loadData(f)
     {
+        this.borderColour = DATA.metadata.borderColor;
+        this.defaultHexFill = DATA.metadata.defaultHexFill;
+
         // eventually replace this with a recursive function
         DATA.defs.forEach(def =>
         {
@@ -79,7 +82,8 @@ class HexMap
             this.hexes.push(rows);
         }
 
-        this.jumps = DATA.jumps;
+        this.jumpNextIndex = DATA.jumps.length;
+        this.jumps = new Map(DATA.jumps.map((jump, index) => [index, jump]));
 
         let mapPanel = document.getElementById("mapPanel");
         mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
@@ -183,7 +187,8 @@ class HexMap
                 coords.push(x, y);
             });
 
-            this.map.append(SVG.create("line", {x1 : coords[0], y1 : coords[1], x2 : coords[2], y2 : coords[3], stroke : "#ff0000", "stroke-width" : "6"}));
+            j.svg = SVG.create("line", {x1 : coords[0], y1 : coords[1], x2 : coords[2], y2 : coords[3], stroke : "#ff0000", "stroke-width" : "6", class : "jumpLine"});
+            this.map.append(j.svg);
         });
 
         this.drawCursor();
