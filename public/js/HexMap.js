@@ -70,6 +70,28 @@ class HexMap
             }
         });
 
+        this.connectors = new Map();
+        DATA.connectors.forEach(con =>
+        {
+            this.connectors.set(con.label, []);
+
+            for(let c = 0; c < 6; c++) // each connector
+            {
+                let vArray = []; // array of variants for each connector
+        
+                con.data[c].forEach(v =>
+                {
+                    let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
+                    n.append(SVG.create("path", v.svg));
+        
+                    this.svg.append(n);
+                    vArray.push({id: v.id, svg: n});
+                });
+        
+                this.connectors.get(con.label).push(vArray);
+            }
+        });
+
         // Map data begins here!
         this.hexes = [];
         for(let col = 0; col < DATA.metadata.columns; col++)

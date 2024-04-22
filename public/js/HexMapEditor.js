@@ -125,6 +125,9 @@ class HexMapEditor
         this.edgeSelect = HTML.createSelect(this.hexMap.edges);
         div.append(HTML.createLabel("Edge: ", this.edgeSelect));
 
+        this.connectorSelect = HTML.createSelect(this.hexMap.connectors);
+        div.append(HTML.createLabel("Connector: ", this.connectorSelect));
+
         this.boundJumpChange = this.handleJumpChange.bind(this);
         this.boundJumpSelect = this.handleJumpSelect.bind(this);
         this.boundJumpButtons = this.handleJumpButtons.bind(this);
@@ -154,6 +157,9 @@ class HexMapEditor
 
     handleKeypress(evt)
     {
+        if(this.paintSelect.value === "jumps")
+            return;
+
         this.painting = !this.painting;
 
         if(this.painting)
@@ -260,9 +266,12 @@ class HexMapEditor
         if(evt.target === this.jumpCreate)
         {
             let index = this.hexMap.jumpNextIndex++;
-            let jump = {from: `${+this.jumpFromCol.value},${+this.jumpFromRow.value}`, 
-                        to:`${+this.jumpToCol.value},${+this.jumpToRow.value}`,
-                        svg: this.jumpLine};
+            let jump = 
+            {
+                from: `${+this.jumpFromCol.value},${+this.jumpFromRow.value}`, 
+                to:`${+this.jumpToCol.value},${+this.jumpToRow.value}`,
+                svg: this.jumpLine
+            };
         
             this.hexMap.jumps.set(index, jump);
             HTML.addOptions(this.jumpSelect, [{text: `Jump ${jump.from} to ${jump.to}`, value: index}]);
@@ -320,8 +329,6 @@ class HexMapEditor
                 this.jumpLine.setAttribute("x1", x);
                 this.jumpLine.setAttribute("y1", y);
             }
-
-            console.log(this.jumpLine);
 
             this.jumpFromCol.value = coords[0];
             this.jumpFromRow.value = coords[1];
@@ -425,7 +432,12 @@ class HexMapEditor
         }
         
         if(this.paintSelect.value === "connectors") // roads and rails
-            hex.terrain = this.terrain.get(this.terrainSelect.value);
+        {
+            console.log("adding a connector...");
+
+            hex.addConnector({"edge": "Rail", "edgeIndex": 1, "variant": 0});
+        }
+            
 
         if(this.paintSelect.value === "meta") // country resources 
             hex.terrain = this.terrain.get(this.terrainSelect.value);

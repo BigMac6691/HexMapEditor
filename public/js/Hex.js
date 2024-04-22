@@ -47,8 +47,6 @@ class Hex
         this.edges.set(edge.id, [value, n]);
 
         this.svg.append(this.edges.get(edge.id)[1]);
-
-        console.log(edge);
     }
 
     addCorner(value)
@@ -56,9 +54,25 @@ class Hex
 
     }
 
-    addConnector(value)
+    addConnector(value) // {edge (none, rail), index, variant}
     {
+        if(this.connectors === null)
+            this.connectors = new Map();
 
+        let connector = this.hexMap.connectors.get(value.edge)[value.edgeIndex][value.variant];
+
+        if(this.connectors.has(connector.id))
+            return;
+
+        let n = SVG.createUse(connector.id, connector.svg);
+        n.setAttribute("x", this.hexTerrain.x.baseVal.value);
+        n.setAttribute("y", this.hexTerrain.y.baseVal.value);
+        n.setAttribute("width", this.hexTerrain.width.baseVal.value);
+        n.setAttribute("height", this.hexTerrain.height.baseVal.value);
+
+        this.connectors.set(connector.id, [value, n]);
+
+        this.svg.append(this.connectors.get(connector.id)[1]);
     }
 
     drawHex(x, y, w, h)

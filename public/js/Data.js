@@ -2,8 +2,8 @@ let DATA =
 {
     "metadata" :
     {
-        "columns" : 15,
-        "rows" : 15,
+        "columns" : 1,
+        "rows" : 1,
         "borderColor" : "#000000",
         "defaultHexFill" : "#ffffff"
     },
@@ -54,6 +54,38 @@ let DATA =
                 {
                     "type" : "line",
                     "data" : {x1: "0", y1: "23", x2: "45", y2: "23", stroke: "#000000", "stroke-width": "3"},
+                    "children" : []
+                }
+            ]
+        },
+        {
+            "type" : "pattern",
+            "data" : {id: "railPattern", x: "0", y: "0", width: "20", height: "20", patternUnits: "userSpaceOnUse"},
+            "children": 
+            [
+                {
+                    "type" : "line",
+                    "data" : {x1: "0", y1: "2", x2: "20", y2: "2", stroke: "#b36800", "stroke-width": "3"},
+                    "children" : []
+                },
+                {
+                    "type" : "line",
+                    "data" : {x1: "0", y1: "18", x2: "20", y2: "18", stroke: "#b36800", "stroke-width": "3"},
+                    "children" : []
+                },
+                {
+                    "type" : "line",
+                    "data" : {x1: "0", y1: "2", x2: "20", y2: "2", stroke: "#b36800", "stroke-width": "3"},
+                    "children" : []
+                },
+                {
+                    "type" : "line",
+                    "data" : {x1: "5", y1: "0", x2: "5", y2: "20", stroke: "#999999", "stroke-width": "2"},
+                    "children" : []
+                },
+                {
+                    "type" : "line",
+                    "data" : {x1: "15", y1: "0", x2: "15", y2: "20", stroke: "#999999", "stroke-width": "2"},
                     "children" : []
                 }
             ]
@@ -139,21 +171,64 @@ let DATA =
             ]
         }
     ],
+    "connectors":
+    [
+        {
+            "label" : "None",
+            "data" : [[],[],[],[],[],[]]
+        },
+        {
+            "label" : "Rail",
+            "data" :
+            [
+                [ // top
+                    { // variant 1
+                        "id" : "railTT_1",
+                        "svg" : {"d" : "M 500 433 L 500 0", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"20"}
+                    }
+                ],
+                [// top right
+                    { // variant 1
+                        "id" : "railTR_1",
+                        "svg" : {"d" : "M 500 433 L 875 216.5", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"20"}
+                    }
+                ],
+                [// bottom right
+                    { // variant 1
+                        "id" : "railBR_1",
+                        "svg" : {"d" : "M 500 433 L 875 649.5", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"50"}
+                    }
+                ],
+                [// bottom
+                    { // variant 1
+                        "id" : "railBB_1",
+                        "svg" : {"d" : "M 500 433 L 500 866", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"50"}
+                    }
+                ],
+                [// bottom left
+                    { // variant 1
+                        "id" : "railBL_1",
+                        "svg" : {"d" : "M 500 433 L 125 649.5", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"50"}
+                    }
+                ],
+                [// top left
+                    { // variant 1
+                        "id" : "railTL_1",
+                        "svg" : {"d" : "M 500 433 L 125 216.5", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"50"}
+                    }
+                ]
+            ]
+        }
+    ],
     "jumps":
     [
-        {"from": "7,1", "to": "12,7"}
+        // {"from": "7,1", "to": "12,7"}
     ]
 /*
     Structure of edge corners array of the label/id of the corner must match the edge?
     {
         label : river, forest, etc... this is what you see in drop down
         data: [0 = top right, 1 = right, etc...][variants 0..n]
-    }
-
-    Structure of connectors array of
-    {
-        label : road, railroad, etc... this is what you see in drop down
-        data : [0 = top, 1 = top right, etc...][variants 0..n]
     }
 
     Metadata is just a list of attributes the user has defined to be of interest and importance in the game.
