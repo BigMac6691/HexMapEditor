@@ -184,37 +184,49 @@ let DATA =
                 [ // top
                     { // variant 1
                         "id" : "railTT_1",
-                        "svg" : {"d" : "M 500 433 L 500 0", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"20"}
+                        "innerHTML" : '<line x1="475" y1="0" x2="525" y2="0" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="475" y1="43" x2="525" y2="43" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="475" y1="87" x2="525" y2="87" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="475" y1="130" x2="525" y2="130" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="475" y1="173" x2="525" y2="173" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="475" y1="216" x2="525" y2="216" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="475" y1="260" x2="525" y2="260" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="475" y1="303" x2="525" y2="303" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="475" y1="346" x2="525" y2="346" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="475" y1="389" x2="525" y2="389" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="475" y1="433" x2="525" y2="433" stroke="#b36800" stroke-width="20"/>' +
+                                      '<line x1="486" y1="0" x2="490" y2="433" stroke="#999999" stroke-width="6"/>' +
+                                      '<line x1="514" y1="0" x2="510" y2="433" stroke="#999999" stroke-width="6"/>'
                     }
                 ],
                 [// top right
                     { // variant 1
                         "id" : "railTR_1",
-                        "svg" : {"d" : "M 500 433 L 875 216.5", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"20"}
+                        "innerHTML" : '<use xlink:href="#railTT_1" x="0" y="0" width="1000" height="866" transform="rotate(60, 500, 433)"></use>'
                     }
                 ],
                 [// bottom right
                     { // variant 1
                         "id" : "railBR_1",
-                        "svg" : {"d" : "M 500 433 L 875 649.5", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"50"}
+                        "innerHTML" : '<use xlink:href="#railTT_1" x="0" y="0" width="1000" height="866" transform="rotate(120, 500, 433)"></use>'
                     }
                 ],
                 [// bottom
                     { // variant 1
                         "id" : "railBB_1",
-                        "svg" : {"d" : "M 500 433 L 500 866", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"50"}
+                        "innerHTML" : '<use xlink:href="#railTT_1" x="0" y="0" width="1000" height="866" transform="rotate(180, 500, 433)"></use>'
                     }
                 ],
                 [// bottom left
                     { // variant 1
                         "id" : "railBL_1",
-                        "svg" : {"d" : "M 500 433 L 125 649.5", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"50"}
+                        "innerHTML" : '<use xlink:href="#railTT_1" x="0" y="0" width="1000" height="866" transform="rotate(240, 500, 433)"></use>'
                     }
                 ],
                 [// top left
                     { // variant 1
                         "id" : "railTL_1",
-                        "svg" : {"d" : "M 500 433 L 125 216.5", "fill": "none", "stroke":"url(#railPattern)", "stroke-width":"50"}
+                        "innerHTML" : '<use xlink:href="#railTT_1" x="0" y="0" width="1000" height="866" transform="rotate(300, 500, 433)"></use>'
                     }
                 ]
             ]

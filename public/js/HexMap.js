@@ -82,7 +82,7 @@ class HexMap
                 con.data[c].forEach(v =>
                 {
                     let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
-                    n.append(SVG.create("path", v.svg));
+                    n.innerHTML = v.innerHTML;
         
                     this.svg.append(n);
                     vArray.push({id: v.id, svg: n});

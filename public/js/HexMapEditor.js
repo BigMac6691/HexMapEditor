@@ -394,6 +394,29 @@ class HexMapEditor
         this.jumpToRow.value = ids[3];
     }
 
+    nearestEdge(hex, pt)
+    {
+        let y = +hex.hexTerrain.y.baseVal.value;
+        let h = hex.hexTerrain.height.baseVal.value / 4;
+        let dy = pt.y - y;
+        let rh = h / 5;
+
+        let x = +hex.hexTerrain.x.baseVal.value;
+        let w = hex.hexTerrain.width.baseVal.value / 4;
+        let dx = pt.x - x;
+        let rw = w / 5;
+        let edgeIndex = -1;
+
+        if(Math.abs(w / 2 - dx) < rw) //  top left and bottom left
+            edgeIndex = Math.abs(h - dy) < rh ? 5 : (Math.abs(3 * h - dy) < rh ? 4 : -1);
+        else if(Math.abs(3.5 * w - dx) < rw) // top right and bottom right
+            edgeIndex = Math.abs(h - dy) < rh ? 1 : (Math.abs(3 * h - dy) < rh ? 2 : -1);
+        else if(Math.abs(2 * w - dx) < rw) //  top and bottom
+             edgeIndex = dy < rh ? 0 : (Math.abs(4 * h - dy) < rh ? 3 : -1);
+
+        return edgeIndex;
+    }
+
     updateHex(id, pt)
     {
         if(this.paintSelect.value === "none")
@@ -401,7 +424,11 @@ class HexMapEditor
 
         let hex = this.hexMap.getHexFromId(id);
 
+        // console.log("\n ");
+        // console.log(`innerHTL for ${id}`);
         // console.log(hex.svg.innerHTML);
+        // console.log(JSON.stringify(hex.svg.innerHTML));
+        // console.log(`outerHTL for ${id}`);
         // console.log(hex.svg.outerHTML);
 
         if(this.paintSelect.value === "terrain")
@@ -409,23 +436,7 @@ class HexMapEditor
 
         if(this.paintSelect.value === "edges") // need to develop a way to remove an edge, changing is easy.
         {
-            let y = +hex.hexTerrain.y.baseVal.value;
-            let h = hex.hexTerrain.height.baseVal.value / 4;
-            let dy = pt.y - y;
-            let rh = h / 5;
-
-            let x = +hex.hexTerrain.x.baseVal.value;
-            let w = hex.hexTerrain.width.baseVal.value / 4;
-            let dx = pt.x - x;
-            let rw = w / 5;
-            let edgeIndex = -1;
-
-            if(Math.abs(w / 2 - dx) < rw) //  top left and bottom left
-                edgeIndex = Math.abs(h - dy) < rh ? 5 : (Math.abs(3 * h - dy) < rh ? 4 : -1);
-            else if(Math.abs(3.5 * w - dx) < rw) // top right and bottom right
-                edgeIndex = Math.abs(h - dy) < rh ? 1 : (Math.abs(3 * h - dy) < rh ? 2 : -1);
-            else if(Math.abs(2 * w - dx) < rw) //  top and bottom
-                 edgeIndex = dy < rh ? 0 : (Math.abs(4 * h - dy) < rh ? 3 : -1);
+            let edgeIndex = this.nearestEdge(hex, pt);
 
             if(edgeIndex >= 0)
                 hex.addEdge({"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0});
@@ -434,10 +445,11 @@ class HexMapEditor
         if(this.paintSelect.value === "connectors") // roads and rails
         {
             console.log("adding a connector...");
+            let edgeIndex = this.nearestEdge(hex, pt);
 
-            hex.addConnector({"edge": "Rail", "edgeIndex": 1, "variant": 0});
+            if(edgeIndex >= 0)
+                hex.addConnector({"edge": this.connectorSelect.value, "edgeIndex": edgeIndex, "variant": 0});
         }
-            
 
         if(this.paintSelect.value === "meta") // country resources 
             hex.terrain = this.terrain.get(this.terrainSelect.value);

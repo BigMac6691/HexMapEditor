@@ -84,15 +84,15 @@ class Hex
             this.hexTerrain.setAttribute("width", w);
             this.hexTerrain.setAttribute("height", h);
 
-            if(this.edges !== null)
+            if(this.edges)
                 this.edges.forEach(edge =>
                 {
-                    if(edge !== null)
+                    if(edge)
                     {
-                        edge.setAttribute("x", x);
-                        edge.setAttribute("y", y);
-                        edge.setAttribute("width", w);
-                        edge.setAttribute("height", h);
+                        edge[1].setAttribute("x", x);
+                        edge[1].setAttribute("y", y);
+                        edge[1].setAttribute("width", w);
+                        edge[1].setAttribute("height", h);
                     }
                 });
         }
