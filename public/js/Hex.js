@@ -30,7 +30,13 @@ class Hex
 
     addEdge(value) // {edge (none, river), index, variant}
     {
-        if(this.edges === null)
+        if(value.edge === "None")
+        {
+            this.handleNone(this.edges, value);
+            return;
+        }
+
+        if(!this.edges)
             this.edges = new Map();
 
         let edge = this.hexMap.edges.get(value.edge)[value.edgeIndex][value.variant];
@@ -56,7 +62,13 @@ class Hex
 
     addConnector(value) // {edge (none, rail), index, variant}
     {
-        if(this.connectors === null)
+        if(value.edge === "None")
+        {
+            this.handleNone(this.connectors, value);
+            return;
+        }
+
+        if(!this.connectors)
             this.connectors = new Map();
 
         let connector = this.hexMap.connectors.get(value.edge)[value.edgeIndex][value.variant];
@@ -73,6 +85,24 @@ class Hex
         this.connectors.set(connector.id, [value, n]);
 
         this.svg.append(this.connectors.get(connector.id)[1]);
+    }
+
+    handleNone(map, value)
+    {
+        if(!map)
+            return;
+
+        for(const [k, v] of map)
+        {
+            if(v[0].edgeIndex === value.edgeIndex)
+            {
+                this.svg.removeChild(v[1]);
+                map.delete(k);
+                return;
+            }
+        }
+
+        return;
     }
 
     drawHex(x, y, w, h)

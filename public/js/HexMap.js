@@ -59,7 +59,7 @@ class HexMap
         
                 edge.data[e].forEach(v =>
                 {
-                    let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
+                    let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
                     n.append(SVG.create("path", v.svg));
         
                     this.svg.append(n);
@@ -81,7 +81,7 @@ class HexMap
         
                 con.data[c].forEach(v =>
                 {
-                    let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
+                    let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
                     n.innerHTML = v.innerHTML;
         
                     this.svg.append(n);

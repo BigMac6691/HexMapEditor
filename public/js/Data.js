@@ -2,8 +2,8 @@ let DATA =
 {
     "metadata" :
     {
-        "columns" : 1,
-        "rows" : 1,
+        "columns" : 15,
+        "rows" : 15,
         "borderColor" : "#000000",
         "defaultHexFill" : "#ffffff"
     },

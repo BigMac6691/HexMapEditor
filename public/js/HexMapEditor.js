@@ -444,7 +444,6 @@ class HexMapEditor
         
         if(this.paintSelect.value === "connectors") // roads and rails
         {
-            console.log("adding a connector...");
             let edgeIndex = this.nearestEdge(hex, pt);
 
             if(edgeIndex >= 0)
