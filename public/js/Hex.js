@@ -87,6 +87,7 @@ class Hex
         this.svg.append(this.connectors.get(connector.id)[1]);
     }
 
+    // separate borders from metadata - have the editor do all the calculations for borders
     addMetadata(value)
     {  
         if(!this.metadata)
@@ -108,7 +109,7 @@ class Hex
 
         for(const [k, v] of value)
         {
-            if(this.metadata.get(k) === v)
+            if(this.metadata.get(k) === v) // if no change in property value skip to next incoming property
                 continue;
 
             this.metadata.set(k, v);

@@ -184,24 +184,24 @@ let DATA =
             "id": "CountryBorder",
             "innerHtml": 
             [
-                '<line x1="250" y1="0" x2="750" y2="0" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>',
-                '<line x1="750" y1="0" x2="1000" y2="433" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>',
-                '<line x1="1000" y1="433" x2="750" y2="866" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>',
-                '<line x1="750" y1="866" x2="250" y2="866" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>',
-                '<line x1="250" y1="866" x2="0" y2="433" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>',
-                '<line x1="0" y1="433" x2="250" y2="0" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>'
+                '<line x1="250" y1="0" x2="750" y2="0" stroke="#ff0000" stroke-width="30" stroke-dasharray="25,25"/>',
+                '<line x1="750" y1="0" x2="1000" y2="433" stroke="#ff0000" stroke-width="30" stroke-dasharray="25,25"/>',
+                '<line x1="1000" y1="433" x2="750" y2="866" stroke="#ff0000" stroke-width="30" stroke-dasharray="25,25"/>',
+                '<line x1="750" y1="866" x2="250" y2="866" stroke="#ff0000" stroke-width="30" stroke-dasharray="25,25"/>',
+                '<line x1="250" y1="866" x2="0" y2="433" stroke="#ff0000" stroke-width="30" stroke-dasharray="25,25"/>',
+                '<line x1="0" y1="433" x2="250" y2="0" stroke="#ff0000" stroke-width="30" stroke-dasharray="25,25"/>'
             ]
         },
         {
             "id": "ProvincialBorder",
             "innerHtml": 
             [
-                '<line x1="250" y1="0" x2="750" y2="0" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>',
-                '<line x1="750" y1="0" x2="1000" y2="433" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>',
-                '<line x1="1000" y1="433" x2="750" y2="866" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>',
-                '<line x1="750" y1="866" x2="250" y2="866" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>',
-                '<line x1="250" y1="866" x2="0" y2="433" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>',
-                '<line x1="0" y1="433" x2="250" y2="0" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>'
+                '<line x1="250" y1="0" x2="750" y2="0" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
+                '<line x1="750" y1="0" x2="1000" y2="433" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
+                '<line x1="1000" y1="433" x2="750" y2="866" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
+                '<line x1="750" y1="866" x2="250" y2="866" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
+                '<line x1="250" y1="866" x2="0" y2="433" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
+                '<line x1="0" y1="433" x2="250" y2="0" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>'
             ]
         }
     ],
@@ -242,6 +242,8 @@ let DATA =
         field : metadata attribute name
         data type : the type as used with the html input element?  selects will be complex...
         data : how to draw the border when neighboring hex has different metadata value (from the inside)
+
+        renderRules: border, decoration (like iron ore symbol), label (like city name), none (no visual effect)
     }
      */
 }
