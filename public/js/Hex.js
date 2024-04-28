@@ -11,7 +11,7 @@ class Hex
         this.edges = null;
         this.corners = null;
         this.connectors = null;
-        this.meta = null;
+        this.metadata = null;
         this.content = null;
 
         let id = `${col},${row}`;
@@ -85,6 +85,76 @@ class Hex
         this.connectors.set(connector.id, [value, n]);
 
         this.svg.append(this.connectors.get(connector.id)[1]);
+    }
+
+    addMetadata(value)
+    {  
+        if(!this.metadata)
+            this.metadata = new Map();
+
+        let offset = this.hexMap.offsetOn ? (this.col % 2 ? -1 : 0) : (this.col % 2 ? 0 : -1);
+        let adj = 
+        [
+            this.hexMap.getHexFromId(`${this.col},${this.row - 1}`),
+            this.hexMap.getHexFromId(`${this.col + 1},${this.row + offset}`),
+            this.hexMap.getHexFromId(`${this.col + 1},${this.row + offset + 1}`),
+            this.hexMap.getHexFromId(`${this.col},${this.row + 1}`),
+            this.hexMap.getHexFromId(`${this.col - 1},${this.row + offset + 1}`),
+            this.hexMap.getHexFromId(`${this.col - 1},${this.row + offset}`)
+        ];
+
+        console.log(" ");
+        console.log(adj);
+
+        for(const [k, v] of value)
+        {
+            if(this.metadata.get(k) === v)
+                continue;
+
+            this.metadata.set(k, v);
+
+            let md = this.hexMap.metadata.get(k);
+
+            console.log(`Hex ${this.col},${this.row} -> (${md.renderRules[0].type}) ${k}::${v} render symbol ${md.renderRules[0].symbol}`);
+
+            if(md.renderRules[0].type === "border") // at this point you know that a property value has changed
+            {
+                if(!this.borders)
+                    this.borders = new Map();
+
+                for(let side = 0; side < 6; side++)
+                {
+                    let borderId = `${md.renderRules[0].symbol}_${side}`;
+
+                    console.log(borderId);
+
+                    if(v === adj[side]?.metadata?.get(k)) // an adjacent hex has the same property value
+                    {
+                        let id = `${md.renderRules[0].symbol}_${(side + 3) % 6}`; // look for side opposite this side
+                        let d = adj[side].borders.get(id);
+
+                        if(d)
+                        {
+                            adj[side].svg.removeChild(d);
+                            adj[side].borders.delete(id);
+                        }
+                    }
+                    else
+                    {
+                        let n = SVG.createUse(borderId);
+                        n.setAttribute("x", this.hexTerrain.x.baseVal.value);
+                        n.setAttribute("y", this.hexTerrain.y.baseVal.value);
+                        n.setAttribute("width", this.hexTerrain.width.baseVal.value);
+                        n.setAttribute("height", this.hexTerrain.height.baseVal.value);
+
+                        this.svg.append(n);
+                        this.borders.set(borderId, n);
+                    }
+                } // for sides
+            }
+            else
+                throw new Error(`Unknown rendering rule ${md.renderRules[0].type} for metadata.`);
+        } // for passed meta
     }
 
     handleNone(map, value)

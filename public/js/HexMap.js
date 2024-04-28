@@ -26,15 +26,16 @@ class HexMap
 
     loadData(f)
     {
-        this.borderColour = DATA.metadata.borderColor;
-        this.defaultHexFill = DATA.metadata.defaultHexFill;
+        this.borderColour = DATA.mapMetadata.borderColor;
+        this.defaultHexFill = DATA.mapMetadata.defaultHexFill;
+        this.offsetOn = DATA.mapMetadata.offsetOn;
 
         // eventually replace this with a recursive function
-        DATA.defs.forEach(def =>
+        DATA.defs.forEach(record =>
         {
-            let n = SVG.create(def.type, def.data);
+            let n = SVG.create(record.type, record.data);
 
-            def.children.forEach(child =>
+            record.children.forEach(child =>
             {
                 n.append(SVG.create(child.type, child.data));
             });
@@ -49,15 +50,15 @@ class HexMap
         });
     
         this.edges = new Map();
-        DATA.edges.forEach(edge =>
+        DATA.edges.forEach(record =>
         {
-            this.edges.set(edge.label, []);
+            this.edges.set(record.label, []);
         
             for(let e = 0; e < 6; e++) // each edge
             {
                 let vArray = []; // array of variants for each edge
         
-                edge.data[e].forEach(v =>
+                record.data[e].forEach(v =>
                 {
                     let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
                     n.append(SVG.create("path", v.svg));
@@ -66,20 +67,20 @@ class HexMap
                     vArray.push({id: v.id, svg: n});
                 });
         
-                this.edges.get(edge.label).push(vArray);
+                this.edges.get(record.label).push(vArray);
             }
         });
 
         this.connectors = new Map();
-        DATA.connectors.forEach(con =>
+        DATA.connectors.forEach(record =>
         {
-            this.connectors.set(con.label, []);
+            this.connectors.set(record.label, []);
 
             for(let c = 0; c < 6; c++) // each connector
             {
                 let vArray = []; // array of variants for each connector
         
-                con.data[c].forEach(v =>
+                record.data[c].forEach(v =>
                 {
                     let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
                     n.innerHTML = v.innerHTML;
@@ -88,17 +89,39 @@ class HexMap
                     vArray.push({id: v.id, svg: n});
                 });
         
-                this.connectors.get(con.label).push(vArray);
+                this.connectors.get(record.label).push(vArray);
+            }
+        });
+
+        // Metadata begins here!
+        this.metadata = new Map();
+        DATA.metadata.forEach(record =>
+        {
+            this.metadata.set(record.label, record);
+        });
+
+        // Borders begins here!
+        this.borders = new Map();
+        DATA.borders.forEach(record =>
+        {
+            this.borders.set(record.id, record);
+
+            for(let i = 0; i < 6; i++)
+            {
+                let n = SVG.create("symbol", {id: `${record.id}_${i}`, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+                n.innerHTML = record.innerHtml[i];
+    
+                this.svg.append(n);
             }
         });
 
         // Map data begins here!
         this.hexes = [];
-        for(let col = 0; col < DATA.metadata.columns; col++)
+        for(let col = 0; col < DATA.mapMetadata.columns; col++)
         {
             let rows = [];
 
-            for(let row = 0; row < DATA.metadata.rows; row++)
+            for(let row = 0; row < DATA.mapMetadata.rows; row++)
                 rows.push(new Hex(this, col, row));
             
             this.hexes.push(rows);

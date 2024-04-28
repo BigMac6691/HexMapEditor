@@ -152,6 +152,32 @@ class HexMapEditor
         jumpDiv.append(HTML.createLabel("Jumps: ", this.jumpSelect), " ", this.jumpCreate, " ", this.jumpDelete);
         div.append(jumpDiv);
 
+        div.append(HTML.create("hr"));
+        this.metadata = new Map();
+        for(const[k, v] of this.hexMap.metadata)
+        {
+            if(v.editor.type === "select")
+            {
+                let n = HTML.create("select");
+                HTML.addOptions(n, v.editor.values.map(o =>
+                {
+                    return {text: o, value: o};
+                }));
+
+                this.metadata.set(k, n);
+                div.append(HTML.createLabel(k + " ", n));
+            }
+            else if(v.editor.type === "input")
+            {
+                let n = HTML.create("input", v.editor.opts);
+
+                this.metadata.set(k, n);
+                div.append(HTML.createLabel(k + ": ", n));
+            }
+            else
+                throw new Error(`Unknown metadata type [${v.type}]`);
+        }
+
         return div;
     }
 
@@ -451,7 +477,13 @@ class HexMapEditor
         }
 
         if(this.paintSelect.value === "meta") // country resources 
-            hex.terrain = this.terrain.get(this.terrainSelect.value);
+        {
+            let value = new Map();
+            for(const [k, v] of this.metadata)
+                value.set(k, v.value);
+
+            hex.addMetadata(value);
+        }
 
         if(this.paintSelect.value === "content") // units
             hex.terrain = this.terrain.get(this.terrainSelect.value);

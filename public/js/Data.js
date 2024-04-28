@@ -1,41 +1,15 @@
 let DATA = 
 {
-    "metadata" :
+    "mapMetadata" :
     {
-        "columns" : 15,
-        "rows" : 15,
+        "columns" : 5,
+        "rows" : 5,
         "borderColor" : "#000000",
-        "defaultHexFill" : "#ffffff"
+        "defaultHexFill" : "#ffffff",
+        "offsetOn": 1
     },
     "defs" :
     [
-        {
-            "type" : "linearGradient",
-            "data" : {id: "topLeftFade", x1: "0", y1: "0", x2: "0", y2: 1},
-            "children" : 
-            [
-                {
-                    "type" : "stop",
-                    "data" : {offset: "0%", "stop-color": "#ff0000"},
-                    "children" : []
-                },
-                {
-                    "type" : "stop",
-                    "data" : {offset: "10%", "stop-color": "#ff0000", "stop-opacity": "0.5"},
-                    "children" : []
-                },
-                {
-                    "type" : "stop",
-                    "data" : {offset: "20%", "stop-color": "#ff0000", "stop-opacity": "0.2"},
-                    "children" : []
-                },
-                {
-                    "type" : "stop",
-                    "data" : {offset: "100%", "stop-color": "#ff0000", "stop-opacity": "0"},
-                    "children" : []
-                }
-            ]
-        },
         {
             "type" : "pattern",
             "data" : {id: "cityPattern", x: "0", y: "0", width: "45", height: "45", patternUnits: "userSpaceOnUse"},
@@ -54,38 +28,6 @@ let DATA =
                 {
                     "type" : "line",
                     "data" : {x1: "0", y1: "23", x2: "45", y2: "23", stroke: "#000000", "stroke-width": "3"},
-                    "children" : []
-                }
-            ]
-        },
-        {
-            "type" : "pattern",
-            "data" : {id: "railPattern", x: "0", y: "0", width: "20", height: "20", patternUnits: "userSpaceOnUse"},
-            "children": 
-            [
-                {
-                    "type" : "line",
-                    "data" : {x1: "0", y1: "2", x2: "20", y2: "2", stroke: "#b36800", "stroke-width": "3"},
-                    "children" : []
-                },
-                {
-                    "type" : "line",
-                    "data" : {x1: "0", y1: "18", x2: "20", y2: "18", stroke: "#b36800", "stroke-width": "3"},
-                    "children" : []
-                },
-                {
-                    "type" : "line",
-                    "data" : {x1: "0", y1: "2", x2: "20", y2: "2", stroke: "#b36800", "stroke-width": "3"},
-                    "children" : []
-                },
-                {
-                    "type" : "line",
-                    "data" : {x1: "5", y1: "0", x2: "5", y2: "20", stroke: "#999999", "stroke-width": "2"},
-                    "children" : []
-                },
-                {
-                    "type" : "line",
-                    "data" : {x1: "15", y1: "0", x2: "15", y2: "20", stroke: "#999999", "stroke-width": "2"},
                     "children" : []
                 }
             ]
@@ -235,6 +177,55 @@ let DATA =
     "jumps":
     [
         // {"from": "7,1", "to": "12,7"}
+    ],
+    "borders":
+    [
+        {
+            "id": "CountryBorder",
+            "innerHtml": 
+            [
+                '<line x1="250" y1="0" x2="750" y2="0" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>',
+                '<line x1="750" y1="0" x2="1000" y2="433" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>',
+                '<line x1="1000" y1="433" x2="750" y2="866" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>',
+                '<line x1="750" y1="866" x2="250" y2="866" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>',
+                '<line x1="250" y1="866" x2="0" y2="433" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>',
+                '<line x1="0" y1="433" x2="250" y2="0" stroke="#ff0000" stroke-width="30" stroke-dasharray="30,20"/>'
+            ]
+        },
+        {
+            "id": "ProvincialBorder",
+            "innerHtml": 
+            [
+                '<line x1="250" y1="0" x2="750" y2="0" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>',
+                '<line x1="750" y1="0" x2="1000" y2="433" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>',
+                '<line x1="1000" y1="433" x2="750" y2="866" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>',
+                '<line x1="750" y1="866" x2="250" y2="866" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>',
+                '<line x1="250" y1="866" x2="0" y2="433" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>',
+                '<line x1="0" y1="433" x2="250" y2="0" stroke="#ffff00" stroke-width="6" stroke-dasharray="10,10"/>'
+            ]
+        }
+    ],
+    "metadata": 
+    [
+        {
+            "label" : "Country",
+            "editor" :
+            {
+                "type" : "select",
+                "values" : ["None", "Canada", "United States", "Mexico"]
+            },
+            "renderRules" : [{"type": "border", "symbol": "CountryBorder"}]
+        }
+        // ,
+        // {
+        //     "label" : "Province",
+        //     "editor" :
+        //     {
+        //         "type" : "input",
+        //         "opts" : {"type": "number", "min": "0", "value": "0"}
+        //     },
+        //     "renderRules" : [{"type": "border", "symbol": "ProvincialBorder"}]
+        // }
     ]
 /*
     Structure of edge corners array of the label/id of the corner must match the edge?
@@ -244,9 +235,12 @@ let DATA =
     }
 
     Metadata is just a list of attributes the user has defined to be of interest and importance in the game.
+    Start with two fields - country and province, then think about adding a third called control.
+        Could very easily add others like population, resource type, resource value, etc.
     Hexes will need some way to know when to show a border based on meta data.
     {
         field : metadata attribute name
+        data type : the type as used with the html input element?  selects will be complex...
         data : how to draw the border when neighboring hex has different metadata value (from the inside)
     }
      */
