@@ -2,6 +2,7 @@ class HexMapEditor
 {
     constructor() 
     {
+        // alternative to numerous bound speciclized event handlers - one handler that then redirects to specialized handlers
         this.boundSVGChange = this.handleSVGChange.bind(this);
         this.boundMapModelChange = this.handleMapModelChange.bind(this);
         this.boundMouseMove = this.handleMouseMove.bind(this);
@@ -94,6 +95,9 @@ class HexMapEditor
         this.defaultTerrainColour = HTML.create("input", {type: "color", value: this.hexMap.defaultHexFill}, null, {change: this.boundMapModelChange});
         div.append(HTML.createLabel("Default Hex Colour: ", this.defaultTerrainColour));
 
+        this.offsetCheckbox = HTML.create("input", {type: "checkbox", checked: this.hexMap.offsetOn});
+        div.append(HTML.createLabel("Hex offset: ", this.offsetCheckbox));
+
         return div;
     }
 
@@ -132,30 +136,33 @@ class HexMapEditor
         this.boundJumpSelect = this.handleJumpSelect.bind(this);
         this.boundJumpButtons = this.handleJumpButtons.bind(this);
 
-        let jumpDiv = HTML.create("div");
+        let tempDiv = HTML.create("div");
         this.jumpFromCol = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
         this.jumpFromRow = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
-        jumpDiv.append(HTML.createLabel("Jump from: ", this.jumpFromCol), HTML.createLabel(", ", this.jumpFromRow));
+        tempDiv.append(HTML.createLabel("Jump from: ", this.jumpFromCol), HTML.createLabel(", ", this.jumpFromRow));
 
         this.jumpToCol = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
         this.jumpToRow = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
-        jumpDiv.append(HTML.createLabel(" to ", this.jumpToCol), HTML.createLabel(", ", this.jumpToRow));
-        div.append(jumpDiv);
+        tempDiv.append(HTML.createLabel(" to ", this.jumpToCol), HTML.createLabel(", ", this.jumpToRow));
+        div.append(tempDiv);
 
-        jumpDiv = HTML.create("div");
+        tempDiv = HTML.create("div");
         this.jumpCreate = HTML.create("button", {type: "button", innerHTML: "Create"}, null, {click: this.boundJumpButtons});
         this.jumpDelete = HTML.create("button", {type: "button", innerHTML: "Delete", style: "display:none"}, null, {click: this.boundJumpButtons});
         this.jumpSelect = HTML.create("select", null, null, {change: this.boundJumpSelect});
         let data = [{text: "New Jump", value: "new"}];
         this.hexMap.jumps.forEach((v, k) => data.push({text: `Jump ${v.from} to ${v.to}`, value: k}));
         HTML.addOptions(this.jumpSelect, data);
-        jumpDiv.append(HTML.createLabel("Jumps: ", this.jumpSelect), " ", this.jumpCreate, " ", this.jumpDelete);
-        div.append(jumpDiv);
+        tempDiv.append(HTML.createLabel("Jumps: ", this.jumpSelect), " ", this.jumpCreate, " ", this.jumpDelete);
+        div.append(tempDiv);
 
         div.append(HTML.create("hr"));
         this.metadata = new Map();
         for(const[k, v] of this.hexMap.metadata)
         {
+            tempDiv = HTML.create("div");
+            let cb = HTML.create("input", {type: "checkbox"});
+
             if(v.editor.type === "select")
             {
                 let n = HTML.create("select");
@@ -164,15 +171,17 @@ class HexMapEditor
                     return {text: o, value: o};
                 }));
 
-                this.metadata.set(k, n);
-                div.append(HTML.createLabel(k + " ", n));
+                this.metadata.set(k, [cb, n]);
+                tempDiv.append(cb, HTML.createLabel(k + " ", n));
+                div.append(tempDiv);
             }
             else if(v.editor.type === "input")
             {
                 let n = HTML.create("input", v.editor.opts);
 
-                this.metadata.set(k, n);
-                div.append(HTML.createLabel(k + ": ", n));
+                this.metadata.set(k, [cb, n]);
+                tempDiv.append(cb, HTML.createLabel(k + ": ", n));
+                div.append(tempDiv);
             }
             else
                 throw new Error(`Unknown metadata type [${v.type}]`);
@@ -480,7 +489,8 @@ class HexMapEditor
         {
             let value = new Map();
             for(const [k, v] of this.metadata)
-                value.set(k, v.value);
+                if(v[0].checked)
+                    value.set(k, v[1].value);
 
             hex.addMetadata(value);
         }

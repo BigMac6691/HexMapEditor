@@ -154,13 +154,14 @@ class HexMap
 
     getHexFromId(id)
     {
+        console.log(id);
         let hex = null;
 
         if(id.includes(","))
         {
             let pt = id.split(",");
 
-            if(pt[0] < this.hexes.length && pt[1] < this.hexes[0].length)
+            if(pt[0] >= 0 && pt[0] < this.hexes.length && pt[1] >= 0 && pt[1] < this.hexes[0].length)
                 hex = this.hexes[pt[0]][pt[1]];
         }
 

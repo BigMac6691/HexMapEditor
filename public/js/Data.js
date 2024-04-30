@@ -2,8 +2,8 @@ let DATA =
 {
     "mapMetadata" :
     {
-        "columns" : 5,
-        "rows" : 5,
+        "columns" : 2,
+        "rows" : 2,
         "borderColor" : "#000000",
         "defaultHexFill" : "#ffffff",
         "offsetOn": 1
@@ -196,12 +196,12 @@ let DATA =
             "id": "ProvincialBorder",
             "innerHtml": 
             [
-                '<line x1="250" y1="0" x2="750" y2="0" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
-                '<line x1="750" y1="0" x2="1000" y2="433" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
-                '<line x1="1000" y1="433" x2="750" y2="866" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
-                '<line x1="750" y1="866" x2="250" y2="866" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
-                '<line x1="250" y1="866" x2="0" y2="433" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
-                '<line x1="0" y1="433" x2="250" y2="0" stroke="#ffff00" stroke-width="6" stroke-dasharray="25,25" stroke-dashoffset="25"/>'
+                '<line x1="250" y1="0" x2="750" y2="0" stroke="#ff00ff" stroke-width="15" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
+                '<line x1="750" y1="0" x2="1000" y2="433" stroke="#ff00ff" stroke-width="15" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
+                '<line x1="1000" y1="433" x2="750" y2="866" stroke="#ff00ff" stroke-width="15" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
+                '<line x1="750" y1="866" x2="250" y2="866" stroke="#ff00ff" stroke-width="15" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
+                '<line x1="250" y1="866" x2="0" y2="433" stroke="#ff00ff" stroke-width="15" stroke-dasharray="25,25" stroke-dashoffset="25"/>',
+                '<line x1="0" y1="433" x2="250" y2="0" stroke="#ff00ff" stroke-width="15" stroke-dasharray="25,25" stroke-dashoffset="25"/>'
             ]
         }
     ],
@@ -216,16 +216,16 @@ let DATA =
             },
             "renderRules" : [{"type": "border", "symbol": "CountryBorder"}]
         }
-        // ,
-        // {
-        //     "label" : "Province",
-        //     "editor" :
-        //     {
-        //         "type" : "input",
-        //         "opts" : {"type": "number", "min": "0", "value": "0"}
-        //     },
-        //     "renderRules" : [{"type": "border", "symbol": "ProvincialBorder"}]
-        // }
+        ,
+        {
+            "label" : "Province",
+            "editor" :
+            {
+                "type" : "input",
+                "opts" : {"type": "number", "min": "0", "value": "0"}
+            },
+            "renderRules" : [{"type": "border", "symbol": "ProvincialBorder"}]
+        }
     ]
 /*
     Structure of edge corners array of the label/id of the corner must match the edge?
