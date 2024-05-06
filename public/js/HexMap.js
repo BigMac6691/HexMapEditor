@@ -44,52 +44,81 @@ class HexMap
         });
 
         this.terrain = new Map();
+        this.terrainTypes = new Set();
         DATA.terrain.forEach(t =>
         {
-            this.terrain.set(t.label, t);
+            this.terrainTypes.add(t.label);
+            this.terrain.set(t.label, t.data);
         });
     
         this.edges = new Map();
+        this.edgeTypes = new Set();
         DATA.edges.forEach(record =>
         {
-            this.edges.set(record.label, []);
-        
+            this.edgeTypes.add(record.label);
+
             for(let e = 0; e < 6; e++) // each edge
             {
-                let vArray = []; // array of variants for each edge
-        
-                record.data[e].forEach(v =>
+                record.data[e].forEach((v, i) =>
                 {
-                    let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
-                    n.append(SVG.create("path", v.svg));
+                    let id = `${record.label}_e${e}_v${i}`;
+                    let n = SVG.create("symbol", {id: id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+
+                    n.innerHTML = v;
         
                     this.svg.append(n);
-                    vArray.push({id: v.id, svg: n});
+                    this.edges.set(id, n);
                 });
-        
-                this.edges.get(record.label).push(vArray);
             }
         });
 
+        this.corners = new Map();
+        this.cornerTypes = new Set();
+        DATA.corners.forEach(record =>
+        {
+            this.cornerTypes.add(record.label);
+
+            for(let e = 0; e < 6; e++)
+            {
+                record.data[e].forEach((v, c) =>
+                {
+                    v.forEach((p, i) =>
+                    {
+                        let id = `${record.label}_e${e}_c${c}_v${i}`;
+                        let n = SVG.create("symbol", {id: id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+
+                        n.innerHTML = p;
+
+                        this.svg.append(n);
+                        this.corners.set(id, n);
+                    });
+                });
+            }
+        });
+
+        console.log("Edges:");
+        console.log(this.edges);
+        console.log("Corners:");
+        console.log(this.corners);
+        console.log("===============================");
+
         this.connectors = new Map();
+        this.connectorTypes = new Set();
         DATA.connectors.forEach(record =>
         {
-            this.connectors.set(record.label, []);
+            this.connectorTypes.add(record.label);
 
-            for(let c = 0; c < 6; c++) // each connector
+            for(let e = 0; e < 6; e++) // each connector
             {
-                let vArray = []; // array of variants for each connector
-        
-                record.data[c].forEach(v =>
+                record.data[e].forEach((v, i) =>
                 {
-                    let n = SVG.create("symbol", {id: v.id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
-                    n.innerHTML = v.innerHTML;
+                    let id = `${record.label}_e${e}_v${i}`;
+                    let n = SVG.create("symbol", {id: id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+                    n.innerHTML = v;
         
                     this.svg.append(n);
-                    vArray.push({id: v.id, svg: n});
+                    this.connectors.set(id, n);
                 });
-        
-                this.connectors.get(record.label).push(vArray);
             }
         });
 
@@ -154,7 +183,6 @@ class HexMap
 
     getHexFromId(id)
     {
-        console.log(id);
         let hex = null;
 
         if(id.includes(","))

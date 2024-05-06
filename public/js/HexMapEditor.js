@@ -123,13 +123,13 @@ class HexMapEditor
             ]);
         div.append(HTML.createLabel("Paint: ", this.paintSelect));
 
-        this.terrainSelect = HTML.createSelect(this.hexMap.terrain);
+        this.terrainSelect = HTML.createSelect(this.hexMap.terrainTypes);
         div.append(HTML.createLabel("Terrain: ", this.terrainSelect));
 
-        this.edgeSelect = HTML.createSelect(this.hexMap.edges);
+        this.edgeSelect = HTML.createSelect(this.hexMap.edgeTypes);
         div.append(HTML.createLabel("Edge: ", this.edgeSelect));
 
-        this.connectorSelect = HTML.createSelect(this.hexMap.connectors);
+        this.connectorSelect = HTML.createSelect(this.hexMap.connectorTypes);
         div.append(HTML.createLabel("Connector: ", this.connectorSelect));
 
         this.boundJumpChange = this.handleJumpChange.bind(this);
@@ -459,6 +459,9 @@ class HexMapEditor
 
         let hex = this.hexMap.getHexFromId(id);
 
+        console.log("==================================");
+        console.log(pt);
+
         // console.log("\n ");
         // console.log(`innerHTL for ${id}`);
         // console.log(hex.svg.innerHTML);
@@ -467,14 +470,70 @@ class HexMapEditor
         // console.log(hex.svg.outerHTML);
 
         if(this.paintSelect.value === "terrain")
-            hex.setTerrain(this.hexMap.terrain.get(this.terrainSelect.value));
+        {
+            hex.setTerrain({type: this.terrainSelect.value, variant: 0});
+        }
 
         if(this.paintSelect.value === "edges") // need to develop a way to remove an edge, changing is easy.
         {
             let edgeIndex = this.nearestEdge(hex, pt);
 
             if(edgeIndex >= 0)
+            {
                 hex.addEdge({"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0});
+
+                let offset = this.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
+                let adj = 
+                [
+                    this.hexMap.getHexFromId(`${hex.col},${hex.row - 1}`),
+                    this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset}`),
+                    this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset + 1}`),
+                    this.hexMap.getHexFromId(`${hex.col},${hex.row + 1}`),
+                    this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset + 1}`),
+                    this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
+                ];
+
+                let beforeIndex = (edgeIndex + 5) % 6; // this the edge before and the corner before
+                let oppHex = adj[beforeIndex] ? adj[beforeIndex] : adj[(beforeIndex + 1) % 6]; // this is the first of two hexes that define the oppsite edge
+
+                console.log(hex.edges);
+                console.log(oppHex);
+
+                let oppHexEdgeIndex = (beforeIndex + 2) % 6; // the index of the edge of the first of two opp hexes to use
+                
+                console.log(`edgeIndex=${edgeIndex}, beforeIndex=${beforeIndex}, oppHexEdgeIndex=${oppHexEdgeIndex}, edgeSelectValue=${this.edgeSelect.value}`);
+                console.log(oppHex.edges);
+
+                let oppEdgeExists = false;
+
+                if(oppHex.edges)
+                {
+                    oppHex.edges.forEach((v, k) =>
+                    {
+                        if(k.edge === this.edgeSelect.value && k.edgeIndex === oppHexEdgeIndex)
+                            oppEdgeExists = true;
+                    });
+                }
+
+                let cornerType = 0;
+
+                if(hex.edges)
+                    hex.edges.forEach((v, k) => 
+                    {
+                        console.log(k);
+                    
+                        if(k.edge === this.edgeSelect.value)
+                        {
+                            if(k.edgeIndex === beforeIndex)
+                                cornerType++;
+                        
+                            if(k.edgeIndex === edgeIndex)
+                                cornerType += 2;
+                        }
+                    });
+
+                console.log(`oppEdge=${oppEdgeExists} cornerType=${cornerType + (oppEdgeExists ? 3 : 0)}, edge count=${hex.edges.size}`);
+            }
         }
         
         if(this.paintSelect.value === "connectors") // roads and rails

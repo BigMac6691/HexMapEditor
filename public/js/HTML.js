@@ -10,11 +10,11 @@ class HTML
         return n;
     }
 
-    static createSelect(map, opts, clazz, listeners)
+    static createSelect(values, opts, clazz, listeners)
     {
         let select = this.create("select", opts, clazz, listeners);
 
-        map.forEach((v, k) => select.append(HTML.create("option", {text: k, value: k})));
+        values.forEach((v, k) => select.append(HTML.create("option", {text: v, value: v})));
 
         return select;
     }
