@@ -459,16 +459,6 @@ class HexMapEditor
 
         let hex = this.hexMap.getHexFromId(id);
 
-        console.log("==================================");
-        console.log(pt);
-
-        // console.log("\n ");
-        // console.log(`innerHTL for ${id}`);
-        // console.log(hex.svg.innerHTML);
-        // console.log(JSON.stringify(hex.svg.innerHTML));
-        // console.log(`outerHTL for ${id}`);
-        // console.log(hex.svg.outerHTML);
-
         if(this.paintSelect.value === "terrain")
         {
             hex.setTerrain({type: this.terrainSelect.value, variant: 0});
@@ -493,46 +483,8 @@ class HexMapEditor
                     this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
                 ];
 
-                let beforeIndex = (edgeIndex + 5) % 6; // this the edge before and the corner before
-                let oppHex = adj[beforeIndex] ? adj[beforeIndex] : adj[(beforeIndex + 1) % 6]; // this is the first of two hexes that define the oppsite edge
-
-                console.log(hex.edges);
-                console.log(oppHex);
-
-                let oppHexEdgeIndex = (beforeIndex + 2) % 6; // the index of the edge of the first of two opp hexes to use
-                
-                console.log(`edgeIndex=${edgeIndex}, beforeIndex=${beforeIndex}, oppHexEdgeIndex=${oppHexEdgeIndex}, edgeSelectValue=${this.edgeSelect.value}`);
-                console.log(oppHex.edges);
-
-                let oppEdgeExists = false;
-
-                if(oppHex.edges)
-                {
-                    oppHex.edges.forEach((v, k) =>
-                    {
-                        if(k.edge === this.edgeSelect.value && k.edgeIndex === oppHexEdgeIndex)
-                            oppEdgeExists = true;
-                    });
-                }
-
-                let cornerType = 0;
-
-                if(hex.edges)
-                    hex.edges.forEach((v, k) => 
-                    {
-                        console.log(k);
-                    
-                        if(k.edge === this.edgeSelect.value)
-                        {
-                            if(k.edgeIndex === beforeIndex)
-                                cornerType++;
-                        
-                            if(k.edgeIndex === edgeIndex)
-                                cornerType += 2;
-                        }
-                    });
-
-                console.log(`oppEdge=${oppEdgeExists} cornerType=${cornerType + (oppEdgeExists ? 3 : 0)}, edge count=${hex.edges.size}`);
+                this.evaluateCorner(hex, adj, edgeIndex);
+                this.evaluateCorner(hex, adj, (edgeIndex + 5) % 6); 
             }
         }
         
@@ -556,5 +508,28 @@ class HexMapEditor
 
         if(this.paintSelect.value === "content") // units
             hex.terrain = this.terrain.get(this.terrainSelect.value);
+    }
+
+    evaluateCorner(hex, adj, cornerIndex)
+    {
+        let edgeBefore = hex.edges ? hex.edges.partialHas({"edgeIndex": cornerIndex}) : false;
+        let edgeAfter = hex.edges ? hex.edges.partialHas({"edgeIndex": (cornerIndex + 1) % 6}) : false;
+        let edgeOpp1 = adj[cornerIndex]?.edges ? adj[cornerIndex].edges.partialHas({"edgeIndex": (cornerIndex + 2) % 6}) : false;
+        let edgeOpp2 = adj[(cornerIndex + 1) % 6]?.edges ? adj[(cornerIndex + 1) % 6].edges.partialHas({"edgeIndex": (cornerIndex + 5) % 6}) : false;
+        let corner = edgeBefore ? 1 : 0;
+
+        if(edgeAfter)
+            corner +=2;
+
+        if(edgeBefore && !edgeAfter)
+            corner += edgeOpp2 ? 3 : 0;
+
+        if(!edgeBefore && edgeAfter)
+            corner += edgeOpp1 ? 3 : 0;
+
+        console.log(`before=${edgeBefore}, after=${edgeAfter}, edgeOpp1=${edgeOpp1}, edgeOpp2=${edgeOpp2}, corner=${corner}`);
+
+        if(corner > 0)
+            hex.addCorner({"edge" : this.edgeSelect.value, "edgeIndex" : cornerIndex, "cornerType": corner - 1, "variant" : 0});
     }
 }

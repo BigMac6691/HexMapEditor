@@ -13,6 +13,11 @@ text
     alignment-baseline: middle; /* this is a valid SVG property */
 }
 
+#cursor
+{
+    animation: cursor 3s infinite;
+}
+
 .jumpLine
 {
     pointer-events: none;

@@ -21,7 +21,7 @@ class HexMap
         this.loadData();
 
         this.cursor = new DOMPoint(0, 0);
-        this.cursorHex = SVG.createUse("hexagon", {id: "cursor", stroke: "#ff0000", fill: "none", style: "animation: cursor 3s infinite;"});
+        this.cursorHex = SVG.createUse("hexagon", {id: "cursor", stroke: "#ff0000", fill: "none", "pointer-events": "none"});
     }
 
     loadData(f)

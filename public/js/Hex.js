@@ -56,7 +56,26 @@ class Hex
 
     addCorner(value)
     {
+        if(value.edge === "None")
+        {
+            this.handleNone(this.corners, value);
+            return;
+        }
 
+        if(!this.corners)
+            this.corners = new KOMap();
+
+        if(this.corners.partialHas(value))
+            return;
+
+        let n = SVG.createUse(`${value.edge}_e${value.edgeIndex}_c${value.cornerType}_v${value.variant}`);
+        n.setAttribute("x", this.hexTerrain.x.baseVal.value);
+        n.setAttribute("y", this.hexTerrain.y.baseVal.value);
+        n.setAttribute("width", this.hexTerrain.width.baseVal.value);
+        n.setAttribute("height", this.hexTerrain.height.baseVal.value);
+
+        this.corners.setKO(value, n);
+        this.svg.append(this.corners.getKO(value));
     }
 
     addConnector(value) // {edge (none, rail), index, variant}

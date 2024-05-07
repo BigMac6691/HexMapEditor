@@ -135,11 +135,11 @@ let DATA =
                 ],
                 [ // left corner
                     // five possible permutations, innerHTML
-                    ['<path d="M 192.3 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
-                    ['<path d="M 192.3 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
-                    ['<path d="M 192.3 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
-                    ['<path d="M 192.3 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
-                    ['<path d="M 192.3 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>']
+                    ['<path d="M 115.4 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
+                    ['<path d="M 115.4 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
+                    ['<path d="M 115.4 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
+                    ['<path d="M 115.4 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
+                    ['<path d="M 115.4 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>']
                 ],
                 [ // top left corner
                     // five possible permutations, innerHTML
