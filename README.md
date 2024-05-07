@@ -1,4 +1,5 @@
 # HexMapEditor
+![Test](documentation/images/BasicHexagon.svg)
 ## The Dream
 The plan is to make a tool for creating hex maps.  The map will be rendered using SVG.  Which will also include a separete hex map viewer.  The basic file representing a map will use JSON.
 ## Features
