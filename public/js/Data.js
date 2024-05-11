@@ -102,49 +102,49 @@ let DATA =
             "data":
             [
                 [ // top right corner
-                    // five possible permutations, innerHTML
-                    ['<path d="M 634.5 0 L 750 0 L 807.7 100 L 692.3 100 Z" fill="#0000ff"/>'], // this array is the variants
-                    ['<path d="M 634.5 0 L 750 0 L 807.7 100 L 692.3 100 Z" fill="#0000ff"/>'],
+                    // five possible types of corners, innerHTML
+                    ['<path d="M 634.5 0 L 750 0 L 692.3 100 Z" fill="#0000ff"/>'], // this array is the variants
+                    ['<path d="M 750 0 L 807.7 100 L 692.3 100 Z" fill="#0000ff"/>'],
                     ['<path d="M 634.5 0 L 750 0 L 807.7 100 L 692.3 100 Z" fill="#0000ff"/>'],
                     ['<path d="M 634.5 0 L 750 0 L 807.7 100 L 692.3 100 Z" fill="#0000ff"/>'],
                     ['<path d="M 634.5 0 L 750 0 L 807.7 100 L 692.3 100 Z" fill="#0000ff"/>'] 
                 ],
                 [ // right corner
-                    // five possible permutations, innerHTML
-                    ['<path d="M 942 333 L 1000 433 L 942 533 L 884.5 433 Z" fill="#0000ff"/>'],
-                    ['<path d="M 942 333 L 1000 433 L 942 533 L 884.5 433 Z" fill="#0000ff"/>'],
+                    // five possible types of corners, innerHTML
+                    ['<path d="M 1000 433 L 884.5 433 L 942 333 Z" fill="#0000ff"/>'],
+                    ['<path d="M 1000 433 L 884.5 433 L 942 533 Z" fill="#0000ff"/>'],
                     ['<path d="M 942 333 L 1000 433 L 942 533 L 884.5 433 Z" fill="#0000ff"/>'],
                     ['<path d="M 942 333 L 1000 433 L 942 533 L 884.5 433 Z" fill="#0000ff"/>'],
                     ['<path d="M 942 333 L 1000 433 L 942 533 L 884.5 433 Z" fill="#0000ff"/>']
                 ],
                 [ // bottom right corner
-                    // five possible permutations, innerHTML
-                    ['<path d="M 692.3 766 L 807.7 766 L 750 866 L 634.5 866 Z" fill="#0000ff"/>'],
-                    ['<path d="M 692.3 766 L 807.7 766 L 750 866 L 634.5 866 Z" fill="#0000ff"/>'],
+                    // five possible types of corners, innerHTML
+                    ['<path d="M 692.3 766 L 807.7 766 L 750 866 Z" fill="#0000ff"/>'],
+                    ['<path d="M 692.3 766 L 750 866 L 634.5 866 Z" fill="#0000ff"/>'],
                     ['<path d="M 692.3 766 L 807.7 766 L 750 866 L 634.5 866 Z" fill="#0000ff"/>'],
                     ['<path d="M 692.3 766 L 807.7 766 L 750 866 L 634.5 866 Z" fill="#0000ff"/>'],
                     ['<path d="M 692.3 766 L 807.7 766 L 750 866 L 634.5 866 Z" fill="#0000ff"/>']
                 ],
                 [ // bottom left corner
-                    // five possible permutations, innerHTML
-                    ['<path d="M 192.3 766 L 307.7 766 L 365.5 866 L 250 866 Z" fill="#0000ff"/>'],
-                    ['<path d="M 192.3 766 L 307.7 766 L 365.5 866 L 250 866 Z" fill="#0000ff"/>'],
+                    // five possible types of corners, innerHTML
+                    ['<path d="M 307.7 766 L 365.5 866 L 250 866 Z" fill="#0000ff"/>'],
+                    ['<path d="M 192.3 766 L 307.7 766 L 250 866 Z" fill="#0000ff"/>'],
                     ['<path d="M 192.3 766 L 307.7 766 L 365.5 866 L 250 866 Z" fill="#0000ff"/>'],
                     ['<path d="M 192.3 766 L 307.7 766 L 365.5 866 L 250 866 Z" fill="#0000ff"/>'],
                     ['<path d="M 192.3 766 L 307.7 766 L 365.5 866 L 250 866 Z" fill="#0000ff"/>']
                 ],
                 [ // left corner
-                    // five possible permutations, innerHTML
-                    ['<path d="M 115.4 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
-                    ['<path d="M 115.4 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
+                    // five possible types of corners, innerHTML
+                    ['<path d="M 115.4 433 L 57.7 533 L 0 433 Z" fill="#0000ff"/>'],
+                    ['<path d="M 115.4 433 L 57.7 333 L 0 433 Z" fill="#0000ff"/>'],
                     ['<path d="M 115.4 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
                     ['<path d="M 115.4 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>'],
                     ['<path d="M 115.4 433 L 57.7 533 L 0 433 L 57.7 333 Z" fill="#0000ff"/>']
                 ],
                 [ // top left corner
-                    // five possible permutations, innerHTML
-                    ['<path d="M 192.3 100 L 250 0 L 365.5 0 L 307.7 100 Z" fill="#0000ff"/>'],
-                    ['<path d="M 192.3 100 L 250 0 L 365.5 0 L 307.7 100 Z" fill="#0000ff"/>'],
+                    // five possible types of corners, innerHTML
+                    ['<path d="M 192.3 100 L 250 0 L 307.7 100 Z" fill="#0000ff"/>'],
+                    ['<path d="M 250 0 L 365.5 0 L 307.7 100 Z" fill="#0000ff"/>'],
                     ['<path d="M 192.3 100 L 250 0 L 365.5 0 L 307.7 100 Z" fill="#0000ff"/>'],
                     ['<path d="M 192.3 100 L 250 0 L 365.5 0 L 307.7 100 Z" fill="#0000ff"/>'],
                     ['<path d="M 192.3 100 L 250 0 L 365.5 0 L 307.7 100 Z" fill="#0000ff"/>']

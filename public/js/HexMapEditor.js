@@ -527,8 +527,6 @@ class HexMapEditor
         if(!edgeBefore && edgeAfter)
             corner += edgeOpp1 ? 3 : 0;
 
-        console.log(`before=${edgeBefore}, after=${edgeAfter}, edgeOpp1=${edgeOpp1}, edgeOpp2=${edgeOpp2}, corner=${corner}`);
-
         if(corner > 0)
             hex.addCorner({"edge" : this.edgeSelect.value, "edgeIndex" : cornerIndex, "cornerType": corner - 1, "variant" : 0});
     }

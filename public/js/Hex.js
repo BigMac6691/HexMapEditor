@@ -68,6 +68,9 @@ class Hex
         if(this.corners.partialHas(value))
             return;
 
+        let matches = this.corners.partialGetAll({edge: value.edge, edgeIndex: value.edgeIndex});
+        matches.forEach(m => this.svg.removeChild(m));        
+
         let n = SVG.createUse(`${value.edge}_e${value.edgeIndex}_c${value.cornerType}_v${value.variant}`);
         n.setAttribute("x", this.hexTerrain.x.baseVal.value);
         n.setAttribute("y", this.hexTerrain.y.baseVal.value);
