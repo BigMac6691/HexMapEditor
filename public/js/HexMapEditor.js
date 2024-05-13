@@ -110,6 +110,19 @@ class HexMapEditor
         this.mouseClick = HTML.create("p", {innerHTML: "Click location: x, y"});
         div.append(this.mouseMove, this.mouseClick);
 
+        this.boundMenuClick = this.handleMenu.bind(this);
+
+        this.menuList = new Map();
+        let menu = HTML.create("div", null, ["menuContainer"]);
+        ["Terrain", "Edges", "Connectors", "Jumps", "Meta", "Content"]
+            .forEach(m => 
+            {
+                let n = HTML.create("div", {innerHTML: m}, ["menuItem"], {click: this.boundMenuClick});
+                menu.append(n);
+                this.menuList.set(n, m);
+            });
+        div.append(menu);
+
         this.paintSelect = HTML.create("select");
         HTML.addOptions(this.paintSelect, 
             [
@@ -188,6 +201,13 @@ class HexMapEditor
         }
 
         return div;
+    }
+
+    handleMenu(evt)
+    {
+        this.menuList.forEach((v, k) => k.classList.remove("menuItemSelected"));
+        evt.target.classList.add("menuItemSelected");
+        console.log(this.menuList.get(evt.target));
     }
 
     handleKeypress(evt)

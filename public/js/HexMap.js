@@ -96,12 +96,6 @@ class HexMap
             }
         });
 
-        console.log("Edges:");
-        console.log(this.edges);
-        console.log("Corners:");
-        console.log(this.corners);
-        console.log("===============================");
-
         this.connectors = new Map();
         this.connectorTypes = new Set();
         DATA.connectors.forEach(record =>

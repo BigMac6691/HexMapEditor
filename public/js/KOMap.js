@@ -28,8 +28,8 @@ class KOMap extends Map
     // returns first partial match
     // 'returnKey' controls what is returned 
     //      0 = just return the value (DEFAULT), 
-    //      1 = return the string key, 
-    //      2 = return the object key
+    //      1 = return the string key and value as array, 
+    //      2 = return the object key and value as array
     partialGet(partialKey, returnType)
     {
         for(const [k, v] of this)
@@ -54,8 +54,8 @@ class KOMap extends Map
     // returns an array of all partial matches
     // 'returnKey' controls what is returned 
     //      0 = just return the value (DEFAULT), 
-    //      1 = return the string key, 
-    //      2 = return the object key
+    //      1 = return the string key and value as array, 
+    //      2 = return the object key and value as array
     partialGetAll(partialKey, returnType)
     {
         let matches = [];
