@@ -66,7 +66,6 @@ input[type='number']
 {
     display: flex;
     flex-direction: row;
-    column-gap: 1em;
     justify-content: center;
     align-content: center;
     border: black solid 0.05em;
@@ -75,7 +74,7 @@ input[type='number']
 
 .menuItem
 {
-    padding: 0.2em;
+    padding: 0.25em;
     cursor: pointer;
 }
 

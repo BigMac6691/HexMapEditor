@@ -111,45 +111,61 @@ class HexMapEditor
         div.append(this.mouseMove, this.mouseClick);
 
         this.boundMenuClick = this.handleMenu.bind(this);
-
-        this.menuList = new Map();
-        let menu = HTML.create("div", null, ["menuContainer"]);
-        ["Terrain", "Edges", "Connectors", "Jumps", "Meta", "Content"]
-            .forEach(m => 
-            {
-                let n = HTML.create("div", {innerHTML: m}, ["menuItem"], {click: this.boundMenuClick});
-                menu.append(n);
-                this.menuList.set(n, m);
-            });
-        div.append(menu);
-
-        this.paintSelect = HTML.create("select");
-        HTML.addOptions(this.paintSelect, 
-            [
-                {text: "None", value: "none"}, 
-                {text: "Terrain", value: "terrain"},
-                {text: "Edges", value: "edges"},
-                {text: "Connectors", value: "connectors"},
-                {text: "Jumps", value: "jumps"},
-                {text: "Meta", value: "meta"},
-                {text: "Content", value: "content"}
-            ]);
-        div.append(HTML.createLabel("Paint: ", this.paintSelect));
-
-        this.terrainSelect = HTML.createSelect(this.hexMap.terrainTypes);
-        div.append(HTML.createLabel("Terrain: ", this.terrainSelect));
-
-        this.edgeSelect = HTML.createSelect(this.hexMap.edgeTypes);
-        div.append(HTML.createLabel("Edge: ", this.edgeSelect));
-
-        this.connectorSelect = HTML.createSelect(this.hexMap.connectorTypes);
-        div.append(HTML.createLabel("Connector: ", this.connectorSelect));
-
         this.boundJumpChange = this.handleJumpChange.bind(this);
         this.boundJumpSelect = this.handleJumpSelect.bind(this);
         this.boundJumpButtons = this.handleJumpButtons.bind(this);
 
+        let list = ["None", "Terrain", "Edges", "Connectors", "Jumps", "Meta", "Content"];
+
+        this.menuList = new Map();
+        let menu = HTML.create("div", null, ["menuContainer"]);
+        div.append(menu);
+
+        list.forEach(m => 
+        {
+            let n = HTML.create("div", {innerHTML: m}, ["menuItem"], {click: this.boundMenuClick});
+            menu.append(n);
+            switch(m)
+            {
+                case list[0]:
+                    n.classList.add("menuItemSelected"); // initial menu option
+                    this.menuList.set(n, HTML.create("div"));
+                    break;
+                case list[1]:
+                    this.terrainSelect = new ComboRadioSelect(this.hexMap.terrainTypes, "terrainCRS");
+                    this.menuList.set(n, this.terrainSelect.groupDiv);
+                    div.append(this.terrainSelect.groupDiv);
+                    break;
+                case list[2]:
+                    this.edgeSelect = new ComboRadioSelect(this.hexMap.edgeTypes, "edgeCRS");
+                    this.menuList.set(n, this.edgeSelect.groupDiv);
+                    div.append(this.edgeSelect.groupDiv);
+                    break;
+                case list[3]:
+                    this.connectorSelect = new ComboRadioSelect(this.hexMap.connectorTypes, "connectorCRS");
+                    this.menuList.set(n, this.connectorSelect.groupDiv);
+                    div.append(this.connectorSelect.groupDiv);
+                    break;
+                case list[4]:
+                    div.append(this.buildJumpDiv(n));
+                    break;
+                case list[5]:
+                    div.append(this.buildMetaDiv(n));
+                    break;
+                case list[6]:
+                    this.menuList.set(n, HTML.create("div"));
+                    break;
+            }
+        });
+
+        return div;
+    }
+
+    buildJumpDiv(menuNode)
+    {
+        let div = HTML.create("div", {style: "display:none"});
         let tempDiv = HTML.create("div");
+
         this.jumpFromCol = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
         this.jumpFromRow = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
         tempDiv.append(HTML.createLabel("Jump from: ", this.jumpFromCol), HTML.createLabel(", ", this.jumpFromRow));
@@ -163,17 +179,27 @@ class HexMapEditor
         this.jumpCreate = HTML.create("button", {type: "button", innerHTML: "Create"}, null, {click: this.boundJumpButtons});
         this.jumpDelete = HTML.create("button", {type: "button", innerHTML: "Delete", style: "display:none"}, null, {click: this.boundJumpButtons});
         this.jumpSelect = HTML.create("select", null, null, {change: this.boundJumpSelect});
+
         let data = [{text: "New Jump", value: "new"}];
         this.hexMap.jumps.forEach((v, k) => data.push({text: `Jump ${v.from} to ${v.to}`, value: k}));
         HTML.addOptions(this.jumpSelect, data);
         tempDiv.append(HTML.createLabel("Jumps: ", this.jumpSelect), " ", this.jumpCreate, " ", this.jumpDelete);
+        
+        this.menuList.set(menuNode, div);
+        
         div.append(tempDiv);
 
-        div.append(HTML.create("hr"));
+        return div;
+    }
+
+    buildMetaDiv(menuNode)
+    {
+        let metaDiv = HTML.create("div", {style: "display:none"});
         this.metadata = new Map();
+
         for(const[k, v] of this.hexMap.metadata)
         {
-            tempDiv = HTML.create("div");
+            let tempDiv = HTML.create("div");
             let cb = HTML.create("input", {type: "checkbox"});
 
             if(v.editor.type === "select")
@@ -186,7 +212,7 @@ class HexMapEditor
 
                 this.metadata.set(k, [cb, n]);
                 tempDiv.append(cb, HTML.createLabel(k + " ", n));
-                div.append(tempDiv);
+                metaDiv.append(tempDiv);
             }
             else if(v.editor.type === "input")
             {
@@ -194,25 +220,30 @@ class HexMapEditor
 
                 this.metadata.set(k, [cb, n]);
                 tempDiv.append(cb, HTML.createLabel(k + ": ", n));
-                div.append(tempDiv);
+                metaDiv.append(tempDiv);
             }
             else
                 throw new Error(`Unknown metadata type [${v.type}]`);
         }
 
-        return div;
+        this.menuList.set(menuNode, metaDiv);
+        
+        return metaDiv;
     }
 
     handleMenu(evt)
     {
-        this.menuList.forEach((v, k) => k.classList.remove("menuItemSelected"));
+        let currentMenu = document.querySelector(".menuItemSelected");
+        currentMenu.classList.remove("menuItemSelected");
+        this.menuList.get(currentMenu).style.display = "none";
+
         evt.target.classList.add("menuItemSelected");
-        console.log(this.menuList.get(evt.target));
+        this.menuList.get(evt.target).style.display = "block";
     }
 
     handleKeypress(evt)
     {
-        if(this.paintSelect.value === "jumps")
+        if(document.querySelector(".menuItemSelected")?.innerHTML === "Jumps")
             return;
 
         this.painting = !this.painting;
@@ -295,7 +326,7 @@ class HexMapEditor
 
         if(this.painting)
         {
-            if(this.paintSelect.value === "jumps")
+            if(document.querySelector(".menuItemSelected")?.innerHTML === "Jumps")
                 this.updateJump(evt.target.id, false);
             else
                 this.updateHex(evt.target.id, pt);
@@ -310,7 +341,7 @@ class HexMapEditor
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
         this.mouseClick.innerHTML = `Click location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} with id ${evt.target.id}`;
 
-        if(this.paintSelect.value === "jumps")
+        if(document.querySelector(".menuItemSelected")?.innerHTML === "Jumps")
             this.updateJump(evt.target.id, true);
         else
             this.updateHex(evt.target.id, pt);
@@ -372,24 +403,28 @@ class HexMapEditor
         }
         else
         {
-            if(this.jumpSelect.value === "new")
-            {
-                this.jumpLine = SVG.create("line", {x1: x, y1: y, x2: x, y2: y, stroke: "#ff0000", "stroke-width": "6", class: "jumpLine"});
-                this.hexMap.map.append(this.jumpLine);
-            }
-            else
-            {
-                this.jumpLine = this.hexMap.jumps.get(+this.jumpSelect.value).svg;
-
-                this.jumpLine.setAttribute("x1", x);
-                this.jumpLine.setAttribute("y1", y);
-            }
+            this.resolveJumpLine(x, y);
 
             this.jumpFromCol.value = coords[0];
             this.jumpFromRow.value = coords[1];
 
             this.jumpStart = hex;
             this.painting = true;           
+        }
+    }
+
+    resolveJumpLine(x, y)
+    {
+        if(this.jumpSelect.value === "new")
+        {
+            this.jumpLine = SVG.create("line", {x1: x, y1: y, x2: x, y2: y, stroke: "#ff0000", "stroke-width": "6", class: "jumpLine"});
+            this.hexMap.map.append(this.jumpLine);
+        }
+        else
+        {
+            this.jumpLine = this.hexMap.jumps.get(+this.jumpSelect.value).svg;
+            this.jumpLine.setAttribute("x1", x);
+            this.jumpLine.setAttribute("y1", y);
         }
     }
 
@@ -407,6 +442,8 @@ class HexMapEditor
 
         let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
         let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2;
+
+        this.resolveJumpLine(x, y);
 
         if(isFrom)
         {
@@ -474,17 +511,19 @@ class HexMapEditor
 
     updateHex(id, pt)
     {
-        if(this.paintSelect.value === "none")
+        let currentMenu = document.querySelector(".menuItemSelected")?.innerHTML;
+
+        if(!currentMenu || currentMenu === "None")
             return;
 
         let hex = this.hexMap.getHexFromId(id);
 
-        if(this.paintSelect.value === "terrain")
+        if(currentMenu === "Terrain")
         {
             hex.setTerrain({type: this.terrainSelect.value, variant: 0});
         }
 
-        if(this.paintSelect.value === "edges") // need to develop a way to remove an edge, changing is easy.
+        if(currentMenu === "Edges") // need to develop a way to remove an edge, changing is easy.
         {
             let edgeIndex = this.nearestEdge(hex, pt);
 
@@ -508,7 +547,7 @@ class HexMapEditor
             }
         }
         
-        if(this.paintSelect.value === "connectors") // roads and rails
+        if(currentMenu === "Connectors") // roads and rails
         {
             let edgeIndex = this.nearestEdge(hex, pt);
 
@@ -516,7 +555,7 @@ class HexMapEditor
                 hex.addConnector({"edge": this.connectorSelect.value, "edgeIndex": edgeIndex, "variant": 0});
         }
 
-        if(this.paintSelect.value === "meta") // country resources 
+        if(currentMenu === "Meta") // country resources 
         {
             let value = new Map();
             for(const [k, v] of this.metadata)
@@ -526,7 +565,7 @@ class HexMapEditor
             hex.addMetadata(value);
         }
 
-        if(this.paintSelect.value === "content") // units
+        if(currentMenu === "Content") // units
             hex.terrain = this.terrain.get(this.terrainSelect.value);
     }
 
