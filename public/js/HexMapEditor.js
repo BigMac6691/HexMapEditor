@@ -361,10 +361,11 @@ class HexMapEditor
         
             this.hexMap.jumps.set(index, jump);
             HTML.addOptions(this.jumpSelect, [{text: `Jump ${jump.from} to ${jump.to}`, value: index}]);
+
             this.jumpSelect.value = index;
             this.jumpSelect.dispatchEvent(new Event("change"));
         }
-        else if( evt.target === this.jumpDelete)
+        else if(evt.target === this.jumpDelete)
         {
             let index = this.jumpSelect.selectedIndex;
             let jump = this.hexMap.jumps.get(+this.jumpSelect.value);
@@ -403,7 +404,17 @@ class HexMapEditor
         }
         else
         {
-            this.resolveJumpLine(x, y);
+            if(this.jumpSelect.value === "new")
+            {
+                this.jumpLine = SVG.create("line", {x1: x, y1: y, x2: x, y2: y, stroke: "#ff0000", "stroke-width": "6", class: "jumpLine"});
+                this.hexMap.map.append(this.jumpLine);
+            }
+            else
+            {
+                this.jumpLine = this.hexMap.jumps.get(+this.jumpSelect.value).svg;
+                this.jumpLine.setAttribute("x1", x);
+                this.jumpLine.setAttribute("y1", y);
+            }
 
             this.jumpFromCol.value = coords[0];
             this.jumpFromRow.value = coords[1];
@@ -413,23 +424,11 @@ class HexMapEditor
         }
     }
 
-    resolveJumpLine(x, y)
-    {
-        if(this.jumpSelect.value === "new")
-        {
-            this.jumpLine = SVG.create("line", {x1: x, y1: y, x2: x, y2: y, stroke: "#ff0000", "stroke-width": "6", class: "jumpLine"});
-            this.hexMap.map.append(this.jumpLine);
-        }
-        else
-        {
-            this.jumpLine = this.hexMap.jumps.get(+this.jumpSelect.value).svg;
-            this.jumpLine.setAttribute("x1", x);
-            this.jumpLine.setAttribute("y1", y);
-        }
-    }
-
     handleJumpChange(evt) // column row inputs changed
     {
+        console.log("handleJumpChange");
+        console.log(this.jumpLine);
+
         let isFrom = evt.target === this.jumpFromCol || evt.target === this.jumpFromRow;
         let id = null;
 
@@ -443,7 +442,23 @@ class HexMapEditor
         let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
         let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2;
 
-        this.resolveJumpLine(x, y);
+        if(this.jumpSelect.value === "new")
+        {
+            if(!this.jumpStart)
+            {
+                this.jumpStart = this.hexMap.getHexFromId(`${this.jumpFromCol.value},${this.jumpFromRow.value}`);
+
+                let startX = +this.jumpStart.hexTerrain.x.baseVal.value + this.jumpStart.hexTerrain.width.baseVal.value / 2;
+                let startY = +this.jumpStart.hexTerrain.y.baseVal.value + this.jumpStart.hexTerrain.height.baseVal.value / 2;
+
+                this.jumpLine = SVG.create("line", {x1: startX, y1: startY, x2: startX, y2: startY, stroke: "#ff0000", "stroke-width": "6", class: "jumpLine"});
+                this.hexMap.map.append(this.jumpLine);
+            }
+        }
+        else
+        {
+            this.jumpLine = this.hexMap.jumps.get(+this.jumpSelect.value).svg;
+        }
 
         if(isFrom)
         {
@@ -470,6 +485,12 @@ class HexMapEditor
         }
         else
         {
+            if(!Array.from(this.hexMap.jumps.values()).some(v => v.svg === this.jumpLine))
+            {
+                this.jumpLine.remove();
+                this.jumpLine = null;
+            }
+
             let jump = this.hexMap.jumps.get(+evt.target.value);
 
             ids.push(...jump.from.split(","), ...jump.to.split(","));
