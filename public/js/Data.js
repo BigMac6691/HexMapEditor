@@ -6,6 +6,7 @@ let DATA =
         "rows" : 7,
         "borderColor" : "#000000",
         "defaultHexFill" : "#ffffff",
+        "textColor" : "#000000",
         "offsetOn": 0
     },
     "defs" :

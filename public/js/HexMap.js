@@ -10,6 +10,7 @@ class HexMap
         this.offsetOn = 0;
         this.borderColour = "#000000";
         this.defaultHexFill = "#ffffff";
+        this.textColor = "#000000";
 
         this.svg.addEventListener("mousemove", evt => this.mouseMove(evt));
         this.svg.addEventListener("click", evt => this.mouseClick(evt));
@@ -28,6 +29,7 @@ class HexMap
     {
         this.borderColour = DATA.mapMetadata.borderColor;
         this.defaultHexFill = DATA.mapMetadata.defaultHexFill;
+        this.textColor = DATA.mapMetadata.textColor;
         this.offsetOn = DATA.mapMetadata.offsetOn;
 
         // eventually replace this with a recursive function

@@ -37,6 +37,9 @@ class HexMapEditor
         let mp = document.getElementById("mapPanel");
         mp.append(this.hexMap.getSVG());
 
+        // File panel
+        let div0 = this.makeFileUI();
+
         // SVG attributes
         let div1 = this.makeSVGUI(mp);        
 
@@ -46,7 +49,23 @@ class HexMapEditor
         // Hex attributes
         let div3 = this.makeHexUI();
 
-        document.getElementById("controlPanel").append(div1, div2, div3);
+        document.getElementById("controlPanel").append(div0, div1, div2, div3);
+    }
+
+    makeFileUI()
+    {
+        let div = HTML.create("div", null, ["controlDiv"]);
+        div.append(HTML.create("h3", {textContent: "File"}));
+
+        this.boundFileButtons = this.handleFileButtons.bind(this);
+
+        let tempDiv = HTML.create("div", null, ["fileDiv"]);
+        tempDiv.append(HTML.create("button", {type: "button", innerHTML: "Load"}, null, {click: this.boundFileButtons}));
+        tempDiv.append(HTML.create("button", {type: "button", innerHTML: "Save"}, null, {click: this.boundFileButtons}));
+        tempDiv.append(this.fileName = HTML.create("div", {innerHTML: "- no current file -"}));
+        div.append(tempDiv);
+
+        return div;
     }
 
     makeSVGUI(mp)
@@ -71,7 +90,7 @@ class HexMapEditor
         div.append(svgDiv);
 
         this.backgroundColour = HTML.create("input", {type: "color", value: "#0000ff"}, null, {change: this.boundSVGChange});
-        div.append(HTML.createLabel("Background colour: ", this.backgroundColour));
+        div.append(HTML.createLabel("Background: ", this.backgroundColour));
 
         return div;
     }
@@ -81,21 +100,26 @@ class HexMapEditor
         let div = HTML.create("div", null, ["controlDiv"]);
         div.append(HTML.create("h3", {textContent: "Model Attributes"}));
 
-        let crDiv = HTML.create("div");
+        let tempDiv = HTML.create("div");
         this.cols = HTML.create("input", {type: "number", value: this.hexMap.hexes.length, min: 1}, null, {change: this.boundMapModelChange});
-        crDiv.append(HTML.createLabel("Map Columns: ", this.cols));
+        tempDiv.append(HTML.createLabel("Map Columns: ", this.cols));
 
         this.rows = HTML.create("input", {type: "number", value: this.hexMap.hexes[0].length, min: 1}, null, {change: this.boundMapModelChange});
-        crDiv.append(HTML.createLabel(" Rows: ", this.rows));
-        div.append(crDiv);
+        tempDiv.append(HTML.createLabel(" Rows: ", this.rows));
+        div.append(tempDiv);
 
+        tempDiv = HTML.create("div");
         this.borderColour = HTML.create("input", {type: "color", value: this.hexMap.borderColour}, null, {change: this.boundMapModelChange});
-        div.append(HTML.createLabel("Border Colour: ", this.borderColour));
+        tempDiv.append(HTML.createLabel("Border: ", this.borderColour));
 
         this.defaultTerrainColour = HTML.create("input", {type: "color", value: this.hexMap.defaultHexFill}, null, {change: this.boundMapModelChange});
-        div.append(HTML.createLabel("Default Hex Colour: ", this.defaultTerrainColour));
+        tempDiv.append(HTML.createLabel(" Hex: ", this.defaultTerrainColour));
 
-        this.offsetCheckbox = HTML.create("input", {type: "checkbox", checked: this.hexMap.offsetOn});
+        this.textColour = HTML.create("input", {type: "color", value: this.hexMap.textColor}, null, {change: this.boundMapModelChange});
+        tempDiv.append(HTML.createLabel(" Text: ", this.textColour));
+        div.append(tempDiv);
+
+        this.offsetCheckbox = HTML.create("input", {type: "checkbox", checked: this.hexMap.offsetOn}, null, {change: this.boundMapModelChange});
         div.append(HTML.createLabel("Hex offset: ", this.offsetCheckbox));
 
         return div;
@@ -164,7 +188,7 @@ class HexMapEditor
     buildJumpDiv(menuNode)
     {
         let div = HTML.create("div", {style: "display:none"});
-        let tempDiv = HTML.create("div");
+        let tempDiv = HTML.create("div", {style: "padding-bottom: 0.5em;"});
 
         this.jumpFromCol = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
         this.jumpFromRow = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
@@ -231,6 +255,11 @@ class HexMapEditor
         return metaDiv;
     }
 
+    handleFileButtons(evt)
+    {
+        console.log(evt.target.innerHTML);
+    }
+
     handleMenu(evt)
     {
         let currentMenu = document.querySelector(".menuItemSelected");
@@ -269,15 +298,16 @@ class HexMapEditor
 
     handleMapModelChange(evt)
     {
-        console.log("Map model change...");
-
         this.hexMap.borderColour = this.borderColour.value;
         this.hexMap.defaultHexFill = this.defaultTerrainColour.value;
 
         let c = +this.cols.value;
         let r = +this.rows.value;
         let model = this.hexMap.hexes;
-        let modelChange = c != model.length || r != model[0].length
+        let modelChange = c != model.length || r != model[0].length || this.hexMap.offsetOn != (this.offsetCheckbox.checked ? 1 : 0);
+
+        this.hexMap.offsetOn = (this.offsetCheckbox.checked ? 1 : 0);
+        this.hexMap.textColor = this.textColour.value;
 
         // Handle column changes
         if(c < model.length)
@@ -304,8 +334,6 @@ class HexMapEditor
         {
             let mapPanel = document.getElementById("mapPanel");
             mapPanel.style.fontSize = `${100 / (this.hexMap.hexes[0].length + (this.hexMap.hexes.length > 1 ? 0.5 : 0))}px`;
-
-            console.log(`Font size: ${mapPanel.style.fontSize}`);
 
             this.hexMap.cursor.x = Math.min(this.hexMap.hexes.length - 1, this.hexMap.cursor.x);
             this.hexMap.cursor.y = Math.min(this.hexMap.hexes[0].length - 1, this.hexMap.cursor.y);
@@ -426,9 +454,6 @@ class HexMapEditor
 
     handleJumpChange(evt) // column row inputs changed
     {
-        console.log("handleJumpChange");
-        console.log(this.jumpLine);
-
         let isFrom = evt.target === this.jumpFromCol || evt.target === this.jumpFromRow;
         let id = null;
 

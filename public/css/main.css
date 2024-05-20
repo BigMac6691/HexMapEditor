@@ -62,6 +62,15 @@ input[type='number']
     padding: 1em;
 }
 
+.fileDiv
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+    column-gap: 1em;
+}
+
 .menuContainer
 {
     display: flex;

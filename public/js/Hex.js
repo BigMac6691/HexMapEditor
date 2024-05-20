@@ -24,7 +24,7 @@ class Hex
 
     setTerrain(value)
     {
-        this.terrain = value.type;
+        this.terrain = value;
         this.hexTerrain.setAttribute("fill", this.hexMap.terrain.has(value.type) ? 
                                                 this.hexMap.terrain.get(value.type)[value.variant].fill : 
                                                 this.hexMap.defaultHexFill);
@@ -196,26 +196,29 @@ class Hex
             this.hexTerrain.setAttribute("y", y);
             this.hexTerrain.setAttribute("width", w);
             this.hexTerrain.setAttribute("height", h);
+            this.hexTerrain.setAttribute("stroke", this.hexMap.borderColour);
+            this.hexTerrain.setAttribute("fill", this.terrain ? 
+                                                this.hexMap.terrain.get(this.terrain.type)[this.terrain.variant].fill : 
+                                                this.hexMap.defaultHexFill);
 
             if(this.edges)
+            {
                 this.edges.forEach(edge =>
                 {
-                    if(edge)
-                    {
-                        edge[1].setAttribute("x", x);
-                        edge[1].setAttribute("y", y);
-                        edge[1].setAttribute("width", w);
-                        edge[1].setAttribute("height", h);
-                    }
+                    edge.setAttribute("x", x);
+                    edge.setAttribute("y", y);
+                    edge.setAttribute("width", w);
+                    edge.setAttribute("height", h);
                 });
-        }
+            }
 
-        if(arguments.length == 4)
             this.drawId(x, y, w, h);
+        }
     }
 
     drawId(x, y, w, h)
     {
+        this.hexId.setAttribute("stroke", this.hexMap.textColor);
         this.hexId.setAttribute("x", `${x + w / 2}`);
         this.hexId.setAttribute("y", `${y + h * 0.21}`);
     }
