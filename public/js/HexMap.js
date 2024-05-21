@@ -27,6 +27,15 @@ class HexMap
 
     loadData(f)
     {
+        this.vbWidth = DATA.mapMetadata.vbWidth;
+        this.vbHeight = DATA.mapMetadata.vbHeight;
+        this.width = DATA.mapMetadata.width;
+        this.height = DATA.mapMetadata.height;
+        this.background = DATA.mapMetadata.background;
+
+        this.svg.setAttribute("viewBox", `0 0 ${this.vbWidth} ${this.vbHeight}`);
+        this.svg.style.backgroundColor = this.background;
+
         this.borderColour = DATA.mapMetadata.borderColor;
         this.defaultHexFill = DATA.mapMetadata.defaultHexFill;
         this.textColor = DATA.mapMetadata.textColor;
@@ -205,16 +214,6 @@ class HexMap
         this.cursorHex.setAttribute("height", target.height.baseVal.value);
 
         this.map.append(this.cursorHex);
-    }
-
-    getMap()
-    {
-        return this.map;
-    }
-
-    getSVG()
-    {
-        return this.svg;
     }
 
     clearMap()

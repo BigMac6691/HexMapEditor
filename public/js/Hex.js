@@ -1,5 +1,8 @@
 class Hex
 {
+    // NOTE a lot of logic here supports the editor - we don't want that!
+    // When adding something here it is coming from the load map process
+    // therefore it should just be straight up assignments not checking etc.
     constructor(m, col, row)
     {
         this.hexMap = m;
@@ -25,9 +28,7 @@ class Hex
     setTerrain(value)
     {
         this.terrain = value;
-        this.hexTerrain.setAttribute("fill", this.hexMap.terrain.has(value.type) ? 
-                                                this.hexMap.terrain.get(value.type)[value.variant].fill : 
-                                                this.hexMap.defaultHexFill);
+        this.hexTerrain.setAttribute("fill", this.hexMap.terrain.get(value.type)[value.variant].fill);
     }
 
     addEdge(value) // {edge (none, river), index, variant}

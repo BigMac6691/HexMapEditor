@@ -35,7 +35,7 @@ class HexMapEditor
     makeUI()
     {
         let mp = document.getElementById("mapPanel");
-        mp.append(this.hexMap.getSVG());
+        mp.append(this.hexMap.svg);
 
         // File panel
         let div0 = this.makeFileUI();
@@ -74,10 +74,10 @@ class HexMapEditor
         div.append(HTML.create("h3", {textContent: "SVG Attributes"}));
 
         let vbDiv = HTML.create("div");
-        this.viewBoxWidth = HTML.create("input", {type: "number", value: "1000"}, null, {change: this.boundSVGChange});
+        this.viewBoxWidth = HTML.create("input", {type: "number", value: this.hexMap.vbWidth}, null, {change: this.boundSVGChange});
         vbDiv.append(HTML.createLabel("View Box Width: ", this.viewBoxWidth));
 
-        this.viewBoxHeight = HTML.create("input", {type: "number", value: "866"}, null, {change: this.boundSVGChange});
+        this.viewBoxHeight = HTML.create("input", {type: "number", value: this.hexMap.vbHeight}, null, {change: this.boundSVGChange});
         vbDiv.append(HTML.createLabel(" Height: ", this.viewBoxHeight));
         div.append(vbDiv);
 
@@ -89,7 +89,7 @@ class HexMapEditor
         svgDiv.append(HTML.createLabel(" Height: ", this.mapHeight, "px"));
         div.append(svgDiv);
 
-        this.backgroundColour = HTML.create("input", {type: "color", value: "#0000ff"}, null, {change: this.boundSVGChange});
+        this.backgroundColour = HTML.create("input", {type: "color", value: this.hexMap.background}, null, {change: this.boundSVGChange});
         div.append(HTML.createLabel("Background: ", this.backgroundColour));
 
         return div;
@@ -149,6 +149,7 @@ class HexMapEditor
         {
             let n = HTML.create("div", {innerHTML: m}, ["menuItem"], {click: this.boundMenuClick});
             menu.append(n);
+
             switch(m)
             {
                 case list[0]:
@@ -223,7 +224,7 @@ class HexMapEditor
 
         for(const[k, v] of this.hexMap.metadata)
         {
-            let tempDiv = HTML.create("div");
+            let tempDiv = HTML.create("div", {style: "padding-bottom: 0.3em;"});
             let cb = HTML.create("input", {type: "checkbox"});
 
             if(v.editor.type === "select")
@@ -235,7 +236,7 @@ class HexMapEditor
                 }));
 
                 this.metadata.set(k, [cb, n]);
-                tempDiv.append(cb, HTML.createLabel(k + " ", n));
+                tempDiv.append(cb, HTML.createLabel(k + ": ", n));
                 metaDiv.append(tempDiv);
             }
             else if(v.editor.type === "input")
@@ -287,13 +288,19 @@ class HexMapEditor
     {
         if(evt.target === this.viewBoxWidth || evt.target === this.viewBoxHeight)
         {
-            this.hexMap.getSVG().setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
-            // this.recalculatePolygon();
+            this.hexMap.vbWidth = this.viewBoxWidth.value;
+            this.hexMap.vbHeight = this.viewBoxHeight.value;
+            
+            this.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
         }
         else if(evt.target === this.backgroundColour)
-            this.hexMap.getSVG().style.background = evt.target.value;
+        {
+            this.hexMap.background = evt.target.value;
+
+            this.hexMap.svg.style.background = evt.target.value;
+        }
         else
-            this.hexMap.getSVG().setAttribute(evt.target.name, evt.target.value);
+            this.hexMap.svg.setAttribute(evt.target.name, evt.target.value);
     }
 
     handleMapModelChange(evt)
@@ -565,33 +572,10 @@ class HexMapEditor
         let hex = this.hexMap.getHexFromId(id);
 
         if(currentMenu === "Terrain")
-        {
             hex.setTerrain({type: this.terrainSelect.value, variant: 0});
-        }
 
-        if(currentMenu === "Edges") // need to develop a way to remove an edge, changing is easy.
-        {
-            let edgeIndex = this.nearestEdge(hex, pt);
-
-            if(edgeIndex >= 0)
-            {
-                hex.addEdge({"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0});
-
-                let offset = this.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
-                let adj = 
-                [
-                    this.hexMap.getHexFromId(`${hex.col},${hex.row - 1}`),
-                    this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset}`),
-                    this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset + 1}`),
-                    this.hexMap.getHexFromId(`${hex.col},${hex.row + 1}`),
-                    this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset + 1}`),
-                    this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
-                ];
-
-                this.evaluateCorner(hex, adj, edgeIndex);
-                this.evaluateCorner(hex, adj, (edgeIndex + 5) % 6); 
-            }
-        }
+        if(currentMenu === "Edges")
+            this.addEdge(hex, pt);
         
         if(currentMenu === "Connectors") // roads and rails
         {
@@ -615,7 +599,32 @@ class HexMapEditor
             hex.terrain = this.terrain.get(this.terrainSelect.value);
     }
 
-    evaluateCorner(hex, adj, cornerIndex)
+    addEdge(hex, pt)
+    {
+        let edgeIndex = this.nearestEdge(hex, pt);
+
+        if(edgeIndex >= 0)
+        {
+            hex.addEdge({"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0});
+            
+            // bug when the edge is none - the corners are not always removed.
+            let offset = this.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
+            let adj = 
+            [
+                this.hexMap.getHexFromId(`${hex.col},${hex.row - 1}`),
+                this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset}`),
+                this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset + 1}`),
+                this.hexMap.getHexFromId(`${hex.col},${hex.row + 1}`),
+                this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset + 1}`),
+                this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
+            ];
+
+            this.determineCorner(hex, adj, edgeIndex);
+            this.determineCorner(hex, adj, (edgeIndex + 5) % 6); 
+        }
+    }
+
+    determineCorner(hex, adj, cornerIndex)
     {
         let edgeBefore = hex.edges ? hex.edges.partialHas({"edgeIndex": cornerIndex}) : false;
         let edgeAfter = hex.edges ? hex.edges.partialHas({"edgeIndex": (cornerIndex + 1) % 6}) : false;

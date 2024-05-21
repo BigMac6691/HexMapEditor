@@ -2,6 +2,12 @@ let DATA =
 {
     "mapMetadata" :
     {
+        "vbWidth" : 1001,
+        "vbHeight" : 866,
+        "width" : 1379,
+        "height" : 1198,
+        "background": "#ff00ff",
+
         "columns" : 7,
         "rows" : 7,
         "borderColor" : "#000000",
@@ -251,12 +257,6 @@ let DATA =
         }
     ]
 /*
-    Structure of edge corners array of the label/id of the corner must match the edge?
-    {
-        label : river, forest, etc... this is what you see in drop down
-        data: [0 = top right, 1 = right, etc...][permutation - there are five][variants 0..n]
-    }
-
     Metadata is just a list of attributes the user has defined to be of interest and importance in the game.
         renderRules: border, decoration (like iron ore symbol), label (like city name), none (no visual effect)
                 could decoration and label be the same thing?
