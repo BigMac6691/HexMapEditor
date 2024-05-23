@@ -27,7 +27,7 @@ input[type='number']
 .mainBody
 {
     display: flex;
-    height: calc(100% - 40px);
+    height: 100%;
 }
 
 .mapContainer

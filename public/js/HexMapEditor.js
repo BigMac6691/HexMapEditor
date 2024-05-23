@@ -578,25 +578,27 @@ class HexMapEditor
             this.addEdge(hex, pt);
         
         if(currentMenu === "Connectors") // roads and rails
-        {
-            let edgeIndex = this.nearestEdge(hex, pt);
-
-            if(edgeIndex >= 0)
-                hex.addConnector({"edge": this.connectorSelect.value, "edgeIndex": edgeIndex, "variant": 0});
-        }
+            this.addConnector(hex, pt);
 
         if(currentMenu === "Meta") // country resources 
-        {
-            let value = new Map();
-            for(const [k, v] of this.metadata)
-                if(v[0].checked)
-                    value.set(k, v[1].value);
-
-            hex.addMetadata(value);
-        }
+            this.addMetadata(hex);
 
         if(currentMenu === "Content") // units
-            hex.terrain = this.terrain.get(this.terrainSelect.value);
+            ;
+    }
+
+    handleNone(hex, map, value)
+    {
+        if(!map)
+            return;
+
+        let matches = map.partialGetAll({edgeIndex: value.edgeIndex}, 1);
+
+        matches.forEach(v => 
+        {
+            hex.svg.removeChild(v[1]); // "this" is the hex
+            map.delete(v[0]);
+        });
     }
 
     addEdge(hex, pt)
@@ -605,9 +607,14 @@ class HexMapEditor
 
         if(edgeIndex >= 0)
         {
-            hex.addEdge({"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0});
+            let value = {"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0};
+
+            if(value.edge === "None")
+                this.handleNone(hex, hex.edges, value);
+            else if(!hex.edges || !hex.edges.partialHas(value))
+                hex.addEdge(value);
             
-            // bug when the edge is none - the corners are not always removed.
+            // bug when the edge is none - the corners are not always correct afterwards.
             let offset = this.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
             let adj = 
             [
@@ -619,8 +626,10 @@ class HexMapEditor
                 this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
             ];
 
-            this.determineCorner(hex, adj, edgeIndex);
-            this.determineCorner(hex, adj, (edgeIndex + 5) % 6); 
+            console.log(" ");
+
+            this.determineCorner(hex, adj, (edgeIndex + 5) % 6); // corner before edge
+            this.determineCorner(hex, adj, edgeIndex); // corner after edge
         }
     }
 
@@ -641,7 +650,77 @@ class HexMapEditor
         if(!edgeBefore && edgeAfter)
             corner += edgeOpp1 ? 3 : 0;
 
-        if(corner > 0)
+        console.log(`cornerIndex=${cornerIndex}, before=${edgeBefore}, after=${edgeAfter}, opp1=${edgeOpp1}, opp2=${edgeOpp2} corner=${corner}`);
+
+        if(corner > 0) // when deleting the corner before the edge corner is zero
             hex.addCorner({"edge" : this.edgeSelect.value, "edgeIndex" : cornerIndex, "cornerType": corner - 1, "variant" : 0});
+    }
+
+    addConnector(hex, pt)
+    {
+        let edgeIndex = this.nearestEdge(hex, pt);
+
+        if(edgeIndex >= 0)
+        {
+            let value = {"edge": this.connectorSelect.value, "edgeIndex": edgeIndex, "variant": 0};
+
+            if(value.edge === "None")
+                this.handleNone(hex, hex.connectors, value);
+            else if(!hex.connectors || !hex.connectors.partialHas(value))
+                hex.addConnector(value);
+        }
+    }
+
+    addMetadata(hex)
+    {
+        let mdList = new Map();
+        for(const [k, v] of this.metadata)
+            if(v[0].checked)
+                mdList.set(k, v[1].value);
+
+        let offset = this.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
+        let adj = 
+        [
+            this.hexMap.getHexFromId(`${hex.col},${hex.row - 1}`),
+            this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset}`),
+            this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset + 1}`),
+            this.hexMap.getHexFromId(`${hex.col},${hex.row + 1}`),
+            this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset + 1}`),
+            this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
+        ];
+
+        for(const [k, v] of mdList)
+        {
+            if(hex?.metadata?.get(k) === v) // if no change in property value skip to next incoming property
+                continue;
+
+            hex.addMetadata({key: k, value: v});
+
+            let md = this.hexMap.metadata.get(k);
+
+            if(md.renderRules[0].type === "border") // at this point you know that a property value has changed
+            {
+                for(let side = 0; side < 6; side++)
+                {
+                    let borderId = `${md.renderRules[0].symbol}_${side}`;
+
+                    if(v === adj[side]?.metadata?.get(k)) // an adjacent hex has the same property value
+                    {
+                        let oppId = `${md.renderRules[0].symbol}_${(side + 3) % 6}`; // look for side opposite this side
+                        let oppBorder = adj[side].borders.get(oppId);
+
+                        if(oppBorder)
+                        {
+                            adj[side].svg.removeChild(oppBorder);
+                            adj[side].borders.delete(oppId);
+                        }
+                    }
+                    else
+                        hex.addBorder({id: borderId});
+                } // for sides
+            }
+            else
+                throw new Error(`Unknown rendering rule ${md.renderRules[0].type} for metadata.`);
+        } // for passed meta
     }
 }

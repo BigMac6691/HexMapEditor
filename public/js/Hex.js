@@ -33,17 +33,8 @@ class Hex
 
     addEdge(value) // {edge (none, river), index, variant}
     {
-        if(value.edge === "None")
-        {
-            this.handleNone(this.edges, value);
-            return;
-        }
-
         if(!this.edges)
             this.edges = new KOMap();
-
-        if(this.edges.partialHas(value))
-            return;
 
         let n = SVG.createUse(`${value.edge}_e${value.edgeIndex}_v${value.variant}`);
         n.setAttribute("x", this.hexTerrain.x.baseVal.value);
@@ -88,17 +79,8 @@ class Hex
 
     addConnector(value) // {edge (none, rail), index, variant}
     {
-        if(value.edge === "None")
-        {
-            this.handleNone(this.connectors, value);
-            return;
-        }
-
         if(!this.connectors)
             this.connectors = new KOMap();
-
-        if(this.connectors.partialHas(value))
-            return;
 
         let n = SVG.createUse(`${value.edge}_e${value.edgeIndex}_v${value.variant}`);
         n.setAttribute("x", this.hexTerrain.x.baseVal.value);
@@ -110,83 +92,27 @@ class Hex
         this.svg.append(this.connectors.getKO(value));
     }
 
-    // separate borders from metadata - have the editor do all the calculations for borders
     addMetadata(value)
     {  
         if(!this.metadata)
             this.metadata = new KOMap();
 
-        let offset = this.hexMap.offsetOn ? (this.col % 2 ? -1 : 0) : (this.col % 2 ? 0 : -1);
-        let adj = 
-        [
-            this.hexMap.getHexFromId(`${this.col},${this.row - 1}`),
-            this.hexMap.getHexFromId(`${this.col + 1},${this.row + offset}`),
-            this.hexMap.getHexFromId(`${this.col + 1},${this.row + offset + 1}`),
-            this.hexMap.getHexFromId(`${this.col},${this.row + 1}`),
-            this.hexMap.getHexFromId(`${this.col - 1},${this.row + offset + 1}`),
-            this.hexMap.getHexFromId(`${this.col - 1},${this.row + offset}`)
-        ];
-
-        for(const [k, v] of value)
-        {
-            if(this.metadata.get(k) === v) // if no change in property value skip to next incoming property
-                continue;
-
-            this.metadata.set(k, v);
-
-            let md = this.hexMap.metadata.get(k);
-
-            if(md.renderRules[0].type === "border") // at this point you know that a property value has changed
-            {
-                if(!this.borders)
-                    this.borders = new KOMap();
-
-                for(let side = 0; side < 6; side++)
-                {
-                    let borderId = `${md.renderRules[0].symbol}_${side}`;
-
-                    if(v === adj[side]?.metadata?.get(k)) // an adjacent hex has the same property value
-                    {
-                        let id = `${md.renderRules[0].symbol}_${(side + 3) % 6}`; // look for side opposite this side
-                        let d = adj[side].borders.get(id);
-
-                        if(d)
-                        {
-                            adj[side].svg.removeChild(d);
-                            adj[side].borders.delete(id);
-                        }
-                    }
-                    else
-                    {
-                        let n = SVG.createUse(borderId);
-                        n.setAttribute("x", this.hexTerrain.x.baseVal.value);
-                        n.setAttribute("y", this.hexTerrain.y.baseVal.value);
-                        n.setAttribute("width", this.hexTerrain.width.baseVal.value);
-                        n.setAttribute("height", this.hexTerrain.height.baseVal.value);
-
-                        this.svg.append(n);
-                        this.borders.set(borderId, n);
-                    }
-                } // for sides
-            }
-            else
-                throw new Error(`Unknown rendering rule ${md.renderRules[0].type} for metadata.`);
-        } // for passed meta
+        this.metadata.set(value.key, value.value);
     }
 
-    handleNone(map, value)
+    addBorder(value)
     {
-        if(!map)
-            return;
+        if(!this.borders)
+            this.borders = new KOMap();
 
-        let matches = map.partialGetAll({edgeIndex: value.edgeIndex}, 1);
+        let n = SVG.createUse(value.id);
+        n.setAttribute("x", this.hexTerrain.x.baseVal.value);
+        n.setAttribute("y", this.hexTerrain.y.baseVal.value);
+        n.setAttribute("width", this.hexTerrain.width.baseVal.value);
+        n.setAttribute("height", this.hexTerrain.height.baseVal.value);
 
-        matches.forEach(v => 
-        {
-            this.svg.removeChild(v[1]);
-            map.delete(v[0]);
-        });
-        
+        this.borders.set(value.id, n);
+        this.svg.append(n);
     }
 
     drawHex(x, y, w, h)
