@@ -592,12 +592,12 @@ class HexMapEditor
         if(!map)
             return;
 
-        let matches = map.partialGetAll({edgeIndex: value.edgeIndex}, 1);
+        let matches = map.partialGetAll({edgeIndex: value.edgeIndex}, 2);
 
         matches.forEach(v => 
         {
-            hex.svg.removeChild(v[1]); // "this" is the hex
-            map.delete(v[0]);
+            hex.svg.removeChild(v[1]);
+            map.deleteKO(v[0]);
         });
     }
 
@@ -607,14 +607,22 @@ class HexMapEditor
 
         if(edgeIndex >= 0)
         {
+            let curEdgeType = null;
             let value = {"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0};
 
             if(value.edge === "None")
+            {
+                curEdgeType = hex?.edges?.partialHas({"edgeIndex": edgeIndex}) ? hex.edges.partialGet({"edgeIndex": edgeIndex}, 2)[0].edge : null;
+
                 this.handleNone(hex, hex.edges, value);
+            }
             else if(!hex.edges || !hex.edges.partialHas(value))
+            {
+                curEdgeType = this.edgeSelect.value;
+
                 hex.addEdge(value);
+            }
             
-            // bug when the edge is none - the corners are not always correct afterwards.
             let offset = this.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
             let adj = 
             [
@@ -628,13 +636,15 @@ class HexMapEditor
 
             console.log(" ");
 
-            this.determineCorner(hex, adj, (edgeIndex + 5) % 6); // corner before edge
-            this.determineCorner(hex, adj, edgeIndex); // corner after edge
+            this.addCorner(hex, adj, curEdgeType, (edgeIndex + 5) % 6); // corner before edge
+            this.addCorner(hex, adj, curEdgeType, edgeIndex); // corner after edge
         }
     }
 
-    determineCorner(hex, adj, cornerIndex)
+    addCorner(hex, adj, edgeType, cornerIndex)
     {
+        this.handleNone(hex, hex.corners, {"edge": edgeType, "edgeIndex": cornerIndex});
+
         let edgeBefore = hex.edges ? hex.edges.partialHas({"edgeIndex": cornerIndex}) : false;
         let edgeAfter = hex.edges ? hex.edges.partialHas({"edgeIndex": (cornerIndex + 1) % 6}) : false;
         let edgeOpp1 = adj[cornerIndex]?.edges ? adj[cornerIndex].edges.partialHas({"edgeIndex": (cornerIndex + 2) % 6}) : false;
@@ -652,8 +662,8 @@ class HexMapEditor
 
         console.log(`cornerIndex=${cornerIndex}, before=${edgeBefore}, after=${edgeAfter}, opp1=${edgeOpp1}, opp2=${edgeOpp2} corner=${corner}`);
 
-        if(corner > 0) // when deleting the corner before the edge corner is zero
-            hex.addCorner({"edge" : this.edgeSelect.value, "edgeIndex" : cornerIndex, "cornerType": corner - 1, "variant" : 0});
+        if(corner > 0) 
+            hex.addCorner({"edge" : edgeType, "edgeIndex" : cornerIndex, "cornerType": corner - 1, "variant" : 0});
     }
 
     addConnector(hex, pt)

@@ -48,24 +48,8 @@ class Hex
 
     addCorner(value)
     {
-        if(value.edge === "None")
-        {
-            this.handleNone(this.corners, value);
-            return;
-        }
-
         if(!this.corners)
             this.corners = new KOMap();
-
-        if(this.corners.partialHas(value))
-            return;
-
-        let matches = this.corners.partialGetAll({edge: value.edge, edgeIndex: value.edgeIndex}, 1);
-        matches.forEach(m => 
-        {
-            this.svg.removeChild(m[1]);
-            this.corners.delete(m[0]);
-        });        
 
         let n = SVG.createUse(`${value.edge}_e${value.edgeIndex}_c${value.cornerType}_v${value.variant}`);
         n.setAttribute("x", this.hexTerrain.x.baseVal.value);
