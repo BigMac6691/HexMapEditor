@@ -259,6 +259,104 @@ class HexMapEditor
     handleFileButtons(evt)
     {
         console.log(evt.target.innerHTML);
+
+        if(evt.target.innerHTML === "Save")
+            this.handleSave();
+        else
+            this.handleLoad();
+    }
+
+    handleSave()
+    {
+        let data = {};
+        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
+            .forEach(v => data[v] = this.hexMap[v]);
+
+        data.defs = [];
+        for(let e of this.hexMap.defs.children)
+            data.defs.push(e.outerHTML);
+
+        ["terrain"].forEach(v => data[v] = [...this.hexMap[v]]);
+
+        data.edges = [];
+        this.hexMap.edges.forEach((v, k) =>
+        {
+            data.edges.push([k, v.innerHTML]);
+        });
+
+        data.corners = [];
+        this.hexMap.corners.forEach((v, k) =>
+        {
+            data.corners.push([k, v.innerHTML]);
+        });
+
+        data.connectors = [];
+        this.hexMap.connectors.forEach((v, k) =>
+        {
+            data.connectors.push([k, v.innerHTML]);
+        });
+
+        data.metadata = [];
+        this.hexMap.metadata.forEach((v, k) =>
+        {
+            data.metadata.push([k, v]);
+        });
+
+        data.borders = [];
+        this.hexMap.borders.forEach((v, k) =>
+        {
+            data.borders.push([k, v.innerHTML]);
+        });
+
+        data.jumps = [];
+        this.hexMap.jumps.forEach((v, k) =>
+        {
+            let temp = {"from": v.from, "to": v.to, "svg": v.svg.outerHTML};
+            data.jumps.push([k, temp]);
+        });
+
+        data.hexes = [];
+        this.hexMap.hexes.forEach(row =>
+        {
+            let rows = [];
+            row.forEach(hex =>
+            {
+                let temp = {};
+
+                ["col", "row", "terrain"].forEach(v => temp[v] = hex[v]);
+                ["edges", "corners", "connectors", "metadata", "content"].forEach(v => temp[v] = hex[v] ? [...hex[v]] : null);
+
+                rows.push(temp);
+            });
+
+            data.hexes.push(rows);
+        });
+
+        let json = JSON.stringify(data);
+        console.log(json);
+        localStorage.setItem("test.hexmap", JSON.stringify(data));
+    }
+
+    handleLoad()
+    {
+        // function recreateChildElements(mainElement, childHTMLArray) {
+        //     mainElement.innerHTML = ''; // Clear existing children
+          
+        //     childHTMLArray.forEach(childHTML => {
+        //       mainElement.insertAdjacentHTML('beforeend', childHTML);
+        //     });
+        //   }
+          
+        //   // Example usage on page load:
+        //   window.onload = function() {
+        //     const mainElement = document.getElementById('main');
+        //     const storedChildHTMLArray = JSON.parse(localStorage.getItem('childHTMLArray'));
+          
+        //     if (storedChildHTMLArray) {
+        //       recreateChildElements(mainElement, storedChildHTMLArray);
+        //     }
+        //   };
+          
     }
 
     handleMenu(evt)
@@ -659,8 +757,6 @@ class HexMapEditor
 
         if(!edgeBefore && edgeAfter)
             corner += edgeOpp1 ? 3 : 0;
-
-        console.log(`cornerIndex=${cornerIndex}, before=${edgeBefore}, after=${edgeAfter}, opp1=${edgeOpp1}, opp2=${edgeOpp2} corner=${corner}`);
 
         if(corner > 0) 
             hex.addCorner({"edge" : edgeType, "edgeIndex" : cornerIndex, "cornerType": corner - 1, "variant" : 0});

@@ -44,7 +44,7 @@ let DATA =
     [
         {
             "label" : "Clear",
-            "data" : [{fill : "#ffffff"}]
+            "data" : [{fill : "#ffffff"}] // array of variants
         },
         {           
             "label": "Forest",
