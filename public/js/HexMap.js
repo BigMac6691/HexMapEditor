@@ -19,10 +19,89 @@ class HexMap
         this.hexagonSymbol.append(SVG.create("polygon", {points: "250,0 750,0 1000,433 750,866 250,866 0,433"}));
         this.svg.append(this.hexagonSymbol);
 
-        this.loadData();
+        // this.loadData();
 
         this.cursor = new DOMPoint(0, 0);
         this.cursorHex = SVG.createUse("hexagon", {id: "cursor", stroke: "#ff0000", fill: "none", "pointer-events": "none"});
+    }
+
+    loadFile(fileName)
+    {
+        let data = JSON.parse(localStorage.getItem(fileName));
+
+        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
+            .forEach(v => this[v] = data[v]);
+
+        ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v]);
+
+        data.defs.forEach(v => this.defs.insertAdjacentHTML("beforeend", v));
+
+        this.terrain = new Map(data.terrain.map((v, k) => [v[0], v[1]]));
+
+        this.edges = new KOMap();
+        data.edges.forEach(v => 
+        {
+            let n = SVG.create("symbol", {id: v[0], viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+            n.innerHTML = v[1];
+        
+            this.svg.append(n);
+            this.edges.set(v[0], n);
+        });
+
+        this.corners = new KOMap();
+        data.corners.forEach(v => 
+        {
+            let n = SVG.create("symbol", {id: v[0], viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+            n.innerHTML = v[1];
+        
+            this.svg.append(n);
+            this.corners.set(v[0], n);
+        });
+
+        this.connectors = new KOMap();
+        data.connectors.forEach(v => 
+        {
+            let n = SVG.create("symbol", {id: v[0], viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+            n.innerHTML = v[1];
+        
+            this.svg.append(n);
+            this.connectors.set(v[0], n);
+        });
+
+        this.metadata = new Map(data.metadata.map((v, k) => [v[0], v[1]]));
+
+        this.borders = new KOMap();
+        data.borders.forEach(v => 
+        {
+            this.borders.set(v[0], v[1]);
+
+            for(let i = 0; i < 6; i++)
+            {
+                let n = SVG.create("symbol", {id: `${v[0]}_${i}`, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+                n.innerHTML = v[1].innerHtml[i];
+    
+                this.svg.append(n);
+            }
+        });
+
+        this.jumps = new Map(data.jumps.map((jump, index) => [index, jump]));
+
+        this.hexes = [];
+        data.hexes.forEach(column => 
+        {
+            let columnHexes = [];
+            column.forEach(row => 
+            {
+                let hex = new Hex(this, row.col, row.row);
+
+                columnHexes.push(hex);
+            });
+
+            this.hexes.push(columnHexes);
+        });
+
+        mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
+        console.log(data);
     }
 
     loadData(f)

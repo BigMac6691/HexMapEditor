@@ -12,6 +12,7 @@ class HexMapEditor
         this.painting = false;
 
         this.hexMap = new HexMap();
+        this.hexMap.loadFile("test.hexmap");
         this.hexMap.svg.addEventListener("mousemove", this.boundMouseMove);
         this.hexMap.svg.addEventListener("click", this.boundMouseClick);
 
@@ -276,44 +277,25 @@ class HexMapEditor
         for(let e of this.hexMap.defs.children)
             data.defs.push(e.outerHTML);
 
-        ["terrain"].forEach(v => data[v] = [...this.hexMap[v]]);
+        ["terrain", "terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => data[v] = [...this.hexMap[v]]);
 
         data.edges = [];
-        this.hexMap.edges.forEach((v, k) =>
-        {
-            data.edges.push([k, v.innerHTML]);
-        });
+        this.hexMap.edges.forEach((v, k) => data.edges.push([k, v.innerHTML]));
 
         data.corners = [];
-        this.hexMap.corners.forEach((v, k) =>
-        {
-            data.corners.push([k, v.innerHTML]);
-        });
+        this.hexMap.corners.forEach((v, k) => data.corners.push([k, v.innerHTML]));
 
         data.connectors = [];
-        this.hexMap.connectors.forEach((v, k) =>
-        {
-            data.connectors.push([k, v.innerHTML]);
-        });
+        this.hexMap.connectors.forEach((v, k) => data.connectors.push([k, v.innerHTML]));
 
         data.metadata = [];
-        this.hexMap.metadata.forEach((v, k) =>
-        {
-            data.metadata.push([k, v]);
-        });
+        this.hexMap.metadata.forEach((v, k) => data.metadata.push([k, v]));
 
         data.borders = [];
-        this.hexMap.borders.forEach((v, k) =>
-        {
-            data.borders.push([k, v.innerHTML]);
-        });
+        this.hexMap.borders.forEach((v, k) => data.borders.push([k, v]));
 
         data.jumps = [];
-        this.hexMap.jumps.forEach((v, k) =>
-        {
-            let temp = {"from": v.from, "to": v.to, "svg": v.svg.outerHTML};
-            data.jumps.push([k, temp]);
-        });
+        this.hexMap.jumps.forEach((v, k) => data.jumps.push([k, {"from": v.from, "to": v.to, "svg": v.svg.outerHTML}]));
 
         data.hexes = [];
         this.hexMap.hexes.forEach(row =>
@@ -332,8 +314,6 @@ class HexMapEditor
             data.hexes.push(rows);
         });
 
-        let json = JSON.stringify(data);
-        console.log(json);
         localStorage.setItem("test.hexmap", JSON.stringify(data));
     }
 
@@ -714,7 +694,7 @@ class HexMapEditor
 
                 this.handleNone(hex, hex.edges, value);
             }
-            else if(!hex.edges || !hex.edges.partialHas(value))
+            else// if(!hex.edges || !hex.edges.partialHas(value))
             {
                 curEdgeType = this.edgeSelect.value;
 
@@ -731,8 +711,6 @@ class HexMapEditor
                 this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset + 1}`),
                 this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
             ];
-
-            console.log(" ");
 
             this.addCorner(hex, adj, curEdgeType, (edgeIndex + 5) % 6); // corner before edge
             this.addCorner(hex, adj, curEdgeType, edgeIndex); // corner after edge
