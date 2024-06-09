@@ -3,6 +3,8 @@ class HexMap
     constructor()
     {
         this.svg = SVG.create("svg", {viewBox: "0 0 1000 866", preserveAspectRatio: "none", style: "background-color:blue"});
+        this.vbWidth = "1000";
+        this.vbHeight = "866";
         this.defs = SVG.create("defs");
         this.map = SVG.create("g");
         this.svg.append(this.defs, this.map);
@@ -21,19 +23,20 @@ class HexMap
         this.svg.append(this.hexagonSymbol);
 
         // this.loadData();
+        this.terrainTypes = new Set();
+        this.edgeTypes = new Set();
+        this.cornerTypes = new Set();
+        this.connectorTypes = new Set();
+        this.jumps = new Map();
+        this.metadata = new Map();
+        this.hexes = [[new Hex(this, 0, 0)]];
 
         this.cursor = new DOMPoint(0, 0);
         this.cursorHex = SVG.createUse("hexagon", {id: "cursor", stroke: "#ff0000", fill: "none", "pointer-events": "none"});
     }
 
-    loadFile(fileName)
+    loadFile(data)
     {
-        let file = localStorage.getItem(fileName);
-        console.log(`Size of file=${file.length}`);
-        let data = JSON.parse(file);
-        console.log(`Size of hexes=${JSON.stringify(data.hexes).length}`);
-        console.log(data);
-
         ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
             .forEach(v => this[v] = data[v]);
 

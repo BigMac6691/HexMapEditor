@@ -12,7 +12,7 @@ class HexMapEditor
         this.painting = false;
 
         this.hexMap = new HexMap();
-        this.hexMap.loadFile("test.hexmap");
+        // this.hexMap.loadFile("test.hexmap");
         this.hexMap.svg.addEventListener("mousemove", this.boundMouseMove);
         this.hexMap.svg.addEventListener("click", this.boundMouseClick);
 
@@ -36,6 +36,10 @@ class HexMapEditor
     makeUI()
     {
         let mp = document.getElementById("mapPanel");
+
+        while (mp.lastElementChild)
+            mp.removeChild(mp.lastElementChild);
+
         mp.append(this.hexMap.svg);
 
         // File panel
@@ -322,24 +326,44 @@ class HexMapEditor
 
     handleLoad()
     {
-        // function recreateChildElements(mainElement, childHTMLArray) {
-        //     mainElement.innerHTML = ''; // Clear existing children
-          
-        //     childHTMLArray.forEach(childHTML => {
-        //       mainElement.insertAdjacentHTML('beforeend', childHTML);
-        //     });
-        //   }
-          
-        //   // Example usage on page load:
-        //   window.onload = function() {
-        //     const mainElement = document.getElementById('main');
-        //     const storedChildHTMLArray = JSON.parse(localStorage.getItem('childHTMLArray'));
-          
-        //     if (storedChildHTMLArray) {
-        //       recreateChildElements(mainElement, storedChildHTMLArray);
-        //     }
-        //   };
-          
+        let fileName = prompt("File name:");
+
+        if(fileName)
+        {
+            let file = localStorage.getItem(fileName);
+            
+            if(file)
+            {
+                console.log(`Size of file=${file.length}`);
+
+                try
+                {
+                    let object = JSON.parse(file);
+
+                    console.log(`Size of hexes=${JSON.stringify(object.hexes).length}`);
+                    console.log(object);
+
+                    let mp = document.getElementById("mapPanel");
+
+                    while (mp.lastElementChild)
+                        mp.removeChild(mp.lastElementChild);
+
+                    this.hexMap = new HexMap();
+                    this.hexMap.loadFile(object);
+                    this.hexMap.initMap();
+
+                    mp.append(this.hexMap.svg);
+                    this.fileName.innerHTML = fileName;
+                }
+                catch(e)
+                {
+                    console.log(e);
+                    alert(`Exception processing ${fileName}, see console for more details.`);
+                }
+            }
+            else
+                alert(`File ${fileName} not found or empty.`);
+        }
     }
 
     handleMenu(evt)
