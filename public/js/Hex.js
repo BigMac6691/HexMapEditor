@@ -15,6 +15,7 @@ class Hex
         this.corners = null;
         this.connectors = null;
         this.metadata = null;
+        this.borders = null;
         this.content = null;
 
         let id = `${col},${row}`;
@@ -27,6 +28,9 @@ class Hex
 
     setTerrain(value)
     {
+        if(!value)
+            return;
+
         this.terrain = value;
         this.hexTerrain.setAttribute("fill", this.hexMap.terrain.get(value.type)[value.variant].fill);
     }
@@ -112,16 +116,21 @@ class Hex
                                                 this.hexMap.terrain.get(this.terrain.type)[this.terrain.variant].fill : 
                                                 this.hexMap.defaultHexFill);
 
-            if(this.edges)
+            let details = [this.edges, this.corners, this.connectors, this.borders];
+
+            details.forEach(detail =>
             {
-                this.edges.forEach(edge =>
+                if(detail)
                 {
-                    edge.setAttribute("x", x);
-                    edge.setAttribute("y", y);
-                    edge.setAttribute("width", w);
-                    edge.setAttribute("height", h);
-                });
-            }
+                    detail.forEach(attribute =>
+                    {
+                        attribute.setAttribute("x", x);
+                        attribute.setAttribute("y", y);
+                        attribute.setAttribute("width", w);
+                        attribute.setAttribute("height", h);
+                    });
+                }
+            });
 
             this.drawId(x, y, w, h);
         }

@@ -269,8 +269,9 @@ class HexMapEditor
 
     handleSave()
     {
+        console.log(this.hexMap);
         let data = {};
-        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
+        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor", "jumpNextIndex"]
             .forEach(v => data[v] = this.hexMap[v]);
 
         data.defs = [];
@@ -295,7 +296,7 @@ class HexMapEditor
         this.hexMap.borders.forEach((v, k) => data.borders.push([k, v]));
 
         data.jumps = [];
-        this.hexMap.jumps.forEach((v, k) => data.jumps.push([k, {"from": v.from, "to": v.to, "svg": v.svg.outerHTML}]));
+        this.hexMap.jumps.forEach(v => data.jumps.push({"from": v.from, "to": v.to, "svg": v.svg.outerHTML}));
 
         data.hexes = [];
         this.hexMap.hexes.forEach(row =>
@@ -306,7 +307,8 @@ class HexMapEditor
                 let temp = {};
 
                 ["col", "row", "terrain"].forEach(v => temp[v] = hex[v]);
-                ["edges", "corners", "connectors", "metadata", "content"].forEach(v => temp[v] = hex[v] ? [...hex[v]] : null);
+                ["edges", "corners", "connectors", "borders", "content"].forEach(v => temp[v] = hex[v] ? [...hex[v].keys()] : null);
+                ["metadata"].forEach(v => temp[v] = hex[v] ? [...hex[v]] : null);
 
                 rows.push(temp);
             });
@@ -315,6 +317,7 @@ class HexMapEditor
         });
 
         localStorage.setItem("test.hexmap", JSON.stringify(data));
+        console.log(data);
     }
 
     handleLoad()

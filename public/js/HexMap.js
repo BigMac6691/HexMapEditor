@@ -8,6 +8,7 @@ class HexMap
         this.svg.append(this.defs, this.map);
 
         this.offsetOn = 0;
+        this.jumpNextIndex = 0;
         this.borderColour = "#000000";
         this.defaultHexFill = "#ffffff";
         this.textColor = "#000000";
@@ -27,9 +28,13 @@ class HexMap
 
     loadFile(fileName)
     {
-        let data = JSON.parse(localStorage.getItem(fileName));
+        let file = localStorage.getItem(fileName);
+        console.log(`Size of file=${file.length}`);
+        let data = JSON.parse(file);
+        console.log(`Size of hexes=${JSON.stringify(data.hexes).length}`);
+        console.log(data);
 
-        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
+        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor", "jumpNextIndex"]
             .forEach(v => this[v] = data[v]);
 
         ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v]);
@@ -84,7 +89,8 @@ class HexMap
             }
         });
 
-        this.jumps = new Map(data.jumps.map((jump, index) => [index, jump]));
+        this.jumps = new Map();
+        data.jumps.forEach(v => this.jumps.set(this.jumpNextIndex++, v));
 
         this.hexes = [];
         data.hexes.forEach(column => 
@@ -94,6 +100,20 @@ class HexMap
             {
                 let hex = new Hex(this, row.col, row.row);
 
+                hex.setTerrain(row.terrain);
+                
+                if(row.edges)
+                    row.edges.forEach(v => hex.addEdge(JSON.parse(v)));
+
+                if(row.corners)
+                    row.corners.forEach(v => hex.addCorner(JSON.parse(v)));
+
+                if(row.connectors)
+                    row.connectors.forEach(v => hex.addConnector(JSON.parse(v)));
+
+                if(row.borders)
+                    row.borders.forEach(v => hex.addBorder({id: v}));
+
                 columnHexes.push(hex);
             });
 
@@ -101,7 +121,7 @@ class HexMap
         });
 
         mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
-        console.log(data);
+        console.log(this);
     }
 
     loadData(f)
