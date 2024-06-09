@@ -34,7 +34,7 @@ class HexMap
         console.log(`Size of hexes=${JSON.stringify(data.hexes).length}`);
         console.log(data);
 
-        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor", "jumpNextIndex"]
+        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
             .forEach(v => this[v] = data[v]);
 
         ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v]);
@@ -96,23 +96,26 @@ class HexMap
         data.hexes.forEach(column => 
         {
             let columnHexes = [];
-            column.forEach(row => 
+            column.forEach(rowHex => 
             {
-                let hex = new Hex(this, row.col, row.row);
+                let hex = new Hex(this, rowHex.col, rowHex.row);
 
-                hex.setTerrain(row.terrain);
+                hex.setTerrain(rowHex.terrain);
                 
-                if(row.edges)
-                    row.edges.forEach(v => hex.addEdge(JSON.parse(v)));
+                if(rowHex.edges)
+                    rowHex.edges.forEach(v => hex.addEdge(JSON.parse(v)));
 
-                if(row.corners)
-                    row.corners.forEach(v => hex.addCorner(JSON.parse(v)));
+                if(rowHex.corners)
+                    rowHex.corners.forEach(v => hex.addCorner(JSON.parse(v)));
 
-                if(row.connectors)
-                    row.connectors.forEach(v => hex.addConnector(JSON.parse(v)));
+                if(rowHex.connectors)
+                    rowHex.connectors.forEach(v => hex.addConnector(JSON.parse(v)));
 
-                if(row.borders)
-                    row.borders.forEach(v => hex.addBorder({id: v}));
+                if(rowHex.borders)
+                    rowHex.borders.forEach(v => hex.addBorder({id: v}));
+
+                if(rowHex.metadata)
+                    rowHex.metadata.forEach(v => hex.addMetadata({key: v[0], value: v[1]}));
 
                 columnHexes.push(hex);
             });

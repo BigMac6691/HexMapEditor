@@ -271,7 +271,7 @@ class HexMapEditor
     {
         console.log(this.hexMap);
         let data = {};
-        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor", "jumpNextIndex"]
+        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
             .forEach(v => data[v] = this.hexMap[v]);
 
         data.defs = [];
@@ -778,7 +778,9 @@ class HexMapEditor
 
         for(const [k, v] of mdList)
         {
-            if(hex?.metadata?.get(k) === v) // if no change in property value skip to next incoming property
+            let valueChange = hex?.metadata?.get(k) !== v;
+
+            if(!valueChange) // if no change in property value skip to next incoming property
                 continue;
 
             hex.addMetadata({key: k, value: v});
@@ -787,6 +789,21 @@ class HexMapEditor
 
             if(md.renderRules[0].type === "border") // at this point you know that a property value has changed
             {
+                if(valueChange) // if a value changes remove all borders for that value from selected hex only
+                {
+                    for(let side = 0; side < 6; side++)
+                    {
+                        let borderId = `${md.renderRules[0].symbol}_${side}`;
+                        let border = hex?.borders?.get(borderId);
+
+                        if(border)
+                        {
+                            hex.svg.removeChild(border);
+                            hex.borders.delete(borderId);
+                        }
+                    }
+                }
+
                 for(let side = 0; side < 6; side++)
                 {
                     let borderId = `${md.renderRules[0].symbol}_${side}`;
@@ -802,7 +819,7 @@ class HexMapEditor
                             adj[side].borders.delete(oppId);
                         }
                     }
-                    else
+                    else // do we add matching border on other side?
                         hex.addBorder({id: borderId});
                 } // for sides
             }
