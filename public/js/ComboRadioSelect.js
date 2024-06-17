@@ -11,9 +11,19 @@ class ComboRadioSelect
         this.select.style = "display: none";
 		this.groupDiv.style = "display: none";
 
-        let div = document.createElement("div");
+		this.select.addEventListener("change", this.boundChangeHandler);
+
+        this.init(list, name);
+	}
+
+	init(list, name)
+	{
+		while(this.groupDiv.lastElementChild) // clears radio, need to clear select as well
+			this.groupDiv.removeChild(this.groupDiv.lastElementChild);
+
+		let div = document.createElement("div");
         div.style = "display: flex; flex-direction: column;";
-		
+
 		list.forEach(v => 
 		{
 			let option = document.createElement("option");
@@ -32,12 +42,11 @@ class ComboRadioSelect
 			let n = document.createElement("label");
 			n.append(radio, radio.value);
 			
-            div.append(n);
+			div.append(n);
 		});
 
-        this.groupDiv.append(div);
+		this.groupDiv.append(div);
 		
-		this.select.addEventListener("change", this.boundChangeHandler);
 		this.value = this.select.value;
 		
 		this.updateGroup(this.select.value);

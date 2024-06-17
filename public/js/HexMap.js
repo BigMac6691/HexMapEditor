@@ -31,6 +31,7 @@ class HexMap
         this.metadata = new Map();
         this.hexes = [[new Hex(this, 0, 0)]];
 
+        this.displayCursor = true;
         this.cursor = new DOMPoint(0, 0);
         this.cursorHex = SVG.createUse("hexagon", {id: "cursor", stroke: "#ff0000", fill: "none", "pointer-events": "none"});
     }
@@ -313,12 +314,15 @@ class HexMap
         if(this.map.contains(this.cursorHex))
             this.map.removeChild(this.cursorHex); // the cursor has to be added last to be the topmost element or it won't appear.
 
-        this.cursorHex.setAttribute("x", target.x.baseVal.value);
-        this.cursorHex.setAttribute("y", target.y.baseVal.value);
-        this.cursorHex.setAttribute("width", target.width.baseVal.value);
-        this.cursorHex.setAttribute("height", target.height.baseVal.value);
+        if(this.displayCursor)
+        {
+            this.cursorHex.setAttribute("x", target.x.baseVal.value);
+            this.cursorHex.setAttribute("y", target.y.baseVal.value);
+            this.cursorHex.setAttribute("width", target.width.baseVal.value);
+            this.cursorHex.setAttribute("height", target.height.baseVal.value);
 
-        this.map.append(this.cursorHex);
+            this.map.append(this.cursorHex);
+        }
     }
 
     clearMap()

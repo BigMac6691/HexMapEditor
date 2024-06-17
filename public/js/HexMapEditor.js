@@ -10,9 +10,14 @@ class HexMapEditor
         this.boundKeypress = this.handleKeypress.bind(this);
         
         this.painting = false;
-
         this.hexMap = new HexMap();
-        // this.hexMap.loadFile("test.hexmap");
+
+        this.initMap();
+        this.makeUI();
+    }
+
+    initMap()
+    {
         this.hexMap.svg.addEventListener("mousemove", this.boundMouseMove);
         this.hexMap.svg.addEventListener("click", this.boundMouseClick);
 
@@ -29,17 +34,12 @@ class HexMapEditor
             document.removeEventListener("keydown", this.boundKeypress);
         });
 
-        this.makeUI();
         this.hexMap.initMap();
     }
 
     makeUI()
     {
         let mp = document.getElementById("mapPanel");
-
-        while (mp.lastElementChild)
-            mp.removeChild(mp.lastElementChild);
-
         mp.append(this.hexMap.svg);
 
         // File panel
@@ -52,9 +52,16 @@ class HexMapEditor
         let div2 = this.makeModelUI();
 
         // Hex attributes
+        this.hexUIDiv = HTML.create("div", null, ["controlDiv"]);
         let div3 = this.makeHexUI();
 
-        document.getElementById("controlPanel").append(div0, div1, div2, div3);
+        let div4 = HTML.create("div", null, ["controlDiv"]);
+        div4.append(HTML.create("h3", {textContent: "Feature Editor"}));
+        
+        let div5 = HTML.create("div", null, ["controlDiv"]);
+        div5.append(HTML.create("h3", {textContent: "Hex Editor"}));
+
+        document.getElementById("controlPanel").append(div0, div1, div2, div3, div4, div5);
     }
 
     makeFileUI()
@@ -124,20 +131,27 @@ class HexMapEditor
         tempDiv.append(HTML.createLabel(" Text: ", this.textColour));
         div.append(tempDiv);
 
+        tempDiv = HTML.create("div");
         this.offsetCheckbox = HTML.create("input", {type: "checkbox", checked: this.hexMap.offsetOn}, null, {change: this.boundMapModelChange});
-        div.append(HTML.createLabel("Hex offset: ", this.offsetCheckbox));
+        tempDiv.append(HTML.createLabel("Hex offset: ", this.offsetCheckbox));
+
+        this.displayCursorCheckbox = HTML.create("input", {type: "checkbox", checked: this.hexMap.displayCursor}, null, {change: this.boundMapModelChange});
+        tempDiv.append(HTML.createLabel("Display cursor: ", this.displayCursorCheckbox));
+        div.append(tempDiv);
 
         return div;
     }
 
     makeHexUI()
     {
-        let div = HTML.create("div", null, ["controlDiv"]);
-        div.append(HTML.create("h3", {textContent: "Hex Attributes"}));
+        while(this.hexUIDiv.lastElementChild)
+            this.hexUIDiv.removeChild(this.hexUIDiv.lastElementChild);
+        
+        this.hexUIDiv.append(HTML.create("h3", {textContent: "Map Data"}));
 
         this.mouseMove = HTML.create("p", {innerHTML: "Mouse location x, y"});
         this.mouseClick = HTML.create("p", {innerHTML: "Click location: x, y"});
-        div.append(this.mouseMove, this.mouseClick);
+        this.hexUIDiv.append(this.mouseMove, this.mouseClick);
 
         this.boundMenuClick = this.handleMenu.bind(this);
         this.boundJumpChange = this.handleJumpChange.bind(this);
@@ -148,7 +162,7 @@ class HexMapEditor
 
         this.menuList = new Map();
         let menu = HTML.create("div", null, ["menuContainer"]);
-        div.append(menu);
+        this.hexUIDiv.append(menu);
 
         list.forEach(m => 
         {
@@ -164,23 +178,23 @@ class HexMapEditor
                 case list[1]:
                     this.terrainSelect = new ComboRadioSelect(this.hexMap.terrainTypes, "terrainCRS");
                     this.menuList.set(n, this.terrainSelect.groupDiv);
-                    div.append(this.terrainSelect.groupDiv);
+                    this.hexUIDiv.append(this.terrainSelect.groupDiv);
                     break;
                 case list[2]:
                     this.edgeSelect = new ComboRadioSelect(this.hexMap.edgeTypes, "edgeCRS");
                     this.menuList.set(n, this.edgeSelect.groupDiv);
-                    div.append(this.edgeSelect.groupDiv);
+                    this.hexUIDiv.append(this.edgeSelect.groupDiv);
                     break;
                 case list[3]:
                     this.connectorSelect = new ComboRadioSelect(this.hexMap.connectorTypes, "connectorCRS");
                     this.menuList.set(n, this.connectorSelect.groupDiv);
-                    div.append(this.connectorSelect.groupDiv);
+                    this.hexUIDiv.append(this.connectorSelect.groupDiv);
                     break;
                 case list[4]:
-                    div.append(this.buildJumpDiv(n));
+                    this.hexUIDiv.append(this.buildJumpDiv(n));
                     break;
                 case list[5]:
-                    div.append(this.buildMetaDiv(n));
+                    this.hexUIDiv.append(this.buildMetaDiv(n));
                     break;
                 case list[6]:
                     this.menuList.set(n, HTML.create("div"));
@@ -188,7 +202,7 @@ class HexMapEditor
             }
         });
 
-        return div;
+        return this.hexUIDiv;
     }
 
     buildJumpDiv(menuNode)
@@ -263,8 +277,6 @@ class HexMapEditor
 
     handleFileButtons(evt)
     {
-        console.log(evt.target.innerHTML);
-
         if(evt.target.innerHTML === "Save")
             this.handleSave();
         else
@@ -273,9 +285,14 @@ class HexMapEditor
 
     handleSave()
     {
+        let fileName = prompt("Save file name:", this.fileName.innerHTML);
+
+        if(!fileName)
+            return;
+
         console.log(this.hexMap);
         let data = {};
-        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
+        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
             .forEach(v => data[v] = this.hexMap[v]);
 
         data.defs = [];
@@ -320,13 +337,13 @@ class HexMapEditor
             data.hexes.push(rows);
         });
 
-        localStorage.setItem("test.hexmap", JSON.stringify(data));
+        localStorage.setItem(fileName, JSON.stringify(data));
         console.log(data);
     }
 
     handleLoad()
     {
-        let fileName = prompt("File name:");
+        let fileName = prompt("Load file name:", "test.hexmap");
 
         if(fileName)
         {
@@ -350,7 +367,26 @@ class HexMapEditor
 
                     this.hexMap = new HexMap();
                     this.hexMap.loadFile(object);
-                    this.hexMap.initMap();
+
+                    this.initMap();
+
+                    [
+                        ["viewBoxWidth", "vbWidth"], 
+                        ["viewBoxHeight", "vbHeight"], 
+                        ["mapWidth", "width"], 
+                        ["mapHeight", "height"], 
+                        ["backgroundColour", "background"],
+                        ["borderColour", "borderColour"],
+                        ["defaultTerrainColour", "defaultHexFill"],
+                        ["textColour", "textColor"]
+                    ].forEach(v => this[v[0]].value = object[v[1]]);
+
+                    this.cols.value = object.hexes.length;
+                    this.rows.value= object.hexes[0].length;
+                    this.offsetCheckbox.checked = object.offsetOn === 1;
+                    this.displayCursorCheckbox.checked = object.displayCursor === true;
+
+                    this.makeHexUI();
 
                     mp.append(this.hexMap.svg);
                     this.fileName.innerHTML = fileName;
@@ -419,6 +455,7 @@ class HexMapEditor
         let modelChange = c != model.length || r != model[0].length || this.hexMap.offsetOn != (this.offsetCheckbox.checked ? 1 : 0);
 
         this.hexMap.offsetOn = (this.offsetCheckbox.checked ? 1 : 0);
+        this.hexMap.displayCursor = this.displayCursorCheckbox.checked;
         this.hexMap.textColor = this.textColour.value;
 
         // Handle column changes
