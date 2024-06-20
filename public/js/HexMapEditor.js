@@ -55,8 +55,8 @@ class HexMapEditor
         this.hexUIDiv = HTML.create("div", null, ["controlDiv"]);
         let div3 = this.makeHexUI();
 
-        let div4 = HTML.create("div", null, ["controlDiv"]);
-        div4.append(HTML.create("h3", {textContent: "Feature Editor"}));
+        // Feature editor 
+        let div4 = this.makeFeatureDiv();
         
         let div5 = HTML.create("div", null, ["controlDiv"]);
         div5.append(HTML.create("h3", {textContent: "Hex Editor"}));
@@ -161,7 +161,7 @@ class HexMapEditor
         let list = ["None", "Terrain", "Edges", "Connectors", "Jumps", "Meta", "Content"];
 
         this.menuList = new Map();
-        let menu = HTML.create("div", null, ["menuContainer"]);
+        let menu = HTML.create("div", {id: "mapDataMenu"}, ["menuContainer"]);
         this.hexUIDiv.append(menu);
 
         list.forEach(m => 
@@ -273,6 +273,69 @@ class HexMapEditor
         this.menuList.set(menuNode, metaDiv);
         
         return metaDiv;
+    }
+
+    makeFeatureDiv()
+    {
+        this.featureUIDiv = HTML.create("div", null, ["controlDiv"]);
+        this.featureUIDiv.append(HTML.create("h3", {textContent: "Feature Editor"}));
+
+        let list = ["defs", "Terrain", "Edges", "Connectors", "Jumps", "Meta", "Content"];
+
+        this.featureList = new Map();
+        let menu = HTML.create("div", {id: "featureMenu"}, ["menuContainer"]);
+        this.featureUIDiv.append(menu);
+
+        list.forEach(m => 
+        {
+            let n = HTML.create("div", {innerHTML: m}, ["menuItem"], {click: this.boundMenuClick});
+            menu.append(n);
+
+            switch(m)
+            {
+                case list[0]:
+                    n.classList.add("menuItemSelected"); // initial menu option
+
+                    this.defsEditor = new DefsEditor(this.hexMap);
+                    this.defsEditor.display(true); // initial visible editor
+
+                    this.featureList.set(n, this.defsEditor.uiDiv);
+                    this.featureUIDiv.append(this.defsEditor.uiDiv);
+                    break;
+                case list[1]:
+                    this.terrainEditor = new TerrainEditor(this.hexMap);
+                    this.featureList.set(n, this.terrainEditor.uiDiv);
+                    this.featureUIDiv.append(this.terrainEditor.uiDiv);
+                    break;
+                case list[2]:
+                    // this.edgeSelect = new ComboRadioSelect(this.hexMap.edgeTypes, "edgeCRS");
+                    // this.featureList.set(n, this.edgeSelect.groupDiv);
+                    // this.hexUIDiv.append(this.edgeSelect.groupDiv);
+                    this.featureList.set(n, HTML.create("div"));
+                    break;
+                case list[3]:
+                    // this.connectorSelect = new ComboRadioSelect(this.hexMap.connectorTypes, "connectorCRS");
+                    // this.featureList.set(n, this.connectorSelect.groupDiv);
+                    // this.hexUIDiv.append(this.connectorSelect.groupDiv);
+                    this.featureList.set(n, HTML.create("div"));
+                    break;
+                case list[4]:
+                    // this.hexUIDiv.append(this.buildJumpDiv(n));
+                    this.featureList.set(n, HTML.create("div"));
+                    break;
+                case list[5]:
+                    // this.hexUIDiv.append(this.buildMetaDiv(n));
+                    this.featureList.set(n, HTML.create("div"));
+                    break;
+                case list[6]:
+                    this.featureList.set(n, HTML.create("div"));
+                    break;
+            }
+
+            // this.featureIdParts.append(div);
+        });
+
+        return this.featureUIDiv;        
     }
 
     handleFileButtons(evt)
@@ -404,12 +467,26 @@ class HexMapEditor
 
     handleMenu(evt)
     {
-        let currentMenu = document.querySelector(".menuItemSelected");
+        console.log(evt);
+        let parentMenu = evt.target.parentElement;
+
+        let currentMenu = parentMenu.querySelector(".menuItemSelected");
+
+        console.log(currentMenu.parentElement.id);
+
         currentMenu.classList.remove("menuItemSelected");
-        this.menuList.get(currentMenu).style.display = "none";
+
+        if(parentMenu.id === "mapDataMenu")
+            this.menuList.get(currentMenu).style.display = "none";
+        else
+            this.featureList.get(currentMenu).style.display = "none";
 
         evt.target.classList.add("menuItemSelected");
-        this.menuList.get(evt.target).style.display = "block";
+
+        if(parentMenu.id === "mapDataMenu")
+            this.menuList.get(evt.target).style.display = "block";
+        else
+            this.featureList.get(evt.target).style.display = "flex";
     }
 
     handleKeypress(evt)

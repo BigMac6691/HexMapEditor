@@ -1,4 +1,4 @@
-body, html, h1, h3, p 
+body, html, p 
 {
     margin: 0;
     padding: 0;
@@ -16,6 +16,7 @@ header
 
 h3
 {
+    margin: 0;
     text-align: center;
 }
 
@@ -60,6 +61,20 @@ input[type='number']
     flex-direction: column;
     row-gap: 0.5em;
     padding: 1em;
+}
+
+.featureCol
+{
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.5em;
+}
+
+.featureRow
+{
+    display: flex;
+    flex-direction: row;
+    column-gap: 1em;
 }
 
 .fileDiv
