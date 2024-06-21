@@ -116,3 +116,28 @@ input[type='number']
 {
     width: 4em;
 }
+
+/* Help Dialog styles */
+dialog
+{
+    max-width: 30%;
+}
+
+dialog button
+{
+    display: block;
+    margin-left: auto;
+    margin-right: 1em;
+    margin-top: 0.5em;
+}
+
+dialog h1
+{
+    text-align: center;
+    margin-top: 0;
+}
+
+dialog p
+{
+    margin-bottom: 0.5em;
+}

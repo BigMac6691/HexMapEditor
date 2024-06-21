@@ -4,6 +4,12 @@ class DefsEditor extends FeatureEditor
     {
         super(map);
 
+        this.help = 
+        "<h1>defs</h1>" + 
+        "<p>All <code>defs</code> are instances of SVG <code>pattern</code> elements.</p>" +
+        "<p>The <code>patternUnits</code> attribute is 'userSpaceOnUse', you have control of everything else.</p>" +
+        "<p>The default <code>viewBox</code> for a hexagon has width of 1000 and height of 866.  This aspect ratio is correct for a true hexagon.</p>";
+
         this.x = HTML.create("input", {type: "number", value: 0, min: 0});
         this.y = HTML.create("input", {type: "number", value: 0, min: 0});
         this.width = HTML.create("input", {type: "number", value: 0, min: 0});
@@ -36,6 +42,7 @@ class DefsEditor extends FeatureEditor
         if(!super.handleCreate(evt))
             return;
 
+        let key = this.getKey();
         let n = SVG.create("pattern", 
             {
                 id: this.id.value, 
@@ -47,9 +54,9 @@ class DefsEditor extends FeatureEditor
             });
         n.innerHTML = this.svg.value;
 
-        this.items.set(this.id.value, n);
-        this.idList.append(HTML.create("option", {text: this.id.value, value: this.id.value}));
-        this.idList.value = this.id.value;
+        this.items.set(key, n);
+        this.idList.append(HTML.create("option", {text: key, value: key}));
+        this.idList.value = key;
         this.hexMap.defs.append(n);
     }
 
@@ -58,7 +65,7 @@ class DefsEditor extends FeatureEditor
         if(!super.handleUpdate(evt))
             return;
 
-        let n = this.items.get(this.id.value);
+        let n = this.items.get(this.getKey());
 
         n.setAttribute("x", this.x.value);
         n.setAttribute("y", this.y.value);
@@ -72,11 +79,12 @@ class DefsEditor extends FeatureEditor
         if(!super.handleDelete(evt))
             return;
 
-        let n = this.items.get(this.id.value);
+        let key = this.getKey();
+        let n = this.items.get(key);
 
         this.hexMap.defs.removeChild(n);
         this.idList.removeChild(this.idList.options[this.idList.selectedIndex]);
-        this.items.delete(this.id.value);
+        this.items.delete(key);
 
         this.id.value = "";
         this.x.value = 0;
@@ -84,5 +92,10 @@ class DefsEditor extends FeatureEditor
         this.width.value = 0;
         this.height.value = 0;
         this.svg.value = "";
+    }
+
+    getKey()
+    {
+        return this.id.value;
     }
 }

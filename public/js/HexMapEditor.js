@@ -277,10 +277,11 @@ class HexMapEditor
 
     makeFeatureDiv()
     {
+        this.hexMap.displayCursor = false;
         this.featureUIDiv = HTML.create("div", null, ["controlDiv"]);
         this.featureUIDiv.append(HTML.create("h3", {textContent: "Feature Editor"}));
 
-        let list = ["defs", "Terrain", "Edges", "Connectors", "Jumps", "Meta", "Content"];
+        let list = ["defs", "Terrain", "Edges", "Corners", "Connectors", "Jumps", "Meta", "Content"];
 
         this.featureList = new Map();
         let menu = HTML.create("div", {id: "featureMenu"}, ["menuContainer"]);
@@ -308,26 +309,29 @@ class HexMapEditor
                     this.featureUIDiv.append(this.terrainEditor.uiDiv);
                     break;
                 case list[2]:
-                    // this.edgeSelect = new ComboRadioSelect(this.hexMap.edgeTypes, "edgeCRS");
-                    // this.featureList.set(n, this.edgeSelect.groupDiv);
-                    // this.hexUIDiv.append(this.edgeSelect.groupDiv);
-                    this.featureList.set(n, HTML.create("div"));
+                    this.edgeEditor = new EdgeEditor(this.hexMap);
+                    this.featureList.set(n, this.edgeEditor.uiDiv);
+                    this.featureUIDiv.append(this.edgeEditor.uiDiv);
                     break;
                 case list[3]:
-                    // this.connectorSelect = new ComboRadioSelect(this.hexMap.connectorTypes, "connectorCRS");
-                    // this.featureList.set(n, this.connectorSelect.groupDiv);
-                    // this.hexUIDiv.append(this.connectorSelect.groupDiv);
-                    this.featureList.set(n, HTML.create("div"));
+                    this.cornerEditor = new CornerEditor(this.hexMap);
+                    this.featureList.set(n, this.cornerEditor.uiDiv);
+                    this.featureUIDiv.append(this.cornerEditor.uiDiv);
                     break;
                 case list[4]:
+                    this.connectorEditor = new ConnectorEditor(this.hexMap);
+                    this.featureList.set(n, this.connectorEditor.uiDiv);
+                    this.featureUIDiv.append(this.connectorEditor.uiDiv);
+                    break;
+                case list[5]:
                     // this.hexUIDiv.append(this.buildJumpDiv(n));
                     this.featureList.set(n, HTML.create("div"));
                     break;
-                case list[5]:
+                case list[6]:
                     // this.hexUIDiv.append(this.buildMetaDiv(n));
                     this.featureList.set(n, HTML.create("div"));
                     break;
-                case list[6]:
+                case list[7]:
                     this.featureList.set(n, HTML.create("div"));
                     break;
             }
@@ -467,12 +471,8 @@ class HexMapEditor
 
     handleMenu(evt)
     {
-        console.log(evt);
         let parentMenu = evt.target.parentElement;
-
         let currentMenu = parentMenu.querySelector(".menuItemSelected");
-
-        console.log(currentMenu.parentElement.id);
 
         currentMenu.classList.remove("menuItemSelected");
 

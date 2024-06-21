@@ -2,6 +2,7 @@ class FeatureEditor
 {
     constructor(map)
     {
+        this.help = "This is the editing interface for a feature.";
         this.hexMap = map;
         this.items = new Map();
 
@@ -11,6 +12,7 @@ class FeatureEditor
         this.boundShow = this.handleShow.bind(this);
         this.boundClear = this.handleClear.bind(this);
         this.boundChange = this.handleListChange.bind(this);
+        this.boundHelp = this.handleHelp.bind(this);
 
         this.uiDiv = HTML.create("div", {style: "display: none;"}, ["featureCol"]);
         this.idList = HTML.create("select", {size: "6", style: "min-width: 10em; max-width: 50%"}, null, {change: this.boundChange});
@@ -29,9 +31,15 @@ class FeatureEditor
                         HTML.create("button", {textContent: "Update"}, null, {click: this.boundUpdate}), 
                         HTML.create("button", {textContent: "Delete"}, null, {click: this.boundDelete}),
                         HTML.create("button", {textContent: "Show"}, null, {click: this.boundShow}),
-                        HTML.create("button", {textContent: "Clear"}, null, {click: this.boundClear}));
+                        HTML.create("button", {textContent: "Clear"}, null, {click: this.boundClear}),
+                        HTML.create("button", {innerHTML: "&#10067;"}, null, {click: this.boundHelp}));
 
         this.uiDiv.append(tempDiv1, this.svg, tempDiv2);
+    }
+
+    getKey()
+    {
+        return "";
     }
 
     display(v)
@@ -46,15 +54,17 @@ class FeatureEditor
 
     handleCreate(evt)
     {
-        if(!this.id.value)
+        let key = this.getKey();
+
+        if(!key)
         {
             alert("Missing or invalid id.");
             return false;
         }
 
-        if(this.items.has(this.id.value))
+        if(this.items.has(key))
         {
-            alert(`Duplicate id "${this.id.value}"`);
+            alert(`Duplicate id "${key}"`);
             return false;
         }    
 
@@ -63,15 +73,17 @@ class FeatureEditor
 
     handleUpdate(evt)
     {
-        if(!this.id.value)
+        let key = this.getKey();
+
+        if(!key)
         {
             alert("Missing or invalid id.");
             return false;
         }
 
-        if(!this.items.has(this.id.value))
+        if(!this.items.has(key))
         {
-            alert(`Record with id "${this.id.value}" not found.`);
+            alert(`Record with id "${key}" not found.`);
             return false;
         }
 
@@ -80,15 +92,17 @@ class FeatureEditor
 
     handleDelete(evt)
     {
-        if(!this.id.value)
+        let key = this.getKey();
+
+        if(!key)
         {
             alert("Missing or invalid id.");
             return false;
         }
 
-        if(!this.items.has(this.id.value))
+        if(!this.items.has(key))
         {
-            alert(`Record with id "${this.id.value}" not found.`);
+            alert(`Record with id "${key}" not found.`);
             return false;
         }
 
@@ -102,7 +116,16 @@ class FeatureEditor
 
     handleClear()
     {
-        this.hexMap.hexes = [[new Hex(hexMap, 0, 0)]];
+        this.hexMap.hexes = [[new Hex(this.hexMap, 0, 0)]];
         this.hexMap.initMap();
+    }
+
+    handleHelp()
+    {
+        let dialog = document.getElementById("helpDialog");
+        let content = document.getElementById("helpContent");
+        
+        content.innerHTML = this.help;
+        dialog.showModal();
     }
 }
