@@ -158,7 +158,7 @@ class HexMapEditor
         this.boundJumpSelect = this.handleJumpSelect.bind(this);
         this.boundJumpButtons = this.handleJumpButtons.bind(this);
 
-        let list = ["None", "Terrain", "Edges", "Connectors", "Jumps", "Meta", "Content"];
+        let list = ["None", "Terrain", "Edges", "Connectors", "Jumps", "Meta"];
 
         this.menuList = new Map();
         let menu = HTML.create("div", {id: "mapDataMenu"}, ["menuContainer"]);
@@ -281,7 +281,7 @@ class HexMapEditor
         this.featureUIDiv = HTML.create("div", null, ["controlDiv"]);
         this.featureUIDiv.append(HTML.create("h3", {textContent: "Feature Editor"}));
 
-        let list = ["defs", "Terrain", "Edges", "Corners", "Connectors", "Jumps", "Meta", "Content"];
+        let list = ["defs", "Terrain", "Edges", "Corners", "Connectors", "Meta"];
 
         this.featureList = new Map();
         let menu = HTML.create("div", {id: "featureMenu"}, ["menuContainer"]);
@@ -324,19 +324,10 @@ class HexMapEditor
                     this.featureUIDiv.append(this.connectorEditor.uiDiv);
                     break;
                 case list[5]:
-                    // this.hexUIDiv.append(this.buildJumpDiv(n));
-                    this.featureList.set(n, HTML.create("div"));
-                    break;
-                case list[6]:
                     // this.hexUIDiv.append(this.buildMetaDiv(n));
                     this.featureList.set(n, HTML.create("div"));
                     break;
-                case list[7]:
-                    this.featureList.set(n, HTML.create("div"));
-                    break;
             }
-
-            // this.featureIdParts.append(div);
         });
 
         return this.featureUIDiv;        
@@ -384,7 +375,7 @@ class HexMapEditor
         this.hexMap.borders.forEach((v, k) => data.borders.push([k, v]));
 
         data.jumps = [];
-        this.hexMap.jumps.forEach(v => data.jumps.push({"from": v.from, "to": v.to, "svg": v.svg.outerHTML}));
+        this.hexMap.jumps.forEach(v => data.jumps.push({"from": v.from, "to": v.to}));
 
         data.hexes = [];
         this.hexMap.hexes.forEach(row =>

@@ -4,6 +4,14 @@ class ConnectorEditor extends FeatureEditor
     {
         super(map);
 
+        this.help = 
+        "<h1>Connector</h1>" + 
+        "<p>A connector is one of the six paths from the center of the hexagon to the center of a side.  The connectors are numbered from 0 (the top) clockwise to 5; 1 is top right and so on.</p>" + 
+        "<p>The rendering routine is optimized for this geometry.  You are free to go outside this at your own risk. The important thing to consider is how they connect to each other - i.e. common end points should be used.</p>" +
+        "<p>You can define variants for each type of connector.  When a hex is assigned a connector value it will randomly pick from the available variants; you can edit this manually later if you like.  <b>IMPORTANT</b> the variants are numbered starting from zero so do not leave gaps in the sequence!</p>" +
+        "<p>The SVG you provided to render the connector is captured in a <code>symbol</code> with <code>viewBox</code> of 0 0 1000 866, <code>preserveAspectRatio</code> and <code>pointer-events</code> set to 'none'. The symbol id is composed as follows: ID_eEdge_vVariant, example: Road_e0_v0 is ID of Road to top edge variant 0.</p>" +
+        "<p><b>NOTE</b> connectors are drawn immediatley after edges and corners.</p>";
+
         this.edge = HTML.create("input", {type: "number", value: 0, min: 0, max: 5});
         this.variant = HTML.create("input", {type: "number", value: 0, min: 0});
 

@@ -2,7 +2,8 @@ class HexMap
 {
     constructor()
     {
-        this.svg = SVG.create("svg", {viewBox: "0 0 1000 866", preserveAspectRatio: "none", style: "background-color:blue"});
+        this.background = "#0000ff";
+        this.svg = SVG.create("svg", {viewBox: "0 0 1000 866", preserveAspectRatio: "none", style: `background-color:${this.background}`});
         this.vbWidth = "1000";
         this.vbHeight = "866";
         this.defs = SVG.create("defs");

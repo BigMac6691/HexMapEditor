@@ -127,5 +127,6 @@ class FeatureEditor
         
         content.innerHTML = this.help;
         dialog.showModal();
+        dialog.scrollTop = 0;
     }
 }

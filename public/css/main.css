@@ -120,7 +120,13 @@ input[type='number']
 /* Help Dialog styles */
 dialog
 {
-    max-width: 30%;
+    max-width: 40%;
+}
+
+dialog div
+{
+    overflow-y: scroll;
+    max-height: 25em;
 }
 
 dialog button
@@ -139,5 +145,5 @@ dialog h1
 
 dialog p
 {
-    margin-bottom: 0.5em;
+    margin-bottom: 0.75em;
 }
