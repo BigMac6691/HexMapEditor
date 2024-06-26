@@ -26,6 +26,30 @@ class EdgeEditor extends FeatureEditor
             HTML.createLabel("Variant: ", this.variant));
     }
 
+    init(list)
+    {
+        super.init(list);
+
+        list.forEach((v, k) => 
+        {
+            console.log(`\n${k}`);
+            console.log(v);
+            // v.forEach((svg, i) =>
+            // {
+            //     let key = `${k}_v${i}`;
+            //     let t =
+            //     {
+            //         id: k,
+            //         variant: i,
+            //         fill: svg.fill
+            //     }
+
+            //     this.items.set(key, t);
+            //     this.idList.append(HTML.create("option", {text: key, value: key}));
+            // });
+        });
+    }
+
     handleListChange(evt)
     {
         if(!this.items.has(evt.target.value))

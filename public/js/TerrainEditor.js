@@ -14,6 +14,28 @@ class TerrainEditor extends FeatureEditor
         this.parts.append(HTML.createLabel("Variant: ", this.variant));
     }
 
+    init(list)
+    {
+        super.init(list);
+
+        list.forEach((v, k) => 
+        {
+            v.forEach((svg, i) =>
+            {
+                let key = `${k}_v${i}`;
+                let t =
+                {
+                    id: k,
+                    variant: i,
+                    fill: svg.fill
+                }
+
+                this.items.set(key, t);
+                this.idList.append(HTML.create("option", {text: key, value: key}));
+            });
+        });
+    }
+
     handleListChange(evt)
     {
         if(!this.items.has(evt.target.value))
@@ -37,6 +59,15 @@ class TerrainEditor extends FeatureEditor
         this.items.set(key, v);
         this.idList.append(HTML.create("option", {text: key, value: key}));
         this.idList.value = key;
+
+        let list = [];
+        this.items.forEach((value, k) => 
+        {
+            if(value.id === this.id.value)
+                list[+value.variant] = v;
+        });
+
+        this.hexMap.terrain.set(v.id, list);
     }
 
     handleUpdate(evt)
@@ -47,6 +78,9 @@ class TerrainEditor extends FeatureEditor
         let v = this.items.get(this.getKey());
 
         v.fill = this.svg.value;
+
+        this.hexMap.terrain.get(v.id)[v.variant].fill = v.fill;
+        this.hexMap.initMap();
     }
 
     handleDelete(evt)
@@ -57,6 +91,11 @@ class TerrainEditor extends FeatureEditor
         this.idList.removeChild(this.idList.options[this.idList.selectedIndex]);
         this.items.delete(this.getKey());
 
+        this.clear();
+    }
+
+    clear()
+    {
         this.id.value = "";
         this.variant.value = 0;
         this.svg.value = "";

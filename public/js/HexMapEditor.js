@@ -40,10 +40,16 @@ class HexMapEditor
     makeUI()
     {
         let mp = document.getElementById("mapPanel");
-        mp.append(this.hexMap.svg);
+        mp.append(this.hexMap.svg); 
 
         // File panel
-        let div0 = this.makeFileUI();
+        this.fileControl = new FileControl("File");
+        let div0 = this.fileControl.div;//this.makeFileUI();
+
+        this.boundMapLoad = this.handleMapLoad.bind(this);
+        this.boundMapSave = this.handleMapSave.bind(this);
+        this.fileControl.addEventListener("mapLoad", this.boundMapLoad);
+        this.fileControl.addEventListener("mapSave", this.boundMapSave);
 
         // SVG attributes
         let div1 = this.makeSVGUI(mp);        
@@ -62,22 +68,6 @@ class HexMapEditor
         div5.append(HTML.create("h3", {textContent: "Hex Editor"}));
 
         document.getElementById("controlPanel").append(div0, div1, div2, div3, div4, div5);
-    }
-
-    makeFileUI()
-    {
-        let div = HTML.create("div", null, ["controlDiv"]);
-        div.append(HTML.create("h3", {textContent: "File"}));
-
-        this.boundFileButtons = this.handleFileButtons.bind(this);
-
-        let tempDiv = HTML.create("div", null, ["fileDiv"]);
-        tempDiv.append(HTML.create("button", {type: "button", innerHTML: "Load"}, null, {click: this.boundFileButtons}));
-        tempDiv.append(HTML.create("button", {type: "button", innerHTML: "Save"}, null, {click: this.boundFileButtons}));
-        tempDiv.append(this.fileName = HTML.create("div", {innerHTML: "- no current file -"}));
-        div.append(tempDiv);
-
-        return div;
     }
 
     makeSVGUI(mp)
@@ -118,6 +108,14 @@ class HexMapEditor
 
         this.rows = HTML.create("input", {type: "number", value: this.hexMap.hexes[0].length, min: 1}, null, {change: this.boundMapModelChange});
         tempDiv.append(HTML.createLabel(" Rows: ", this.rows));
+        div.append(tempDiv);
+
+        tempDiv = HTML.create("div");
+        this.jumpColour = HTML.create("input", {type: "color", value: this.hexMap.jumpColour}, null, {change: this.boundMapModelChange});
+        tempDiv.append(HTML.createLabel("Jump colour: ", this.jumpColour));
+
+        this.jumpWidth = HTML.create("input", {type: "number", value: this.hexMap.jumpWidth, min: 1}, null, {change: this.boundMapModelChange});
+        tempDiv.append(HTML.createLabel(" Width: ", this.jumpWidth));
         div.append(tempDiv);
 
         tempDiv = HTML.create("div");
@@ -196,13 +194,100 @@ class HexMapEditor
                 case list[5]:
                     this.hexUIDiv.append(this.buildMetaDiv(n));
                     break;
-                case list[6]:
-                    this.menuList.set(n, HTML.create("div"));
-                    break;
             }
         });
 
         return this.hexUIDiv;
+    }
+
+    handleMapLoad(evt)
+    {
+        while(this.hexMap.defs.lastChild)
+            this.hexMap.defs.removeChild(this.hexMap.defs.lastChild);
+
+        this.hexMap.svg.querySelectorAll("symbol").forEach(n => 
+        {
+            if(n.id !== "hexagon")
+                this.hexMap.svg.removeChild(n);
+        });
+
+        this.hexMap.loadFile(evt.detail);
+        this.initMap();
+        // left is name in editor, right is name in hex map - need to fix that some day...
+        [
+            ["viewBoxWidth", "vbWidth"], 
+            ["viewBoxHeight", "vbHeight"], 
+            ["mapWidth", "width"], 
+            ["mapHeight", "height"], 
+            ["backgroundColour", "background"],
+            ["borderColour", "borderColour"],
+            ["defaultTerrainColour", "defaultHexFill"],
+            ["textColour", "textColor"],
+            ["jumpColour", "jumpColour"],
+            ["jumpWidth", "jumpWidth"]
+        ].forEach(v => this[v[0]].value = evt.detail[v[1]] ?? this.hexMap[v[1]]);
+        
+        this.cols.value = evt.detail.hexes.length;
+        this.rows.value = evt.detail.hexes[0].length;
+        this.offsetCheckbox.checked = evt.detail.offsetOn === 1;
+        this.displayCursorCheckbox.checked = evt.detail.displayCursor ?? true;
+        this.makeHexUI();
+        this.defsEditor.init(this.hexMap.defs.querySelectorAll("pattern"));
+        this.terrainEditor.init(this.hexMap.terrain);
+        this.edgeEditor.init(this.hexMap.edges);
+    }
+
+    handleMapSave(evt)
+    {
+        console.log(this.editor.hexMap);
+        let data = {};
+        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor", "jumpColour", "jumpWidth"]
+            .forEach(v => data[v] = this.editor.hexMap[v]);
+
+        data.defs = [];
+        for(let e of this.editor.hexMap.defs.children)
+            data.defs.push(e.outerHTML);
+
+        ["terrain", "terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => data[v] = [...this.editor.hexMap[v]]);
+
+        data.edges = [];
+        this.editor.hexMap.edges.forEach((v, k) => data.edges.push([k, v.innerHTML]));
+
+        data.corners = [];
+        this.editor.hexMap.corners.forEach((v, k) => data.corners.push([k, v.innerHTML]));
+
+        data.connectors = [];
+        this.editor.hexMap.connectors.forEach((v, k) => data.connectors.push([k, v.innerHTML]));
+
+        data.metadata = [];
+        this.editor.hexMap.metadata.forEach((v, k) => data.metadata.push([k, v]));
+
+        data.borders = [];
+        this.editor.hexMap.borders.forEach((v, k) => data.borders.push([k, v]));
+
+        data.jumps = [];
+        this.editor.hexMap.jumps.forEach(v => data.jumps.push({"from": v.from, "to": v.to}));
+
+        data.hexes = [];
+        this.editor.hexMap.hexes.forEach(row =>
+        {
+            let rows = [];
+            row.forEach(hex =>
+            {
+                let temp = {};
+
+                ["col", "row", "terrain"].forEach(v => temp[v] = hex[v]);
+                ["edges", "corners", "connectors", "borders", "content"].forEach(v => temp[v] = hex[v] ? [...hex[v].keys()] : null);
+                ["metadata"].forEach(v => temp[v] = hex[v] ? [...hex[v]] : null);
+
+                rows.push(temp);
+            });
+
+            data.hexes.push(rows);
+        });
+
+        localStorage.setItem(fileName, JSON.stringify(data));
+        console.log(data);
     }
 
     buildJumpDiv(menuNode)
@@ -304,6 +389,7 @@ class HexMapEditor
                     this.featureUIDiv.append(this.defsEditor.uiDiv);
                     break;
                 case list[1]:
+                    console.log(this.hexMap);
                     this.terrainEditor = new TerrainEditor(this.hexMap);
                     this.featureList.set(n, this.terrainEditor.uiDiv);
                     this.featureUIDiv.append(this.terrainEditor.uiDiv);
@@ -331,133 +417,6 @@ class HexMapEditor
         });
 
         return this.featureUIDiv;        
-    }
-
-    handleFileButtons(evt)
-    {
-        if(evt.target.innerHTML === "Save")
-            this.handleSave();
-        else
-            this.handleLoad();
-    }
-
-    handleSave()
-    {
-        let fileName = prompt("Save file name:", this.fileName.innerHTML);
-
-        if(!fileName)
-            return;
-
-        console.log(this.hexMap);
-        let data = {};
-        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
-            .forEach(v => data[v] = this.hexMap[v]);
-
-        data.defs = [];
-        for(let e of this.hexMap.defs.children)
-            data.defs.push(e.outerHTML);
-
-        ["terrain", "terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => data[v] = [...this.hexMap[v]]);
-
-        data.edges = [];
-        this.hexMap.edges.forEach((v, k) => data.edges.push([k, v.innerHTML]));
-
-        data.corners = [];
-        this.hexMap.corners.forEach((v, k) => data.corners.push([k, v.innerHTML]));
-
-        data.connectors = [];
-        this.hexMap.connectors.forEach((v, k) => data.connectors.push([k, v.innerHTML]));
-
-        data.metadata = [];
-        this.hexMap.metadata.forEach((v, k) => data.metadata.push([k, v]));
-
-        data.borders = [];
-        this.hexMap.borders.forEach((v, k) => data.borders.push([k, v]));
-
-        data.jumps = [];
-        this.hexMap.jumps.forEach(v => data.jumps.push({"from": v.from, "to": v.to}));
-
-        data.hexes = [];
-        this.hexMap.hexes.forEach(row =>
-        {
-            let rows = [];
-            row.forEach(hex =>
-            {
-                let temp = {};
-
-                ["col", "row", "terrain"].forEach(v => temp[v] = hex[v]);
-                ["edges", "corners", "connectors", "borders", "content"].forEach(v => temp[v] = hex[v] ? [...hex[v].keys()] : null);
-                ["metadata"].forEach(v => temp[v] = hex[v] ? [...hex[v]] : null);
-
-                rows.push(temp);
-            });
-
-            data.hexes.push(rows);
-        });
-
-        localStorage.setItem(fileName, JSON.stringify(data));
-        console.log(data);
-    }
-
-    handleLoad()
-    {
-        let fileName = prompt("Load file name:", "test.hexmap");
-
-        if(fileName)
-        {
-            let file = localStorage.getItem(fileName);
-            
-            if(file)
-            {
-                console.log(`Size of file=${file.length}`);
-
-                try
-                {
-                    let object = JSON.parse(file);
-
-                    console.log(`Size of hexes=${JSON.stringify(object.hexes).length}`);
-                    console.log(object);
-
-                    let mp = document.getElementById("mapPanel");
-
-                    while (mp.lastElementChild)
-                        mp.removeChild(mp.lastElementChild);
-
-                    this.hexMap = new HexMap();
-                    this.hexMap.loadFile(object);
-
-                    this.initMap();
-
-                    [
-                        ["viewBoxWidth", "vbWidth"], 
-                        ["viewBoxHeight", "vbHeight"], 
-                        ["mapWidth", "width"], 
-                        ["mapHeight", "height"], 
-                        ["backgroundColour", "background"],
-                        ["borderColour", "borderColour"],
-                        ["defaultTerrainColour", "defaultHexFill"],
-                        ["textColour", "textColor"]
-                    ].forEach(v => this[v[0]].value = object[v[1]]);
-
-                    this.cols.value = object.hexes.length;
-                    this.rows.value= object.hexes[0].length;
-                    this.offsetCheckbox.checked = object.offsetOn === 1;
-                    this.displayCursorCheckbox.checked = object.displayCursor === true;
-
-                    this.makeHexUI();
-
-                    mp.append(this.hexMap.svg);
-                    this.fileName.innerHTML = fileName;
-                }
-                catch(e)
-                {
-                    console.log(e);
-                    alert(`Exception processing ${fileName}, see console for more details.`);
-                }
-            }
-            else
-                alert(`File ${fileName} not found or empty.`);
-        }
     }
 
     handleMenu(evt)
@@ -514,6 +473,8 @@ class HexMapEditor
 
     handleMapModelChange(evt)
     {
+        this.hexMap.jumpColour = this.jumpColour.value;
+        this.hexMap.jumpWidth = +this.jumpWidth.value;
         this.hexMap.borderColour = this.borderColour.value;
         this.hexMap.defaultHexFill = this.defaultTerrainColour.value;
 
@@ -651,7 +612,7 @@ class HexMapEditor
         {
             if(this.jumpSelect.value === "new")
             {
-                this.jumpLine = SVG.create("line", {x1: x, y1: y, x2: x, y2: y, stroke: "#ff0000", "stroke-width": "6", class: "jumpLine"});
+                this.jumpLine = SVG.create("line", {x1: x, y1: y, x2: x, y2: y, stroke: this.jumpColour.value, "stroke-width": this.jumpWidth.value, class: "jumpLine"});
                 this.hexMap.map.append(this.jumpLine);
             }
             else

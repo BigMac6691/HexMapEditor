@@ -37,6 +37,15 @@ class FeatureEditor
         this.uiDiv.append(tempDiv1, this.svg, tempDiv2);
     }
 
+    init(list)
+    {
+        this.clear();
+        this.items.clear();
+
+        while(this.idList.options.length)
+            this.idList.remove(0);
+    }
+
     getKey()
     {
         return "";
@@ -107,6 +116,11 @@ class FeatureEditor
         }
 
         return true;
+    }
+
+    clear()
+    {
+        this.id.value = "";
     }
 
     handleShow()

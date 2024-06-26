@@ -22,6 +22,17 @@ class DefsEditor extends FeatureEditor
             HTML.createLabel("Height: ", this.height));
     }
 
+    init(list)
+    {
+        super.init(list);
+
+        list.forEach(v => 
+        {
+            this.items.set(v.id, v);
+            this.idList.append(HTML.create("option", {text: v.id, value: v.id}));
+        });
+    }
+
     handleListChange(evt)
     {
         if(!this.items.has(evt.target.value))
@@ -86,6 +97,11 @@ class DefsEditor extends FeatureEditor
         this.idList.removeChild(this.idList.options[this.idList.selectedIndex]);
         this.items.delete(key);
 
+        this.clear();
+    }
+
+    clear()
+    {
         this.id.value = "";
         this.x.value = 0;
         this.y.value = 0;

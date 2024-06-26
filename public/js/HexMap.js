@@ -12,6 +12,8 @@ class HexMap
 
         this.offsetOn = 0;
         this.jumpNextIndex = 0;
+        this.jumpColour = "#ff0000";
+        this.jumpWidth = 6;
         this.borderColour = "#000000";
         this.defaultHexFill = "#ffffff";
         this.textColor = "#000000";
@@ -39,10 +41,10 @@ class HexMap
 
     loadFile(data)
     {
-        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor"]
-            .forEach(v => this[v] = data[v]);
+        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor", "jumpColour", "jumpWidth"]
+            .forEach(v => this[v] = data[v] ?? this[v]);
 
-        ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v]);
+        ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v] ?? this[v]);
 
         data.defs.forEach(v => this.defs.insertAdjacentHTML("beforeend", v));
 
@@ -129,7 +131,6 @@ class HexMap
         });
 
         mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
-        console.log(this);
     }
 
     loadData(f)
@@ -366,7 +367,7 @@ class HexMap
                 coords.push(x, y);
             });
 
-            j.svg = SVG.create("line", {x1 : coords[0], y1 : coords[1], x2 : coords[2], y2 : coords[3], stroke : "#ff0000", "stroke-width" : "6", class : "jumpLine"});
+            j.svg = SVG.create("line", {x1 : coords[0], y1 : coords[1], x2 : coords[2], y2 : coords[3], stroke : this.jumpColour, "stroke-width" : this.jumpWidth, class : "jumpLine"});
             this.map.append(j.svg);
         });
 
