@@ -3,7 +3,6 @@ class HexMapEditor
     constructor() 
     {
         // alternative to numerous bound speciclized event handlers - one handler that then redirects to specialized handlers
-        this.boundSVGChange = this.handleSVGChange.bind(this);
         this.boundMapModelChange = this.handleMapModelChange.bind(this);
         this.boundMouseMove = this.handleMouseMove.bind(this);
         this.boundMouseClick = this.handleMouseClick.bind(this);
@@ -18,6 +17,7 @@ class HexMapEditor
 
     initMap()
     {
+        // we don't need to add these listeners as we are not creating a new hex map all the time
         this.hexMap.svg.addEventListener("mousemove", this.boundMouseMove);
         this.hexMap.svg.addEventListener("click", this.boundMouseClick);
 
@@ -47,23 +47,10 @@ class HexMapEditor
         let div0 = this.fileControl.div;
 
         // SVG attributes
-        let data =
-        {
-            viewBoxWidth: this.hexMap.viewBoxWidth,
-            viewBoxHeight: this.hexMap.viewBoxHeight,
-            mapWidth: mp.scrollWidth,
-            mapHeight: mp.scrollHeight,
-            backgroundColour: this.hexMap.backgroundColour
-        }
-        this.svgControl = new SVGControl("SVG Attributes", data);
-        let div1 = this.svgControl.div;
-
-        this.svgControl.addEventListener("svgAttribute", evt =>
-        {
-            console.log(evt);
-            this.hexMap[evt.detail.name] = evt.detail.value;
-        });
+        this.svgControl = new SVGControl("SVG Attributes");
+        this.svgControl.addEventListener("svgAttribute", this.handleSVGChange.bind(this));
         this.fileControl.addEventListener("mapLoad", this.svgControl.handleMapLoad.bind(this.svgControl));
+        let div1 = this.svgControl.div;
 
         // Model atributes
         let div2 = this.makeModelUI();
@@ -346,23 +333,38 @@ class HexMapEditor
             this.hexMap.svg.style.cursor = "crosshair";
     }
 
+    // move this to SVGControl, make it normal to pass the editor to the control
     handleSVGChange(evt)
     {
-        if(evt.target === this.viewBoxWidth || evt.target === this.viewBoxHeight)
-        {
-            this.hexMap.viewBoxWidth = this.viewBoxWidth.value;
-            this.hexMap.viewBoxHeight = this.viewBoxHeight.value;
-            
-            this.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
-        }
-        else if(evt.target === this.backgroundColour)
-        {
-            this.hexMap.backgroundColour = evt.target.value;
+        console.log(evt);
 
-            this.hexMap.svg.style.background = evt.target.value;
+        this.hexMap[evt.detail.name] = evt.detail.value;
+
+        switch(evt.detail.name)
+        {
+            case "viewBoxWidth":
+                this.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
+                break;
+            
+            case "viewBoxWidth":
+                this.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
+                break;
+
+            case "mapWidth":
+                this.hexMap.svg.setAttribute("width", evt.detail.value);
+                break;
+
+            case "mapHeight":
+                this.hexMap.svg.setAttribute("height", evt.detail.value);
+                break;
+
+            case "backgroundColour":
+                this.hexMap.svg.style.background = evt.detail.value;
+                break;
+
+            default:
+                console.log(`Unknown attribute ${evt.detail.name}`);
         }
-        else
-            this.hexMap.svg.setAttribute(evt.target.name, evt.target.value);
     }
 
     handleMapModelChange(evt)

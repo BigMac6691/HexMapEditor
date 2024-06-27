@@ -48,13 +48,6 @@ class HexMap
         ["offsetOn", "borderColour", "defaultHexFill", "textColor", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor", "jumpColour", "jumpWidth"]
             .forEach(v => this[v] = data[v] ?? this[v]);
 
-        // temporary until we can fix the file
-        this.viewBoxWidth = data.vbWidth;
-        this.viewBoxHeight = data.vbHeight;
-        this.backgroundColour = data.background;
-        this.mapWidth = data.width;
-        this.mapHeight = data.height;
-
         ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v] ?? this[v]);
 
         data.defs.forEach(v => this.defs.insertAdjacentHTML("beforeend", v));

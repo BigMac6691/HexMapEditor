@@ -142,23 +142,20 @@ class FileControl extends ControlUI
         this.editor.hexMap.loadFile(data);
         this.editor.initMap();
         
-        console.log(data);
         // since all the following are in their own classes they need to listen for the load event
         // left is name in editor, right is name in hex map - need to fix that some day...
         [
             ["borderColour", "borderColour"],
             ["defaultTerrainColour", "defaultHexFill"],
-            ["textColour", "textColor"]
+            ["textColour", "textColor"],
+            ["jumpColour", "jumpColour"],
+            ["jumpWidth", "jumpWidth"]
         ].forEach(v => 
         {
-            console.log(`[${v[0]},${v[1]}]-${data[v[1]]}`);
+            // console.log(`[${v[0]},${v[1]}]-${data[v[1]]}`);
             this.editor[v[0]].value = data[v[1]] ?? this.editor[v[1]];
         });
 
-        // currently missing in old file
-        this.editor.jumpColour.value = "#ff0000";
-        this.editor.jumpWidth.value = 6;
-        
         this.editor.cols.value = data.hexes.length;
         this.editor.rows.value = data.hexes[0].length;
         this.editor.offsetCheckbox.checked = data.offsetOn === 1;
