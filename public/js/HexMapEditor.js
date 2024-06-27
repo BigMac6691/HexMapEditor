@@ -43,16 +43,27 @@ class HexMapEditor
         mp.append(this.hexMap.svg); 
 
         // File panel
-        this.fileControl = new FileControl("File");
-        let div0 = this.fileControl.div;//this.makeFileUI();
-
-        this.boundMapLoad = this.handleMapLoad.bind(this);
-        this.boundMapSave = this.handleMapSave.bind(this);
-        this.fileControl.addEventListener("mapLoad", this.boundMapLoad);
-        this.fileControl.addEventListener("mapSave", this.boundMapSave);
+        this.fileControl = new FileControl("File", this);
+        let div0 = this.fileControl.div;
 
         // SVG attributes
-        let div1 = this.makeSVGUI(mp);        
+        let data =
+        {
+            viewBoxWidth: this.hexMap.viewBoxWidth,
+            viewBoxHeight: this.hexMap.viewBoxHeight,
+            mapWidth: mp.scrollWidth,
+            mapHeight: mp.scrollHeight,
+            backgroundColour: this.hexMap.backgroundColour
+        }
+        this.svgControl = new SVGControl("SVG Attributes", data);
+        let div1 = this.svgControl.div;
+
+        this.svgControl.addEventListener("svgAttribute", evt =>
+        {
+            console.log(evt);
+            this.hexMap[evt.detail.name] = evt.detail.value;
+        });
+        this.fileControl.addEventListener("mapLoad", this.svgControl.handleMapLoad.bind(this.svgControl));
 
         // Model atributes
         let div2 = this.makeModelUI();
@@ -70,70 +81,43 @@ class HexMapEditor
         document.getElementById("controlPanel").append(div0, div1, div2, div3, div4, div5);
     }
 
-    makeSVGUI(mp)
-    {
-        let div = HTML.create("div", null, ["controlDiv"]);
-        div.append(HTML.create("h3", {textContent: "SVG Attributes"}));
-
-        let vbDiv = HTML.create("div");
-        this.viewBoxWidth = HTML.create("input", {type: "number", value: this.hexMap.vbWidth}, null, {change: this.boundSVGChange});
-        vbDiv.append(HTML.createLabel("View Box Width: ", this.viewBoxWidth));
-
-        this.viewBoxHeight = HTML.create("input", {type: "number", value: this.hexMap.vbHeight}, null, {change: this.boundSVGChange});
-        vbDiv.append(HTML.createLabel(" Height: ", this.viewBoxHeight));
-        div.append(vbDiv);
-
-        let svgDiv = HTML.create("div");
-        this.mapWidth = HTML.create("input", {type: "number", name: "width", value: mp.scrollWidth}, null, {change: this.boundSVGChange});
-        svgDiv.append(HTML.createLabel("SVG Width: ", this.mapWidth, "px"));
-
-        this.mapHeight = HTML.create("input", {type: "number", name: "height", value: mp.scrollHeight}, null, {change: this.boundSVGChange});
-        svgDiv.append(HTML.createLabel(" Height: ", this.mapHeight, "px"));
-        div.append(svgDiv);
-
-        this.backgroundColour = HTML.create("input", {type: "color", value: this.hexMap.background}, null, {change: this.boundSVGChange});
-        div.append(HTML.createLabel("Background: ", this.backgroundColour));
-
-        return div;
-    }
-
     makeModelUI()
     {
         let div = HTML.create("div", null, ["controlDiv"]);
         div.append(HTML.create("h3", {textContent: "Model Attributes"}));
 
         let tempDiv = HTML.create("div");
-        this.cols = HTML.create("input", {type: "number", value: this.hexMap.hexes.length, min: 1}, null, {change: this.boundMapModelChange});
+        this.cols = HTML.create("input", {type: "number", name: "cols", value: this.hexMap.hexes.length, min: 1}, null, {change: this.boundMapModelChange});
         tempDiv.append(HTML.createLabel("Map Columns: ", this.cols));
 
-        this.rows = HTML.create("input", {type: "number", value: this.hexMap.hexes[0].length, min: 1}, null, {change: this.boundMapModelChange});
+        this.rows = HTML.create("input", {type: "number", name: "rows", value: this.hexMap.hexes[0].length, min: 1}, null, {change: this.boundMapModelChange});
         tempDiv.append(HTML.createLabel(" Rows: ", this.rows));
         div.append(tempDiv);
 
         tempDiv = HTML.create("div");
-        this.jumpColour = HTML.create("input", {type: "color", value: this.hexMap.jumpColour}, null, {change: this.boundMapModelChange});
+        this.jumpColour = HTML.create("input", {type: "color", name: "jumpColour", value: this.hexMap.jumpColour}, null, {change: this.boundMapModelChange});
         tempDiv.append(HTML.createLabel("Jump colour: ", this.jumpColour));
 
-        this.jumpWidth = HTML.create("input", {type: "number", value: this.hexMap.jumpWidth, min: 1}, null, {change: this.boundMapModelChange});
+        this.jumpWidth = HTML.create("input", {type: "number", name: "jumpWidth", value: this.hexMap.jumpWidth, min: 1}, null, {change: this.boundMapModelChange});
         tempDiv.append(HTML.createLabel(" Width: ", this.jumpWidth));
         div.append(tempDiv);
 
         tempDiv = HTML.create("div");
-        this.borderColour = HTML.create("input", {type: "color", value: this.hexMap.borderColour}, null, {change: this.boundMapModelChange});
+        this.borderColour = HTML.create("input", {type: "color", name: "borderColour", value: this.hexMap.borderColour}, null, {change: this.boundMapModelChange});
         tempDiv.append(HTML.createLabel("Border: ", this.borderColour));
 
-        this.defaultTerrainColour = HTML.create("input", {type: "color", value: this.hexMap.defaultHexFill}, null, {change: this.boundMapModelChange});
+        this.defaultTerrainColour = HTML.create("input", {type: "color", name: "defaultTerrainColour", value: this.hexMap.defaultHexFill}, null, {change: this.boundMapModelChange});
         tempDiv.append(HTML.createLabel(" Hex: ", this.defaultTerrainColour));
 
-        this.textColour = HTML.create("input", {type: "color", value: this.hexMap.textColor}, null, {change: this.boundMapModelChange});
+        this.textColour = HTML.create("input", {type: "color", name: "textColour", value: this.hexMap.textColor}, null, {change: this.boundMapModelChange});
         tempDiv.append(HTML.createLabel(" Text: ", this.textColour));
         div.append(tempDiv);
 
         tempDiv = HTML.create("div");
-        this.offsetCheckbox = HTML.create("input", {type: "checkbox", checked: this.hexMap.offsetOn}, null, {change: this.boundMapModelChange});
+        this.offsetCheckbox = HTML.create("input", {type: "checkbox", name: "offsetOn", checked: this.hexMap.offsetOn}, null, {change: this.boundMapModelChange});
         tempDiv.append(HTML.createLabel("Hex offset: ", this.offsetCheckbox));
 
-        this.displayCursorCheckbox = HTML.create("input", {type: "checkbox", checked: this.hexMap.displayCursor}, null, {change: this.boundMapModelChange});
+        this.displayCursorCheckbox = HTML.create("input", {type: "checkbox", name: "displayCursor", checked: this.hexMap.displayCursor}, null, {change: this.boundMapModelChange});
         tempDiv.append(HTML.createLabel("Display cursor: ", this.displayCursorCheckbox));
         div.append(tempDiv);
 
@@ -198,96 +182,6 @@ class HexMapEditor
         });
 
         return this.hexUIDiv;
-    }
-
-    handleMapLoad(evt)
-    {
-        while(this.hexMap.defs.lastChild)
-            this.hexMap.defs.removeChild(this.hexMap.defs.lastChild);
-
-        this.hexMap.svg.querySelectorAll("symbol").forEach(n => 
-        {
-            if(n.id !== "hexagon")
-                this.hexMap.svg.removeChild(n);
-        });
-
-        this.hexMap.loadFile(evt.detail);
-        this.initMap();
-        // left is name in editor, right is name in hex map - need to fix that some day...
-        [
-            ["viewBoxWidth", "vbWidth"], 
-            ["viewBoxHeight", "vbHeight"], 
-            ["mapWidth", "width"], 
-            ["mapHeight", "height"], 
-            ["backgroundColour", "background"],
-            ["borderColour", "borderColour"],
-            ["defaultTerrainColour", "defaultHexFill"],
-            ["textColour", "textColor"],
-            ["jumpColour", "jumpColour"],
-            ["jumpWidth", "jumpWidth"]
-        ].forEach(v => this[v[0]].value = evt.detail[v[1]] ?? this.hexMap[v[1]]);
-        
-        this.cols.value = evt.detail.hexes.length;
-        this.rows.value = evt.detail.hexes[0].length;
-        this.offsetCheckbox.checked = evt.detail.offsetOn === 1;
-        this.displayCursorCheckbox.checked = evt.detail.displayCursor ?? true;
-        this.makeHexUI();
-        this.defsEditor.init(this.hexMap.defs.querySelectorAll("pattern"));
-        this.terrainEditor.init(this.hexMap.terrain);
-        this.edgeEditor.init(this.hexMap.edges);
-    }
-
-    handleMapSave(evt)
-    {
-        console.log(this.editor.hexMap);
-        let data = {};
-        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor", "jumpColour", "jumpWidth"]
-            .forEach(v => data[v] = this.editor.hexMap[v]);
-
-        data.defs = [];
-        for(let e of this.editor.hexMap.defs.children)
-            data.defs.push(e.outerHTML);
-
-        ["terrain", "terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => data[v] = [...this.editor.hexMap[v]]);
-
-        data.edges = [];
-        this.editor.hexMap.edges.forEach((v, k) => data.edges.push([k, v.innerHTML]));
-
-        data.corners = [];
-        this.editor.hexMap.corners.forEach((v, k) => data.corners.push([k, v.innerHTML]));
-
-        data.connectors = [];
-        this.editor.hexMap.connectors.forEach((v, k) => data.connectors.push([k, v.innerHTML]));
-
-        data.metadata = [];
-        this.editor.hexMap.metadata.forEach((v, k) => data.metadata.push([k, v]));
-
-        data.borders = [];
-        this.editor.hexMap.borders.forEach((v, k) => data.borders.push([k, v]));
-
-        data.jumps = [];
-        this.editor.hexMap.jumps.forEach(v => data.jumps.push({"from": v.from, "to": v.to}));
-
-        data.hexes = [];
-        this.editor.hexMap.hexes.forEach(row =>
-        {
-            let rows = [];
-            row.forEach(hex =>
-            {
-                let temp = {};
-
-                ["col", "row", "terrain"].forEach(v => temp[v] = hex[v]);
-                ["edges", "corners", "connectors", "borders", "content"].forEach(v => temp[v] = hex[v] ? [...hex[v].keys()] : null);
-                ["metadata"].forEach(v => temp[v] = hex[v] ? [...hex[v]] : null);
-
-                rows.push(temp);
-            });
-
-            data.hexes.push(rows);
-        });
-
-        localStorage.setItem(fileName, JSON.stringify(data));
-        console.log(data);
     }
 
     buildJumpDiv(menuNode)
@@ -456,14 +350,14 @@ class HexMapEditor
     {
         if(evt.target === this.viewBoxWidth || evt.target === this.viewBoxHeight)
         {
-            this.hexMap.vbWidth = this.viewBoxWidth.value;
-            this.hexMap.vbHeight = this.viewBoxHeight.value;
+            this.hexMap.viewBoxWidth = this.viewBoxWidth.value;
+            this.hexMap.viewBoxHeight = this.viewBoxHeight.value;
             
             this.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
         }
         else if(evt.target === this.backgroundColour)
         {
-            this.hexMap.background = evt.target.value;
+            this.hexMap.backgroundColour = evt.target.value;
 
             this.hexMap.svg.style.background = evt.target.value;
         }

@@ -2,10 +2,12 @@ class HexMap
 {
     constructor()
     {
-        this.background = "#0000ff";
-        this.svg = SVG.create("svg", {viewBox: "0 0 1000 866", preserveAspectRatio: "none", style: `background-color:${this.background}`});
-        this.vbWidth = "1000";
-        this.vbHeight = "866";
+        this.backgroundColour = "#0000ff";
+        this.viewBoxWidth = "1000";
+        this.viewBoxHeight = "866";
+        this.mapWidth = 0; // default
+        this.mapHeight = 0; // default
+        this.svg = SVG.create("svg", {viewBox: `0 0 ${this.viewBoxWidth} ${this.viewBoxHeight}`, preserveAspectRatio: "none", style: `background-color:${this.backgroundColour}`});
         this.defs = SVG.create("defs");
         this.map = SVG.create("g");
         this.svg.append(this.defs, this.map);
@@ -25,7 +27,6 @@ class HexMap
         this.hexagonSymbol.append(SVG.create("polygon", {points: "250,0 750,0 1000,433 750,866 250,866 0,433"}));
         this.svg.append(this.hexagonSymbol);
 
-        // this.loadData();
         this.terrainTypes = new Set();
         this.edgeTypes = new Set();
         this.cornerTypes = new Set();
@@ -41,8 +42,18 @@ class HexMap
 
     loadFile(data)
     {
-        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "vbWidth", "vbHeight", "width", "height", "background", "cursor", "jumpColour", "jumpWidth"]
+        console.log("HexMap.loadFile");
+        console.log(data);
+
+        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor", "jumpColour", "jumpWidth"]
             .forEach(v => this[v] = data[v] ?? this[v]);
+
+        // temporary until we can fix the file
+        this.viewBoxWidth = data.vbWidth;
+        this.viewBoxHeight = data.vbHeight;
+        this.backgroundColour = data.background;
+        this.mapWidth = data.width;
+        this.mapHeight = data.height;
 
         ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v] ?? this[v]);
 
@@ -133,149 +144,6 @@ class HexMap
         mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
     }
 
-    loadData(f)
-    {
-        this.vbWidth = DATA.mapMetadata.vbWidth;
-        this.vbHeight = DATA.mapMetadata.vbHeight;
-        this.width = DATA.mapMetadata.width;
-        this.height = DATA.mapMetadata.height;
-        this.background = DATA.mapMetadata.background;
-
-        this.svg.setAttribute("viewBox", `0 0 ${this.vbWidth} ${this.vbHeight}`);
-        this.svg.style.backgroundColor = this.background;
-
-        this.borderColour = DATA.mapMetadata.borderColor;
-        this.defaultHexFill = DATA.mapMetadata.defaultHexFill;
-        this.textColor = DATA.mapMetadata.textColor;
-        this.offsetOn = DATA.mapMetadata.offsetOn;
-
-        // eventually replace this with a recursive function
-        DATA.defs.forEach(record =>
-        {
-            let n = SVG.create(record.type, record.data);
-
-            record.children.forEach(child =>
-            {
-                n.append(SVG.create(child.type, child.data));
-            });
-
-            this.defs.append(n);
-        });
-
-        this.terrain = new Map();
-        this.terrainTypes = new Set();
-        DATA.terrain.forEach(t =>
-        {
-            this.terrainTypes.add(t.label);
-            this.terrain.set(t.label, t.data);
-        });
-    
-        this.edges = new Map();
-        this.edgeTypes = new Set();
-        DATA.edges.forEach(record =>
-        {
-            this.edgeTypes.add(record.label);
-
-            for(let e = 0; e < 6; e++) // each edge
-            {
-                record.data[e].forEach((v, i) =>
-                {
-                    let id = `${record.label}_e${e}_v${i}`;
-                    let n = SVG.create("symbol", {id: id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
-
-                    n.innerHTML = v;
-        
-                    this.svg.append(n);
-                    this.edges.set(id, n);
-                });
-            }
-        });
-
-        this.corners = new Map();
-        this.cornerTypes = new Set();
-        DATA.corners.forEach(record =>
-        {
-            this.cornerTypes.add(record.label);
-
-            for(let e = 0; e < 6; e++)
-            {
-                record.data[e].forEach((v, c) =>
-                {
-                    v.forEach((p, i) =>
-                    {
-                        let id = `${record.label}_e${e}_c${c}_v${i}`;
-                        let n = SVG.create("symbol", {id: id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
-
-                        n.innerHTML = p;
-
-                        this.svg.append(n);
-                        this.corners.set(id, n);
-                    });
-                });
-            }
-        });
-
-        this.connectors = new Map();
-        this.connectorTypes = new Set();
-        DATA.connectors.forEach(record =>
-        {
-            this.connectorTypes.add(record.label);
-
-            for(let e = 0; e < 6; e++) // each connector
-            {
-                record.data[e].forEach((v, i) =>
-                {
-                    let id = `${record.label}_e${e}_v${i}`;
-                    let n = SVG.create("symbol", {id: id, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
-                    n.innerHTML = v;
-        
-                    this.svg.append(n);
-                    this.connectors.set(id, n);
-                });
-            }
-        });
-
-        // Metadata begins here!
-        this.metadata = new Map();
-        DATA.metadata.forEach(record =>
-        {
-            this.metadata.set(record.label, record);
-        });
-
-        // Borders begins here!
-        this.borders = new Map();
-        DATA.borders.forEach(record =>
-        {
-            this.borders.set(record.id, record);
-
-            for(let i = 0; i < 6; i++)
-            {
-                let n = SVG.create("symbol", {id: `${record.id}_${i}`, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
-                n.innerHTML = record.innerHtml[i];
-    
-                this.svg.append(n);
-            }
-        });
-
-        // Map data begins here!
-        this.hexes = [];
-        for(let col = 0; col < DATA.mapMetadata.columns; col++)
-        {
-            let rows = [];
-
-            for(let row = 0; row < DATA.mapMetadata.rows; row++)
-                rows.push(new Hex(this, col, row));
-            
-            this.hexes.push(rows);
-        }
-
-        this.jumpNextIndex = DATA.jumps.length;
-        this.jumps = new Map(DATA.jumps.map((jump, index) => [index, jump]));
-
-        let mapPanel = document.getElementById("mapPanel");
-        mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
-    }
-
     mouseMove(evt)
     {
         if(!evt.target.id.includes(","))
@@ -336,6 +204,10 @@ class HexMap
     initMap()
     {
         this.clearMap();
+
+        console.log(this.backgroundColour);
+
+        this.svg.style = `background-color: ${this.backgroundColour}; cursor: default;`;
 
         let vb = this.svg.getAttribute("viewBox").split(/\s+|,/);
         let w = +vb[2] / (3 * this.hexes.length + 1);

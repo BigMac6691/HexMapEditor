@@ -32,8 +32,8 @@ class EdgeEditor extends FeatureEditor
 
         list.forEach((v, k) => 
         {
-            console.log(`\n${k}`);
-            console.log(v);
+            // console.log(`\n${k}`);
+            // console.log(v);
             // v.forEach((svg, i) =>
             // {
             //     let key = `${k}_v${i}`;
