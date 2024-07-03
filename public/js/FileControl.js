@@ -2,11 +2,8 @@
 If I wanted to reuse this code I would not put the hex map and editor varibles
 inside it.  What I want to do is have the code that deals with saving and 
 loading in one centralized place.
-
-The biggest drawback to this is that if the hex map variable is changed in the
-editor it would have to change here as well. :(
 */
-class FileControl extends ControlUI
+class FileEditor extends Editor
 {
     constructor(title, editor)
     {
@@ -40,29 +37,44 @@ class FileControl extends ControlUI
     {
         console.log(this.editor.hexMap);
         let data = {};
-        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColor", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor", "jumpColour", "jumpWidth"]
+        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor", "jumpColour", "jumpWidth"]
             .forEach(v => data[v] = this.editor.hexMap[v]);
 
         data.defs = [];
         for(let e of this.editor.hexMap.defs.children)
             data.defs.push(e.outerHTML);
 
-        ["terrain", "terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => data[v] = [...this.editor.hexMap[v]]);
+        ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => 
+        {
+            if(this.editor.hexMap[v])
+                data[v] = [...this.editor.hexMap[v]];
+        });
+
+        console.log(this.editor.hexMap.terrain);
+
+        data.terrain = [];
+        if(this.editor.hexMap.terrain)
+            this.editor.hexMap.terrain.forEach((v, k) => data.terrain.push([k, v]));
 
         data.edges = [];
-        this.editor.hexMap.edges.forEach((v, k) => data.edges.push([k, v.innerHTML]));
+        if(this.editor.hexMap.edges)
+            this.editor.hexMap.edges.forEach((v, k) => data.edges.push([k, v.innerHTML]));
 
         data.corners = [];
-        this.editor.hexMap.corners.forEach((v, k) => data.corners.push([k, v.innerHTML]));
+        if(this.editor.hexMap.corners)
+            this.editor.hexMap.corners.forEach((v, k) => data.corners.push([k, v.innerHTML]));
 
         data.connectors = [];
-        this.editor.hexMap.connectors.forEach((v, k) => data.connectors.push([k, v.innerHTML]));
+        if(this.editor.hexMap.connectors)
+            this.editor.hexMap.connectors.forEach((v, k) => data.connectors.push([k, v.innerHTML]));
 
         data.metadata = [];
-        this.editor.hexMap.metadata.forEach((v, k) => data.metadata.push([k, v]));
+        if(this.editor.hexMap.metadata)
+            this.editor.hexMap.metadata.forEach((v, k) => data.metadata.push([k, v]));
 
         data.borders = [];
-        this.editor.hexMap.borders.forEach((v, k) => data.borders.push([k, v]));
+        if(this.editor.hexMap.borders)
+            this.editor.hexMap.borders.forEach((v, k) => data.borders.push([k, v]));
 
         data.jumps = [];
         this.editor.hexMap.jumps.forEach(v => data.jumps.push({"from": v.from, "to": v.to}));
@@ -143,23 +155,6 @@ class FileControl extends ControlUI
         this.editor.initMap();
         
         // since all the following are in their own classes they need to listen for the load event
-        // left is name in editor, right is name in hex map - need to fix that some day...
-        [
-            ["borderColour", "borderColour"],
-            ["defaultTerrainColour", "defaultHexFill"],
-            ["textColour", "textColor"],
-            ["jumpColour", "jumpColour"],
-            ["jumpWidth", "jumpWidth"]
-        ].forEach(v => 
-        {
-            // console.log(`[${v[0]},${v[1]}]-${data[v[1]]}`);
-            this.editor[v[0]].value = data[v[1]] ?? this.editor[v[1]];
-        });
-
-        this.editor.cols.value = data.hexes.length;
-        this.editor.rows.value = data.hexes[0].length;
-        this.editor.offsetCheckbox.checked = data.offsetOn === 1;
-        this.editor.displayCursorCheckbox.checked = data.displayCursor ?? true;
         this.editor.makeHexUI();
         this.editor.defsEditor.init(this.editor.hexMap.defs.querySelectorAll("pattern"));
         this.editor.terrainEditor.init(this.editor.hexMap.terrain);

@@ -1,11 +1,12 @@
-class SVGControl extends ControlUI
+class SVGEditor extends Editor
 {
-    constructor(title)
+    constructor(title, editor)
     {
         super(title);
 
         let mapPanel = document.getElementById("mapPanel");
         
+        this.editor = editor;
         this.display = "flex";
         this.content.classList.add("featureCol");
         this.boundChange = this.handleChange.bind(this);
@@ -32,6 +33,34 @@ class SVGControl extends ControlUI
 
     handleChange(evt)
     {
+        this.editor.hexMap[evt.target.name] = evt.target.value;
+
+        switch(evt.target.name)
+        {
+            case "viewBoxWidth":
+                this.editor.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
+                break;
+            
+            case "viewBoxWidth":
+                this.editor.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
+                break;
+
+            case "mapWidth":
+                this.editor.hexMap.svg.setAttribute("width", evt.target.value);
+                break;
+
+            case "mapHeight":
+                this.editor.hexMap.svg.setAttribute("height", evt.target.value);
+                break;
+
+            case "backgroundColour":
+                this.editor.hexMap.svg.style.background = evt.target.value;
+                break;
+
+            default:
+                console.log(`Unknown SVG attribute ${evt.target.name}`);
+        }
+
         let msg = 
         {
             name: evt.target.name,

@@ -2,8 +2,6 @@ class HexMapEditor
 {
     constructor() 
     {
-        // alternative to numerous bound speciclized event handlers - one handler that then redirects to specialized handlers
-        this.boundMapModelChange = this.handleMapModelChange.bind(this);
         this.boundMouseMove = this.handleMouseMove.bind(this);
         this.boundMouseClick = this.handleMouseClick.bind(this);
         this.boundKeypress = this.handleKeypress.bind(this);
@@ -43,21 +41,24 @@ class HexMapEditor
         mp.append(this.hexMap.svg); 
 
         // File panel
-        this.fileControl = new FileControl("File", this);
+        this.fileControl = new FileEditor("File", this);
         let div0 = this.fileControl.div;
 
         // SVG attributes
-        this.svgControl = new SVGControl("SVG Attributes");
-        this.svgControl.addEventListener("svgAttribute", this.handleSVGChange.bind(this));
+        this.svgControl = new SVGEditor("SVG Attributes", this);
         this.fileControl.addEventListener("mapLoad", this.svgControl.handleMapLoad.bind(this.svgControl));
         let div1 = this.svgControl.div;
 
         // Model atributes
-        let div2 = this.makeModelUI();
+        this.modelControl = new ModelControl("Model Attributes", this);
+        this.fileControl.addEventListener("mapLoad", this.modelControl.handleMapLoad.bind(this.modelControl));
+        let div2 = this.modelControl.div;
 
         // Hex attributes
-        this.hexUIDiv = HTML.create("div", null, ["controlDiv"]);
-        let div3 = this.makeHexUI();
+        this.mapEditor = new MapEditor("MapData", this);
+        this.fileControl.addEventListener("mapLoad", this.mapEditor.handleMapLoad.bind(this.mapEditor));
+        this.hexUIDiv = this.mapEditor.div;//HTML.create("div", null, ["controlDiv"]);
+        let div3 = this.hexUIDiv;//this.makeHexUI();
 
         // Feature editor 
         let div4 = this.makeFeatureDiv();
@@ -66,49 +67,6 @@ class HexMapEditor
         div5.append(HTML.create("h3", {textContent: "Hex Editor"}));
 
         document.getElementById("controlPanel").append(div0, div1, div2, div3, div4, div5);
-    }
-
-    makeModelUI()
-    {
-        let div = HTML.create("div", null, ["controlDiv"]);
-        div.append(HTML.create("h3", {textContent: "Model Attributes"}));
-
-        let tempDiv = HTML.create("div");
-        this.cols = HTML.create("input", {type: "number", name: "cols", value: this.hexMap.hexes.length, min: 1}, null, {change: this.boundMapModelChange});
-        tempDiv.append(HTML.createLabel("Map Columns: ", this.cols));
-
-        this.rows = HTML.create("input", {type: "number", name: "rows", value: this.hexMap.hexes[0].length, min: 1}, null, {change: this.boundMapModelChange});
-        tempDiv.append(HTML.createLabel(" Rows: ", this.rows));
-        div.append(tempDiv);
-
-        tempDiv = HTML.create("div");
-        this.jumpColour = HTML.create("input", {type: "color", name: "jumpColour", value: this.hexMap.jumpColour}, null, {change: this.boundMapModelChange});
-        tempDiv.append(HTML.createLabel("Jump colour: ", this.jumpColour));
-
-        this.jumpWidth = HTML.create("input", {type: "number", name: "jumpWidth", value: this.hexMap.jumpWidth, min: 1}, null, {change: this.boundMapModelChange});
-        tempDiv.append(HTML.createLabel(" Width: ", this.jumpWidth));
-        div.append(tempDiv);
-
-        tempDiv = HTML.create("div");
-        this.borderColour = HTML.create("input", {type: "color", name: "borderColour", value: this.hexMap.borderColour}, null, {change: this.boundMapModelChange});
-        tempDiv.append(HTML.createLabel("Border: ", this.borderColour));
-
-        this.defaultTerrainColour = HTML.create("input", {type: "color", name: "defaultTerrainColour", value: this.hexMap.defaultHexFill}, null, {change: this.boundMapModelChange});
-        tempDiv.append(HTML.createLabel(" Hex: ", this.defaultTerrainColour));
-
-        this.textColour = HTML.create("input", {type: "color", name: "textColour", value: this.hexMap.textColor}, null, {change: this.boundMapModelChange});
-        tempDiv.append(HTML.createLabel(" Text: ", this.textColour));
-        div.append(tempDiv);
-
-        tempDiv = HTML.create("div");
-        this.offsetCheckbox = HTML.create("input", {type: "checkbox", name: "offsetOn", checked: this.hexMap.offsetOn}, null, {change: this.boundMapModelChange});
-        tempDiv.append(HTML.createLabel("Hex offset: ", this.offsetCheckbox));
-
-        this.displayCursorCheckbox = HTML.create("input", {type: "checkbox", name: "displayCursor", checked: this.hexMap.displayCursor}, null, {change: this.boundMapModelChange});
-        tempDiv.append(HTML.createLabel("Display cursor: ", this.displayCursorCheckbox));
-        div.append(tempDiv);
-
-        return div;
     }
 
     makeHexUI()
@@ -129,43 +87,17 @@ class HexMapEditor
 
         let list = ["None", "Terrain", "Edges", "Connectors", "Jumps", "Meta"];
 
-        this.menuList = new Map();
-        let menu = HTML.create("div", {id: "mapDataMenu"}, ["menuContainer"]);
-        this.hexUIDiv.append(menu);
-
         list.forEach(m => 
         {
-            let n = HTML.create("div", {innerHTML: m}, ["menuItem"], {click: this.boundMenuClick});
-            menu.append(n);
-
-            switch(m)
-            {
-                case list[0]:
-                    n.classList.add("menuItemSelected"); // initial menu option
-                    this.menuList.set(n, HTML.create("div"));
-                    break;
-                case list[1]:
-                    this.terrainSelect = new ComboRadioSelect(this.hexMap.terrainTypes, "terrainCRS");
-                    this.menuList.set(n, this.terrainSelect.groupDiv);
-                    this.hexUIDiv.append(this.terrainSelect.groupDiv);
-                    break;
-                case list[2]:
-                    this.edgeSelect = new ComboRadioSelect(this.hexMap.edgeTypes, "edgeCRS");
-                    this.menuList.set(n, this.edgeSelect.groupDiv);
-                    this.hexUIDiv.append(this.edgeSelect.groupDiv);
-                    break;
-                case list[3]:
-                    this.connectorSelect = new ComboRadioSelect(this.hexMap.connectorTypes, "connectorCRS");
-                    this.menuList.set(n, this.connectorSelect.groupDiv);
-                    this.hexUIDiv.append(this.connectorSelect.groupDiv);
-                    break;
-                case list[4]:
-                    this.hexUIDiv.append(this.buildJumpDiv(n));
-                    break;
-                case list[5]:
-                    this.hexUIDiv.append(this.buildMetaDiv(n));
-                    break;
-            }
+        //     switch(m)
+        //     {
+        //         case list[4]:
+        //             this.hexUIDiv.append(this.buildJumpDiv(n));
+        //             break;
+        //         case list[5]:
+        //             this.hexUIDiv.append(this.buildMetaDiv(n));
+        //             break;
+        //     }
         });
 
         return this.hexUIDiv;
@@ -243,7 +175,6 @@ class HexMapEditor
 
     makeFeatureDiv()
     {
-        this.hexMap.displayCursor = false;
         this.featureUIDiv = HTML.create("div", null, ["controlDiv"]);
         this.featureUIDiv.append(HTML.create("h3", {textContent: "Feature Editor"}));
 
@@ -333,98 +264,13 @@ class HexMapEditor
             this.hexMap.svg.style.cursor = "crosshair";
     }
 
-    // move this to SVGControl, make it normal to pass the editor to the control
-    handleSVGChange(evt)
-    {
-        console.log(evt);
-
-        this.hexMap[evt.detail.name] = evt.detail.value;
-
-        switch(evt.detail.name)
-        {
-            case "viewBoxWidth":
-                this.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
-                break;
-            
-            case "viewBoxWidth":
-                this.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
-                break;
-
-            case "mapWidth":
-                this.hexMap.svg.setAttribute("width", evt.detail.value);
-                break;
-
-            case "mapHeight":
-                this.hexMap.svg.setAttribute("height", evt.detail.value);
-                break;
-
-            case "backgroundColour":
-                this.hexMap.svg.style.background = evt.detail.value;
-                break;
-
-            default:
-                console.log(`Unknown attribute ${evt.detail.name}`);
-        }
-    }
-
-    handleMapModelChange(evt)
-    {
-        this.hexMap.jumpColour = this.jumpColour.value;
-        this.hexMap.jumpWidth = +this.jumpWidth.value;
-        this.hexMap.borderColour = this.borderColour.value;
-        this.hexMap.defaultHexFill = this.defaultTerrainColour.value;
-
-        let c = +this.cols.value;
-        let r = +this.rows.value;
-        let model = this.hexMap.hexes;
-        let modelChange = c != model.length || r != model[0].length || this.hexMap.offsetOn != (this.offsetCheckbox.checked ? 1 : 0);
-
-        this.hexMap.offsetOn = (this.offsetCheckbox.checked ? 1 : 0);
-        this.hexMap.displayCursor = this.displayCursorCheckbox.checked;
-        this.hexMap.textColor = this.textColour.value;
-
-        // Handle column changes
-        if(c < model.length)
-            model.length = c;
-        else if(c > model.length)
-        {
-            while(model.length < c)
-                model.push(Array.from({length: model[0].length}, (_, n) => new Hex(this.hexMap, model.length, n)));
-        }
-
-        // Handle row changes
-        if(r < model[0].length)
-            model.forEach(row => row.length = r);
-        else if(r > model[0].length)
-        {
-            let n = r - model[0].length;
-
-            for(let ci = 0; ci < model.length; ci++)
-                for(let ri = 0; ri < n; ri++)
-                    model[ci].push(new Hex(this.hexMap, ci, model[ci].length))
-        }
-
-        if(modelChange)
-        {
-            let mapPanel = document.getElementById("mapPanel");
-            mapPanel.style.fontSize = `${100 / (this.hexMap.hexes[0].length + (this.hexMap.hexes.length > 1 ? 0.5 : 0))}px`;
-
-            this.hexMap.cursor.x = Math.min(this.hexMap.hexes.length - 1, this.hexMap.cursor.x);
-            this.hexMap.cursor.y = Math.min(this.hexMap.hexes[0].length - 1, this.hexMap.cursor.y);
-
-            this.hexMap.initMap();
-        }
-        else
-            this.hexMap.drawMap();
-    }
-
+    // do I need mouse and click listeners here?
     handleMouseMove(evt)
     {
         if(!evt.target.id.includes(","))
             return;
 
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
-        this.mouseMove.innerHTML = `Mouse location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} in hex ${evt.target.id} isPainting ${this.painting}`;
 
         if(this.painting)
         {
@@ -441,7 +287,6 @@ class HexMapEditor
             return;
 
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
-        this.mouseClick.innerHTML = `Click location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} with id ${evt.target.id}`;
 
         if(document.querySelector(".menuItemSelected")?.innerHTML === "Jumps")
             this.updateJump(evt.target.id, true);

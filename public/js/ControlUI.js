@@ -1,4 +1,4 @@
-class ControlUI extends EventTarget
+class Editor extends EventTarget
 {
     constructor(title)
     {

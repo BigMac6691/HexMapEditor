@@ -18,7 +18,7 @@ class HexMap
         this.jumpWidth = 6;
         this.borderColour = "#000000";
         this.defaultHexFill = "#ffffff";
-        this.textColor = "#000000";
+        this.textColour = "#000000";
 
         this.svg.addEventListener("mousemove", evt => this.mouseMove(evt));
         this.svg.addEventListener("click", evt => this.mouseClick(evt));
@@ -45,7 +45,7 @@ class HexMap
         console.log("HexMap.loadFile");
         console.log(data);
 
-        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor", "jumpColour", "jumpWidth"]
+        ["offsetOn", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor", "jumpColour", "jumpWidth"]
             .forEach(v => this[v] = data[v] ?? this[v]);
 
         ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v] ?? this[v]);
@@ -198,8 +198,6 @@ class HexMap
     {
         this.clearMap();
 
-        console.log(this.backgroundColour);
-
         this.svg.style = `background-color: ${this.backgroundColour}; cursor: default;`;
 
         let vb = this.svg.getAttribute("viewBox").split(/\s+|,/);
@@ -221,21 +219,7 @@ class HexMap
             }
         }
 
-        this.jumps.forEach(j =>
-        {
-            let coords = [];
-            [this.getHexFromId(j.from), this.getHexFromId(j.to)].forEach(hex =>
-            {
-                let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
-                let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2;
-                
-                coords.push(x, y);
-            });
-
-            j.svg = SVG.create("line", {x1 : coords[0], y1 : coords[1], x2 : coords[2], y2 : coords[3], stroke : this.jumpColour, "stroke-width" : this.jumpWidth, class : "jumpLine"});
-            this.map.append(j.svg);
-        });
-
+        this.drawJumps();
         this.drawCursor();
     }
 
@@ -261,6 +245,25 @@ class HexMap
             }
         }
 
+        this.drawJumps();
         this.drawCursor();
+    }
+
+    drawJumps()
+    {
+        this.jumps.forEach(j =>
+        {
+            let coords = [];
+            [this.getHexFromId(j.from), this.getHexFromId(j.to)].forEach(hex =>
+            {
+                let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
+                let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2;
+                    
+                coords.push(x, y);
+            });
+    
+            j.svg = SVG.create("line", {x1 : coords[0], y1 : coords[1], x2 : coords[2], y2 : coords[3], stroke : this.jumpColour, "stroke-width" : this.jumpWidth, class : "jumpLine"});
+            this.map.append(j.svg);
+        });
     }
 }
