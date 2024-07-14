@@ -2,22 +2,12 @@ class HexMapEditor
 {
     constructor() 
     {
-        this.boundMouseMove = this.handleMouseMove.bind(this);
-        this.boundMouseClick = this.handleMouseClick.bind(this);
-        this.boundKeypress = this.handleKeypress.bind(this);
+        // this.boundMouseMove = this.handleMouseMove.bind(this);
+        // this.boundMouseClick = this.handleMouseClick.bind(this);
+        // this.boundKeypress = this.handleKeypress.bind(this);
         
         this.painting = false;
         this.hexMap = new HexMap();
-
-        this.initMap();
-        this.makeUI();
-    }
-
-    initMap()
-    {
-        // we don't need to add these listeners as we are not creating a new hex map all the time
-        this.hexMap.svg.addEventListener("mousemove", this.boundMouseMove);
-        this.hexMap.svg.addEventListener("click", this.boundMouseClick);
 
         this.hexMap.svg.addEventListener("mouseenter", () => 
         {
@@ -31,6 +21,16 @@ class HexMapEditor
             this.painting = false;
             document.removeEventListener("keydown", this.boundKeypress);
         });
+
+        this.initMap();
+        this.makeUI();
+    }
+
+    initMap()
+    {
+        // we don't need to add these listeners as we are not creating a new hex map all the time
+        this.hexMap.svg.addEventListener("mousemove", this.boundMouseMove);
+        this.hexMap.svg.addEventListener("click", this.boundMouseClick);
 
         this.hexMap.initMap();
     }
@@ -57,8 +57,7 @@ class HexMapEditor
         // Hex attributes
         this.mapEditor = new MapEditor("MapData", this);
         this.fileControl.addEventListener("mapLoad", this.mapEditor.handleMapLoad.bind(this.mapEditor));
-        this.hexUIDiv = this.mapEditor.div;//HTML.create("div", null, ["controlDiv"]);
-        let div3 = this.hexUIDiv;//this.makeHexUI();
+        let div3 = this.mapEditor.div;
 
         // Feature editor 
         let div4 = this.makeFeatureDiv();
@@ -67,71 +66,6 @@ class HexMapEditor
         div5.append(HTML.create("h3", {textContent: "Hex Editor"}));
 
         document.getElementById("controlPanel").append(div0, div1, div2, div3, div4, div5);
-    }
-
-    makeHexUI()
-    {
-        while(this.hexUIDiv.lastElementChild)
-            this.hexUIDiv.removeChild(this.hexUIDiv.lastElementChild);
-        
-        this.hexUIDiv.append(HTML.create("h3", {textContent: "Map Data"}));
-
-        this.mouseMove = HTML.create("p", {innerHTML: "Mouse location x, y"});
-        this.mouseClick = HTML.create("p", {innerHTML: "Click location: x, y"});
-        this.hexUIDiv.append(this.mouseMove, this.mouseClick);
-
-        this.boundMenuClick = this.handleMenu.bind(this);
-        this.boundJumpChange = this.handleJumpChange.bind(this);
-        this.boundJumpSelect = this.handleJumpSelect.bind(this);
-        this.boundJumpButtons = this.handleJumpButtons.bind(this);
-
-        let list = ["None", "Terrain", "Edges", "Connectors", "Jumps", "Meta"];
-
-        list.forEach(m => 
-        {
-        //     switch(m)
-        //     {
-        //         case list[4]:
-        //             this.hexUIDiv.append(this.buildJumpDiv(n));
-        //             break;
-        //         case list[5]:
-        //             this.hexUIDiv.append(this.buildMetaDiv(n));
-        //             break;
-        //     }
-        });
-
-        return this.hexUIDiv;
-    }
-
-    buildJumpDiv(menuNode)
-    {
-        let div = HTML.create("div", {style: "display:none"});
-        let tempDiv = HTML.create("div", {style: "padding-bottom: 0.5em;"});
-
-        this.jumpFromCol = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
-        this.jumpFromRow = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
-        tempDiv.append(HTML.createLabel("Jump from: ", this.jumpFromCol), HTML.createLabel(", ", this.jumpFromRow));
-
-        this.jumpToCol = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
-        this.jumpToRow = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundJumpChange});
-        tempDiv.append(HTML.createLabel(" to ", this.jumpToCol), HTML.createLabel(", ", this.jumpToRow));
-        div.append(tempDiv);
-
-        tempDiv = HTML.create("div");
-        this.jumpCreate = HTML.create("button", {type: "button", innerHTML: "Create"}, null, {click: this.boundJumpButtons});
-        this.jumpDelete = HTML.create("button", {type: "button", innerHTML: "Delete", style: "display:none"}, null, {click: this.boundJumpButtons});
-        this.jumpSelect = HTML.create("select", null, null, {change: this.boundJumpSelect});
-
-        let data = [{text: "New Jump", value: "new"}];
-        this.hexMap.jumps.forEach((v, k) => data.push({text: `Jump ${v.from} to ${v.to}`, value: k}));
-        HTML.addOptions(this.jumpSelect, data);
-        tempDiv.append(HTML.createLabel("Jumps: ", this.jumpSelect), " ", this.jumpCreate, " ", this.jumpDelete);
-        
-        this.menuList.set(menuNode, div);
-        
-        div.append(tempDiv);
-
-        return div;
     }
 
     buildMetaDiv(menuNode)
@@ -292,163 +226,6 @@ class HexMapEditor
             this.updateJump(evt.target.id, true);
         else
             this.updateHex(evt.target.id, pt);
-    }
-
-    handleJumpButtons(evt)
-    {
-        if(evt.target === this.jumpCreate)
-        {
-            let index = this.hexMap.jumpNextIndex++;
-            let jump = 
-            {
-                from: `${+this.jumpFromCol.value},${+this.jumpFromRow.value}`, 
-                to:`${+this.jumpToCol.value},${+this.jumpToRow.value}`,
-                svg: this.jumpLine
-            };
-        
-            this.hexMap.jumps.set(index, jump);
-            HTML.addOptions(this.jumpSelect, [{text: `Jump ${jump.from} to ${jump.to}`, value: index}]);
-
-            this.jumpSelect.value = index;
-            this.jumpSelect.dispatchEvent(new Event("change"));
-        }
-        else if(evt.target === this.jumpDelete)
-        {
-            let index = this.jumpSelect.selectedIndex;
-            let jump = this.hexMap.jumps.get(+this.jumpSelect.value);
-
-            this.jumpLine = null;
-            this.hexMap.jumps.delete(+this.jumpSelect.value);
-            this.hexMap.map.removeChild(jump.svg);
-
-            this.jumpSelect.value = "new";
-            this.jumpSelect.dispatchEvent(new Event("change"));
-            this.jumpSelect.remove(index);
-        }
-    }
-
-    updateJump(id, endPoint)
-    {
-        let coords = id.split(",");
-        let hex = this.hexMap.getHexFromId(id);
-
-        let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
-        let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2
-
-        if(this.jumpStart) // start point already selected
-        {
-            this.jumpLine.setAttribute("x2", x);
-            this.jumpLine.setAttribute("y2", y);
-
-            this.jumpToCol.value = coords[0];
-            this.jumpToRow.value = coords[1];
-            
-            if(endPoint) // mouse was clicked to create jump end
-            {
-                this.painting = false;
-                this.jumpStart = null;
-            }
-        }
-        else
-        {
-            if(this.jumpSelect.value === "new")
-            {
-                this.jumpLine = SVG.create("line", {x1: x, y1: y, x2: x, y2: y, stroke: this.jumpColour.value, "stroke-width": this.jumpWidth.value, class: "jumpLine"});
-                this.hexMap.map.append(this.jumpLine);
-            }
-            else
-            {
-                this.jumpLine = this.hexMap.jumps.get(+this.jumpSelect.value).svg;
-                this.jumpLine.setAttribute("x1", x);
-                this.jumpLine.setAttribute("y1", y);
-            }
-
-            this.jumpFromCol.value = coords[0];
-            this.jumpFromRow.value = coords[1];
-
-            this.jumpStart = hex;
-            this.painting = true;           
-        }
-    }
-
-    handleJumpChange(evt) // column row inputs changed
-    {
-        let isFrom = evt.target === this.jumpFromCol || evt.target === this.jumpFromRow;
-        let id = null;
-
-        if(isFrom)
-            id = this.jumpFromCol.value + "," + this.jumpFromRow.value;
-        else
-            id = this.jumpToCol.value + "," + this.jumpToRow.value;
-
-        let hex = this.hexMap.getHexFromId(id);
-
-        let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
-        let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2;
-
-        if(this.jumpSelect.value === "new")
-        {
-            if(!this.jumpStart)
-            {
-                this.jumpStart = this.hexMap.getHexFromId(`${this.jumpFromCol.value},${this.jumpFromRow.value}`);
-
-                let startX = +this.jumpStart.hexTerrain.x.baseVal.value + this.jumpStart.hexTerrain.width.baseVal.value / 2;
-                let startY = +this.jumpStart.hexTerrain.y.baseVal.value + this.jumpStart.hexTerrain.height.baseVal.value / 2;
-
-                this.jumpLine = SVG.create("line", {x1: startX, y1: startY, x2: startX, y2: startY, stroke: "#ff0000", "stroke-width": "6", class: "jumpLine"});
-                this.hexMap.map.append(this.jumpLine);
-            }
-        }
-        else
-        {
-            this.jumpLine = this.hexMap.jumps.get(+this.jumpSelect.value).svg;
-        }
-
-        if(isFrom)
-        {
-            this.jumpLine.setAttribute("x1", x);
-            this.jumpLine.setAttribute("y1", y);
-        }
-        else
-        {
-            this.jumpLine.setAttribute("x2", x);
-            this.jumpLine.setAttribute("y2", y);
-        }
-    }
-
-    handleJumpSelect(evt)
-    {
-        let ids = [];
-
-        if(evt.target.value === "new")
-        {
-            ids = [0, 0, 0, 0];
-            this.jumpLine = null;
-            this.jumpCreate.style.display = "inline";
-            this.jumpDelete.style.display = "none";
-        }
-        else
-        {
-            if(!Array.from(this.hexMap.jumps.values()).some(v => v.svg === this.jumpLine))
-            {
-                this.jumpLine.remove();
-                this.jumpLine = null;
-            }
-
-            let jump = this.hexMap.jumps.get(+evt.target.value);
-
-            ids.push(...jump.from.split(","), ...jump.to.split(","));
-            this.jumpLine = jump.svg;
-            this.jumpCreate.style.display = "none";
-            this.jumpDelete.style.display = "inline";
-        }
-
-        this.jumpStart = null;
-        this.painting = false;
-        this.jumpFromCol.value = ids[0];
-        this.jumpFromRow.value = ids[1];
-        this.jumpToCol.value = ids[2];
-        this.jumpToRow.value = ids[3];
     }
 
     nearestEdge(hex, pt)

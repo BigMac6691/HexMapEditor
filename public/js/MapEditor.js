@@ -29,20 +29,17 @@ class MapEditor extends Editor
 					break;
 
 				case "Terrain":
-					this.editor.hexMap.terrainTypes.add("Test Terrain");
-					this.terrainSelect = new ComboRadioSelect(this.editor.hexMap.terrainTypes, "terrainCRS");
+					this.terrainSelect = new ComboRadioSelect(this.editor.hexMap.terrainTypes, "terrainTypes");
 					n = this.terrainSelect.groupDiv;
 					break;
 
 				case "Edges":
-					this.editor.hexMap.edgeTypes.add("Test Edge");
-					this.edgeSelect = new ComboRadioSelect(this.editor.hexMap.edgeTypes, "edgeCRS");
+					this.edgeSelect = new ComboRadioSelect(this.editor.hexMap.edgeTypes, "edgeTypes");
 					n = this.edgeSelect.groupDiv;
 					break;
 
 				case "Connectors":
-					this.editor.hexMap.connectorTypes.add("Test Connector");
-					this.connectorSelect = new ComboRadioSelect(this.editor.hexMap.connectorTypes, "connectorCRS");
+					this.connectorSelect = new ComboRadioSelect(this.editor.hexMap.connectorTypes, "connectorTypes");
 					n = this.connectorSelect.groupDiv;
 					break;
 
@@ -87,6 +84,29 @@ class MapEditor extends Editor
 	handleMapLoad(evt)
 	{
 		console.log("MapEditor - map load event...");
+
 		// first clear everything before loading
+		while(this.editor.hexMap.defs.lastChild)
+            this.editor.hexMap.defs.removeChild(this.editor.hexMap.defs.lastChild);
+
+        this.editor.hexMap.svg.querySelectorAll("symbol").forEach(n => 
+        {
+            if(n.id !== "hexagon")
+                this.editor.hexMap.svg.removeChild(n);
+        });
+
+		this.terrainSelect.init(evt.detail.terrainTypes, "terrainTypes");
+		this.edgeSelect.init(evt.detail.edgeTypes, "edgeTypes");
+		this.connectorSelect.init(evt.detail.connectorTypes, "connectorTypes");
+
+		this.editor.hexMap.loadFile(evt.detail);
+		this.editor.initMap();
+        
+        // since all the following are in their own classes they need to listen for the load event
+        this.editor.defsEditor.init(this.editor.hexMap.defs.querySelectorAll("pattern"));
+        this.editor.terrainEditor.init(this.editor.hexMap.terrain);
+        this.editor.edgeEditor.init(this.editor.hexMap.edges);
+
+		this.jumpEditor.handleMapLoad(evt); // order is important 
 	}
 }

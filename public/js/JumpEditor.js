@@ -4,7 +4,10 @@ class JumpEditor
 	{
 		this.editor = editor;
 		this.boundChange = this.handleChange.bind(this);
-		this.boundButton = this.handleButtons.bind(this);
+		this.boundButtons = this.handleButtons.bind(this);
+
+        this.editor.hexMap.svg.addEventListener("mousemove", this.handleMouseMove.bind(this));
+        this.editor.hexMap.svg.addEventListener("click", this.handleMouseClick.bind(this));
 
 		this.div = HTML.create("div", {style: "display:none"});
         let tempDiv = HTML.create("div", {style: "padding-bottom: 0.5em;"});
@@ -28,8 +31,65 @@ class JumpEditor
         HTML.addOptions(this.select, data);
         tempDiv.append(HTML.createLabel("Jumps: ", this.select), " ", this.create, " ", this.delete);
         
+        this.jumpStart = null;
+        this.jumpLine = null;
         this.div.append(tempDiv);
 	}
+
+    handleMouseMove(evt)
+    {
+        if(this.div.style.display === "none" || !evt.target.id.includes(",") || !this.jumpStart)
+            return;
+
+        let coords = evt.target.id.split(",");
+        let hex = this.editor.hexMap.getHexFromId(evt.target.id);
+
+        let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
+        let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2
+
+        this.jumpLine.setAttribute("x2", x);
+        this.jumpLine.setAttribute("y2", y);
+
+        this.toCol.value = coords[0];
+        this.toRow.value = coords[1];
+    }
+
+    handleMouseClick(evt)
+    {
+        if(this.div.style.display === "none" || !evt.target.id.includes(","))
+            return;
+
+        let coords = evt.target.id.split(",");
+        let hex = this.editor.hexMap.getHexFromId(evt.target.id);
+
+        let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
+        let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2
+
+        if(this.jumpStart)
+        {
+            this.toCol.value = coords[0];
+            this.toRow.value = coords[1];
+            this.jumpStart = null;
+        }
+        else
+        {
+            if(this.select.value === "new")
+            {
+                this.jumpLine = SVG.create("line", {x1: x, y1: y, x2: x, y2: y, stroke: this.editor.modelControl.jumpColour.value, "stroke-width": this.editor.modelControl.jumpWidth.value, class: "jumpLine"});
+                this.editor.hexMap.map.append(this.jumpLine);
+            }
+            else
+            {
+                this.jumpLine = this.editor.hexMap.jumps.get(+this.select.value).svg;
+                this.jumpLine.setAttribute("x1", x);
+                this.jumpLine.setAttribute("y1", y);
+            }
+
+            this.fromCol.value = coords[0];
+            this.fromRow.value = coords[1];
+            this.jumpStart = hex;
+        }
+    }
 
 	handleButtons(evt)
     {
@@ -83,18 +143,18 @@ class JumpEditor
         {
             if(!this.jumpStart)
             {
-                this.jumpStart = this.hexMap.getHexFromId(`${this.fromCol.value},${this.fromRow.value}`);
+                this.jumpStart = this.editor.hexMap.getHexFromId(`${this.fromCol.value},${this.fromRow.value}`);
 
                 let startX = +this.jumpStart.hexTerrain.x.baseVal.value + this.jumpStart.hexTerrain.width.baseVal.value / 2;
                 let startY = +this.jumpStart.hexTerrain.y.baseVal.value + this.jumpStart.hexTerrain.height.baseVal.value / 2;
 
                 this.jumpLine = SVG.create("line", {x1: startX, y1: startY, x2: startX, y2: startY, stroke: "#ff0000", "stroke-width": "6", class: "jumpLine"});
-                this.hexMap.map.append(this.jumpLine);
+                this.editor.hexMap.map.append(this.jumpLine);
             }
         }
         else
         {
-            this.jumpLine = this.hexMap.jumps.get(+this.select.value).svg;
+            this.jumpLine = this.editor.hexMap.jumps.get(+this.select.value).svg;
         }
 
         if(isFrom)
@@ -116,28 +176,22 @@ class JumpEditor
         if(evt.target.value === "new")
         {
             ids = [0, 0, 0, 0];
+            this.jumpStart = null;
             this.jumpLine = null;
             this.create.style.display = "inline";
             this.delete.style.display = "none";
         }
         else
         {
-            if(!Array.from(this.hexMap.jumps.values()).some(v => v.svg === this.jumpLine))
-            {
-                this.jumpLine.remove();
-                this.jumpLine = null;
-            }
-
             let jump = this.editor.hexMap.jumps.get(+evt.target.value);
 
             ids.push(...jump.from.split(","), ...jump.to.split(","));
+            this.jumpStart = this.editor.hexMap.getHexFromId(jump.from);
             this.jumpLine = jump.svg;
             this.create.style.display = "none";
             this.delete.style.display = "inline";
         }
 
-        this.jumpStart = null;
-        this.editor.painting = false;
         this.fromCol.value = ids[0];
         this.fromRow.value = ids[1];
         this.toCol.value = ids[2];
@@ -147,5 +201,13 @@ class JumpEditor
 	handleMapLoad(evt)
 	{
 		console.log("JumpEditor - map load event...");
+
+        while(this.select.options.length > 1)
+            this.select.remove(1);
+
+        this.editor.hexMap.jumps.forEach((j, i) =>
+        {
+            HTML.addOptions(this.select, [{text: `Jump ${j.from} to ${j.to}`, value: i}]);
+        });
 	}
 }

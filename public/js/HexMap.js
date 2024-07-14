@@ -251,6 +251,8 @@ class HexMap
 
     drawJumps()
     {
+        console.log("drawing jumps...");
+
         this.jumps.forEach(j =>
         {
             let coords = [];

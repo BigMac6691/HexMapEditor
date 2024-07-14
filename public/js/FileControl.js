@@ -103,7 +103,7 @@ class FileEditor extends Editor
 
     handleLoad(evt)
     {
-        let fileName = prompt("Load file name:", "test.hexmap");
+        let fileName = prompt("Load file name:", "test.hexmap.v1");
 
         if(!fileName)
         {
@@ -130,7 +130,6 @@ class FileEditor extends Editor
 
             this.fileName.innerHTML = fileName;
 
-            this.load(data);
             this.dispatchEvent(new CustomEvent("mapLoad", {detail: data}));
         }
         catch(e)
@@ -138,26 +137,5 @@ class FileEditor extends Editor
             console.log(e);
             alert(`Exception processing ${fileName}, see console for more details.`);
         }
-    }
-
-    load(data)
-    {
-        while(this.editor.hexMap.defs.lastChild)
-            this.editor.hexMap.defs.removeChild(this.editor.hexMap.defs.lastChild);
-
-        this.editor.hexMap.svg.querySelectorAll("symbol").forEach(n => 
-        {
-            if(n.id !== "hexagon")
-                this.editor.hexMap.svg.removeChild(n);
-        });
-
-        this.editor.hexMap.loadFile(data);
-        this.editor.initMap();
-        
-        // since all the following are in their own classes they need to listen for the load event
-        this.editor.makeHexUI();
-        this.editor.defsEditor.init(this.editor.hexMap.defs.querySelectorAll("pattern"));
-        this.editor.terrainEditor.init(this.editor.hexMap.terrain);
-        this.editor.edgeEditor.init(this.editor.hexMap.edges);
     }
 }
