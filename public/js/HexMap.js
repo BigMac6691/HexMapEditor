@@ -7,7 +7,7 @@ class HexMap
         this.viewBoxHeight = "866";
         this.mapWidth = 0; // default
         this.mapHeight = 0; // default
-        this.svg = SVG.create("svg", {viewBox: `0 0 ${this.viewBoxWidth} ${this.viewBoxHeight}`, preserveAspectRatio: "none", style: `background-color:${this.backgroundColour}`});
+        this.svg = SVG.create("svg", {viewBox: `0 0 ${this.viewBoxWidth} ${this.viewBoxHeight}`, preserveAspectRatio: "none", style: `background-color:${this.backgroundColour}`, tabindex: 0});
         this.defs = SVG.create("defs");
         this.map = SVG.create("g");
         this.svg.append(this.defs, this.map);

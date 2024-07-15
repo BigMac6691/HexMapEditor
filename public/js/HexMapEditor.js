@@ -4,7 +4,7 @@ class HexMapEditor
     {
         // this.boundMouseMove = this.handleMouseMove.bind(this);
         // this.boundMouseClick = this.handleMouseClick.bind(this);
-        // this.boundKeypress = this.handleKeypress.bind(this);
+        this.boundKeypress = this.handleKeypress.bind(this);
         
         this.painting = false;
         this.hexMap = new HexMap();
@@ -29,8 +29,8 @@ class HexMapEditor
     initMap()
     {
         // we don't need to add these listeners as we are not creating a new hex map all the time
-        this.hexMap.svg.addEventListener("mousemove", this.boundMouseMove);
-        this.hexMap.svg.addEventListener("click", this.boundMouseClick);
+        // this.hexMap.svg.addEventListener("mousemove", this.boundMouseMove);
+        // this.hexMap.svg.addEventListener("click", this.boundMouseClick);
 
         this.hexMap.initMap();
     }

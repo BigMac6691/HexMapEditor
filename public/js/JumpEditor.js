@@ -1,5 +1,13 @@
 class JumpEditor
 {
+    /**
+     * There is one thing that really bothers me about this class - it depends on the jumps being
+     * drawn on the map already!  It gets the SVG from the jumps map which currently doesn't exist
+     * until the map is drawn at least once.
+     * 
+     * I think a better approach might be to attach an id to the jump SVG elements and then use
+     * that to get the SVG when we need to manipulate it.
+     */
 	constructor(editor)
 	{
 		this.editor = editor;
@@ -8,10 +16,19 @@ class JumpEditor
 
         this.editor.hexMap.svg.addEventListener("mousemove", this.handleMouseMove.bind(this));
         this.editor.hexMap.svg.addEventListener("click", this.handleMouseClick.bind(this));
+        this.editor.hexMap.svg.addEventListener("keydown", this.handleKeyPress.bind(this));
 
 		this.div = HTML.create("div", {style: "display:none"});
         let tempDiv = HTML.create("div", {style: "padding-bottom: 0.5em;"});
 
+        this.colour = HTML.create("input", {type: "color", name: "jumpColour", value: this.editor.hexMap.jumpColour}, null, {change: this.boundChange});
+        tempDiv.append(HTML.createLabel("Jump colour: ", this.colour));
+
+        this.width = HTML.create("input", {type: "number", name: "jumpWidth", value: this.editor.hexMap.jumpWidth, min: 1}, null, {change: this.boundChange});
+        tempDiv.append(HTML.createLabel(" Width: ", this.width));
+        this.div.append(tempDiv);
+
+        tempDiv = HTML.create("div", {style: "padding-bottom: 0.5em;"});
         this.fromCol = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundChange});
         this.fromRow = HTML.create("input", {type: "number", value: "0", min: "0"}, ["jumpInput"], {change: this.boundChange});
         tempDiv.append(HTML.createLabel("Jump from: ", this.fromCol), HTML.createLabel(", ", this.fromRow));
@@ -36,6 +53,35 @@ class JumpEditor
         this.div.append(tempDiv);
 	}
 
+    handleKeyPress(evt)
+    {
+        console.log(evt);
+
+        if(this.div.style.display === "none" || !this.jumpStart || evt.key !== "Escape")
+            return;
+
+        if(this.select.value === "new")
+        {
+            this.editor.hexMap.map.removeChild(this.jumpLine);
+            this.jumpLine = null;
+            this.jumpStart = null;
+        }
+        else
+        {
+            let jump = this.editor.hexMap.jumps.get(+this.select.value);
+            let hex = this.editor.hexMap.getHexFromId(jump.to);
+
+            let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
+            let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2;
+
+            this.jumpLine.setAttribute("x2", x);
+            this.jumpLine.setAttribute("y2", y);
+
+            this.jumpStart = null;
+            this.jumpLine = null;
+        }
+    }
+
     handleMouseMove(evt)
     {
         if(this.div.style.display === "none" || !evt.target.id.includes(",") || !this.jumpStart)
@@ -45,7 +91,7 @@ class JumpEditor
         let hex = this.editor.hexMap.getHexFromId(evt.target.id);
 
         let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
-        let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2
+        let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2;
 
         this.jumpLine.setAttribute("x2", x);
         this.jumpLine.setAttribute("y2", y);
@@ -75,7 +121,7 @@ class JumpEditor
         {
             if(this.select.value === "new")
             {
-                this.jumpLine = SVG.create("line", {x1: x, y1: y, x2: x, y2: y, stroke: this.editor.modelControl.jumpColour.value, "stroke-width": this.editor.modelControl.jumpWidth.value, class: "jumpLine"});
+                this.jumpLine = SVG.create("line", {x1: x, y1: y, x2: x, y2: y, stroke: this.colour.value, "stroke-width": this.width.value, class: "jumpLine"});
                 this.editor.hexMap.map.append(this.jumpLine);
             }
             else
@@ -99,7 +145,9 @@ class JumpEditor
             let jump = 
             {
                 from: `${+this.fromCol.value},${+this.fromRow.value}`, 
-                to:`${+this.toCol.value},${+this.toRow.value}`,
+                to: `${+this.toCol.value},${+this.toRow.value}`,
+                colour: this.colour.value,
+                width: +this.width.value,
                 svg: this.jumpLine
             };
         
@@ -125,6 +173,22 @@ class JumpEditor
     }
 
 	handleChange(evt) // column row inputs changed
+    {
+        console.log(evt);
+
+        if(evt.target === this.colour || evt.target === this.width)
+        {
+            if(this.jumpLine)
+            {
+                this.jumpLine.setAttribute("stroke", this.colour.value);
+                this.jumpLine.setAttribute("stroke-width", this.width.value);
+            }
+        }
+        else
+            this.colOrRowChange(evt);
+    }
+
+    colOrRowChange(evt)
     {
         let isFrom = evt.target === this.fromCol || evt.target === this.fromRow;
         let id = null;
@@ -171,6 +235,8 @@ class JumpEditor
 
     handleSelect(evt)
     {
+        console.log(evt);
+
         let ids = [];
 
         if(evt.target.value === "new")
@@ -185,8 +251,12 @@ class JumpEditor
         {
             let jump = this.editor.hexMap.jumps.get(+evt.target.value);
 
+            console.log(jump);
+
             ids.push(...jump.from.split(","), ...jump.to.split(","));
             this.jumpStart = this.editor.hexMap.getHexFromId(jump.from);
+            this.colour.value = jump.colour ?? "#ff0000";
+            this.width.value = jump.width ?? 6;
             this.jumpLine = jump.svg;
             this.create.style.display = "none";
             this.delete.style.display = "inline";
@@ -196,6 +266,10 @@ class JumpEditor
         this.fromRow.value = ids[1];
         this.toCol.value = ids[2];
         this.toRow.value = ids[3];
+
+        this.editor.hexMap.svg.focus();
+
+        console.log(this.jumpStart);
     }
 
 	handleMapLoad(evt)
