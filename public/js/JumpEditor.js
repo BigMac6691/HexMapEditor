@@ -16,7 +16,6 @@ class JumpEditor
 
         this.editor.hexMap.svg.addEventListener("mousemove", this.handleMouseMove.bind(this));
         this.editor.hexMap.svg.addEventListener("click", this.handleMouseClick.bind(this));
-        this.editor.hexMap.svg.addEventListener("keydown", this.handleKeyPress.bind(this));
 
 		this.div = HTML.create("div", {style: "display:none"});
         let tempDiv = HTML.create("div", {style: "padding-bottom: 0.5em;"});
@@ -174,8 +173,6 @@ class JumpEditor
 
 	handleChange(evt) // column row inputs changed
     {
-        console.log(evt);
-
         if(evt.target === this.colour || evt.target === this.width)
         {
             if(this.jumpLine)
@@ -235,8 +232,6 @@ class JumpEditor
 
     handleSelect(evt)
     {
-        console.log(evt);
-
         let ids = [];
 
         if(evt.target.value === "new")
@@ -251,9 +246,8 @@ class JumpEditor
         {
             let jump = this.editor.hexMap.jumps.get(+evt.target.value);
 
-            console.log(jump);
-
             ids.push(...jump.from.split(","), ...jump.to.split(","));
+
             this.jumpStart = this.editor.hexMap.getHexFromId(jump.from);
             this.colour.value = jump.colour ?? "#ff0000";
             this.width.value = jump.width ?? 6;
@@ -268,8 +262,6 @@ class JumpEditor
         this.toRow.value = ids[3];
 
         this.editor.hexMap.svg.focus();
-
-        console.log(this.jumpStart);
     }
 
 	handleMapLoad(evt)

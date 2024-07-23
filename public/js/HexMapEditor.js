@@ -2,25 +2,7 @@ class HexMapEditor
 {
     constructor() 
     {
-        // this.boundMouseMove = this.handleMouseMove.bind(this);
-        // this.boundMouseClick = this.handleMouseClick.bind(this);
-        this.boundKeypress = this.handleKeypress.bind(this);
-        
-        this.painting = false;
         this.hexMap = new HexMap();
-
-        this.hexMap.svg.addEventListener("mouseenter", () => 
-        {
-            this.hexMap.svg.style.cursor = "crosshair";
-            document.addEventListener("keydown", this.boundKeypress);
-        });
-
-        this.hexMap.svg.addEventListener("mouseleave", () => 
-        {
-            this.hexMap.svg.style.cursor = "default";
-            this.painting = false;
-            document.removeEventListener("keydown", this.boundKeypress);
-        });
 
         this.initMap();
         this.makeUI();
@@ -28,10 +10,6 @@ class HexMapEditor
 
     initMap()
     {
-        // we don't need to add these listeners as we are not creating a new hex map all the time
-        // this.hexMap.svg.addEventListener("mousemove", this.boundMouseMove);
-        // this.hexMap.svg.addEventListener("click", this.boundMouseClick);
-
         this.hexMap.initMap();
     }
 
@@ -66,45 +44,6 @@ class HexMapEditor
         div5.append(HTML.create("h3", {textContent: "Hex Editor"}));
 
         document.getElementById("controlPanel").append(div0, div1, div2, div3, div4, div5);
-    }
-
-    buildMetaDiv(menuNode)
-    {
-        let metaDiv = HTML.create("div", {style: "display:none"});
-        this.metadata = new Map();
-
-        for(const[k, v] of this.hexMap.metadata)
-        {
-            let tempDiv = HTML.create("div", {style: "padding-bottom: 0.3em;"});
-            let cb = HTML.create("input", {type: "checkbox"});
-
-            if(v.editor.type === "select")
-            {
-                let n = HTML.create("select");
-                HTML.addOptions(n, v.editor.values.map(o =>
-                {
-                    return {text: o, value: o};
-                }));
-
-                this.metadata.set(k, [cb, n]);
-                tempDiv.append(cb, HTML.createLabel(k + ": ", n));
-                metaDiv.append(tempDiv);
-            }
-            else if(v.editor.type === "input")
-            {
-                let n = HTML.create("input", v.editor.opts);
-
-                this.metadata.set(k, [cb, n]);
-                tempDiv.append(cb, HTML.createLabel(k + ": ", n));
-                metaDiv.append(tempDiv);
-            }
-            else
-                throw new Error(`Unknown metadata type [${v.type}]`);
-        }
-
-        this.menuList.set(menuNode, metaDiv);
-        
-        return metaDiv;
     }
 
     makeFeatureDiv()
@@ -183,187 +122,6 @@ class HexMapEditor
             this.menuList.get(evt.target).style.display = "block";
         else
             this.featureList.get(evt.target).style.display = "flex";
-    }
-
-    handleKeypress(evt)
-    {
-        if(document.querySelector(".menuItemSelected")?.innerHTML === "Jumps")
-            return;
-
-        this.painting = !this.painting;
-
-        if(this.painting)
-            this.hexMap.svg.style.cursor = "cell";
-        else
-            this.hexMap.svg.style.cursor = "crosshair";
-    }
-
-    // do I need mouse and click listeners here?
-    handleMouseMove(evt)
-    {
-        if(!evt.target.id.includes(","))
-            return;
-
-        let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
-
-        if(this.painting)
-        {
-            if(document.querySelector(".menuItemSelected")?.innerHTML === "Jumps")
-                this.updateJump(evt.target.id, false);
-            else
-                this.updateHex(evt.target.id, pt);
-        }
-    }
-
-    handleMouseClick(evt)
-    {
-        if(!evt.target.id.includes(","))
-            return;
-
-        let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.hexMap.svg.getScreenCTM().inverse());
-
-        if(document.querySelector(".menuItemSelected")?.innerHTML === "Jumps")
-            this.updateJump(evt.target.id, true);
-        else
-            this.updateHex(evt.target.id, pt);
-    }
-
-    nearestEdge(hex, pt)
-    {
-        let y = +hex.hexTerrain.y.baseVal.value;
-        let h = hex.hexTerrain.height.baseVal.value / 4;
-        let dy = pt.y - y;
-        let rh = h / 5;
-
-        let x = +hex.hexTerrain.x.baseVal.value;
-        let w = hex.hexTerrain.width.baseVal.value / 4;
-        let dx = pt.x - x;
-        let rw = w / 5;
-        let edgeIndex = -1;
-
-        if(Math.abs(w / 2 - dx) < rw) //  top left and bottom left
-            edgeIndex = Math.abs(h - dy) < rh ? 5 : (Math.abs(3 * h - dy) < rh ? 4 : -1);
-        else if(Math.abs(3.5 * w - dx) < rw) // top right and bottom right
-            edgeIndex = Math.abs(h - dy) < rh ? 1 : (Math.abs(3 * h - dy) < rh ? 2 : -1);
-        else if(Math.abs(2 * w - dx) < rw) //  top and bottom
-             edgeIndex = dy < rh ? 0 : (Math.abs(4 * h - dy) < rh ? 3 : -1);
-
-        return edgeIndex;
-    }
-
-    updateHex(id, pt)
-    {
-        let currentMenu = document.querySelector(".menuItemSelected")?.innerHTML;
-
-        if(!currentMenu || currentMenu === "None")
-            return;
-
-        let hex = this.hexMap.getHexFromId(id);
-
-        if(currentMenu === "Terrain")
-            hex.setTerrain({type: this.terrainSelect.value, variant: 0});
-
-        if(currentMenu === "Edges")
-            this.addEdge(hex, pt);
-        
-        if(currentMenu === "Connectors") // roads and rails
-            this.addConnector(hex, pt);
-
-        if(currentMenu === "Meta") // country resources 
-            this.addMetadata(hex);
-
-        if(currentMenu === "Content") // units
-            ;
-    }
-
-    handleNone(hex, map, value)
-    {
-        if(!map)
-            return;
-
-        let matches = map.partialGetAll({edgeIndex: value.edgeIndex}, 2);
-
-        matches.forEach(v => 
-        {
-            hex.svg.removeChild(v[1]);
-            map.deleteKO(v[0]);
-        });
-    }
-
-    addEdge(hex, pt)
-    {
-        let edgeIndex = this.nearestEdge(hex, pt);
-
-        if(edgeIndex >= 0)
-        {
-            let curEdgeType = null;
-            let value = {"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0};
-
-            if(value.edge === "None")
-            {
-                curEdgeType = hex?.edges?.partialHas({"edgeIndex": edgeIndex}) ? hex.edges.partialGet({"edgeIndex": edgeIndex}, 2)[0].edge : null;
-
-                this.handleNone(hex, hex.edges, value);
-            }
-            else// if(!hex.edges || !hex.edges.partialHas(value))
-            {
-                curEdgeType = this.edgeSelect.value;
-
-                hex.addEdge(value);
-            }
-            
-            let offset = this.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
-            let adj = 
-            [
-                this.hexMap.getHexFromId(`${hex.col},${hex.row - 1}`),
-                this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset}`),
-                this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset + 1}`),
-                this.hexMap.getHexFromId(`${hex.col},${hex.row + 1}`),
-                this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset + 1}`),
-                this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
-            ];
-
-            this.addCorner(hex, adj, curEdgeType, (edgeIndex + 5) % 6); // corner before edge
-            this.addCorner(hex, adj, curEdgeType, edgeIndex); // corner after edge
-        }
-    }
-
-    addCorner(hex, adj, edgeType, cornerIndex)
-    {
-        this.handleNone(hex, hex.corners, {"edge": edgeType, "edgeIndex": cornerIndex});
-
-        let edgeBefore = hex.edges ? hex.edges.partialHas({"edgeIndex": cornerIndex}) : false;
-        let edgeAfter = hex.edges ? hex.edges.partialHas({"edgeIndex": (cornerIndex + 1) % 6}) : false;
-        let edgeOpp1 = adj[cornerIndex]?.edges ? adj[cornerIndex].edges.partialHas({"edgeIndex": (cornerIndex + 2) % 6}) : false;
-        let edgeOpp2 = adj[(cornerIndex + 1) % 6]?.edges ? adj[(cornerIndex + 1) % 6].edges.partialHas({"edgeIndex": (cornerIndex + 5) % 6}) : false;
-        let corner = edgeBefore ? 1 : 0;
-
-        if(edgeAfter)
-            corner +=2;
-
-        if(edgeBefore && !edgeAfter)
-            corner += edgeOpp2 ? 3 : 0;
-
-        if(!edgeBefore && edgeAfter)
-            corner += edgeOpp1 ? 3 : 0;
-
-        if(corner > 0) 
-            hex.addCorner({"edge" : edgeType, "edgeIndex" : cornerIndex, "cornerType": corner - 1, "variant" : 0});
-    }
-
-    addConnector(hex, pt)
-    {
-        let edgeIndex = this.nearestEdge(hex, pt);
-
-        if(edgeIndex >= 0)
-        {
-            let value = {"edge": this.connectorSelect.value, "edgeIndex": edgeIndex, "variant": 0};
-
-            if(value.edge === "None")
-                this.handleNone(hex, hex.connectors, value);
-            else if(!hex.connectors || !hex.connectors.partialHas(value))
-                hex.addConnector(value);
-        }
     }
 
     addMetadata(hex)

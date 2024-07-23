@@ -31,4 +31,9 @@ class Menu
 		evt.target.classList.toggle("menuItemSelected");
 		this.items.get(evt.target).style.display = this.display;
 	}
+
+	getSelected()
+	{
+		return this.div.querySelector(".menuItemSelected").innerHTML;
+	}
 }
