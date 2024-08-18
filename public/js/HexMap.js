@@ -18,7 +18,7 @@ class HexMap
         this.jumpWidth = 6;
         this.borderColour = "#000000";
         this.defaultHexFill = "#ffffff";
-        this.textColour = "#000000";
+        this.textColor = "#000000";
 
         this.svg.addEventListener("mousemove", evt => this.mouseMove(evt));
         this.svg.addEventListener("click", evt => this.mouseClick(evt));
@@ -45,7 +45,7 @@ class HexMap
         console.log("HexMap.loadFile");
         console.log(data);
 
-        ["offsetOn", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor", "jumpColour", "jumpWidth"]
+        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor", "jumpColour", "jumpWidth"]
             .forEach(v => this[v] = data[v] ?? this[v]);
 
         ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v] ?? this[v]);

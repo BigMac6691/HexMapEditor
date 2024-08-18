@@ -1,14 +1,37 @@
-class ModelControl extends SidePanel
+class GlobalAttributePanel extends SidePanel
 {
     constructor(title, editor)
     {
         super(title);
+
+        let mapPanel = document.getElementById("mapPanel");
 
         this.editor = editor;
         this.display = "flex";
         this.content.classList.add("featureCol");
         this.boundChange = this.handleChange.bind(this);
 
+        // =============== SVG attributes ===============
+        let vbDiv = HTML.create("div");
+        this.viewBoxWidth = HTML.create("input", {type: "number", name: "viewBoxWidth", value: 1000}, null, {change: this.boundChange});
+        vbDiv.append(HTML.createLabel("View Box Width: ", this.viewBoxWidth));
+
+        this.viewBoxHeight = HTML.create("input", {type: "number", name: "viewBoxHeight", value: 866}, null, {change: this.boundChange});
+        vbDiv.append(HTML.createLabel(" Height: ", this.viewBoxHeight));
+        this.content.append(vbDiv);
+
+        let svgDiv = HTML.create("div");
+        this.mapWidth = HTML.create("input", {type: "number", name: "mapWidth", value: mapPanel ? mapPanel.scrollWidth : 0}, null, {change: this.boundChange});
+        svgDiv.append(HTML.createLabel("SVG Width: ", this.mapWidth, "px"));
+
+        this.mapHeight = HTML.create("input", {type: "number", name: "mapHeight", value: mapPanel ? mapPanel.scrollHeight : 0}, null, {change: this.boundChange});
+        svgDiv.append(HTML.createLabel(" Height: ", this.mapHeight, "px"));
+        this.content.append(svgDiv);
+
+        this.backgroundColour = HTML.create("input", {type: "color", name: "backgroundColour", value: "#0000ff"}, null, {change: this.boundChange});
+        this.content.append(HTML.createLabel("Background: ", this.backgroundColour));
+
+        // =============== Model attributes ===============
         let tempDiv = HTML.create("div");
         this.cols = HTML.create("input", {type: "number", name: "cols", value: this.editor.hexMap.hexes.length, min: 1}, null, {change: this.boundChange});
         tempDiv.append(HTML.createLabel("Map Columns: ", this.cols));
@@ -18,22 +41,14 @@ class ModelControl extends SidePanel
         this.content.append(tempDiv);
 
         tempDiv = HTML.create("div");
-        this.jumpColour = HTML.create("input", {type: "color", name: "jumpColour", value: this.editor.hexMap.jumpColour}, null, {change: this.boundChange});
-        tempDiv.append(HTML.createLabel("Jump colour: ", this.jumpColour));
-
-        this.jumpWidth = HTML.create("input", {type: "number", name: "jumpWidth", value: this.editor.hexMap.jumpWidth, min: 1}, null, {change: this.boundChange});
-        tempDiv.append(HTML.createLabel(" Width: ", this.jumpWidth));
-        this.content.append(tempDiv);
-
-        tempDiv = HTML.create("div");
         this.borderColour = HTML.create("input", {type: "color", name: "borderColour", value: this.editor.hexMap.borderColour}, null, {change: this.boundChange});
         tempDiv.append(HTML.createLabel("Border: ", this.borderColour));
 
-        this.defaultTerrainColour = HTML.create("input", {type: "color", name: "defaultTerrainColour", value: this.editor.hexMap.defaultHexFill}, null, {change: this.boundChange});
-        tempDiv.append(HTML.createLabel(" Hex: ", this.defaultTerrainColour));
+        this.defaultHexFill = HTML.create("input", {type: "color", name: "defaultTerrainColour", value: this.editor.hexMap.defaultHexFill}, null, {change: this.boundChange});
+        tempDiv.append(HTML.createLabel(" Hex: ", this.defaultHexFill));
 
-        this.textColour = HTML.create("input", {type: "color", name: "textColour", value: this.editor.hexMap.textColor}, null, {change: this.boundChange});
-        tempDiv.append(HTML.createLabel(" Text: ", this.textColour));
+        this.textColor = HTML.create("input", {type: "color", name: "textColor", value: this.editor.hexMap.textColor}, null, {change: this.boundChange});
+        tempDiv.append(HTML.createLabel(" Text: ", this.textColor));
         this.content.append(tempDiv);
 
         tempDiv = HTML.create("div");
@@ -47,12 +62,38 @@ class ModelControl extends SidePanel
 
     handleChange(evt)
     {
-        console.log(`${evt.target.name}=${evt.target.value}`);
         let modelChange = false;
         let hexes = this.editor.hexMap.hexes;
 
         switch(evt.target.name)
         {
+            // =============== SVG attributes ===============
+            case "viewBoxWidth":
+                this.editor.hexMap.viewBoxWidth = evt.target.value;
+                this.editor.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
+                break;
+
+            case "viewBoxHeight":
+                this.editor.hexMap.viewBoxHeight = evt.target.value;
+                this.editor.hexMap.svg.setAttribute("viewBox", `0 0 ${this.viewBoxWidth.value} ${this.viewBoxHeight.value}`);
+                break;
+
+            case "mapWidth":
+                this.editor.hexMap.mapWidth = evt.target.value;
+                this.editor.hexMap.svg.setAttribute("width", evt.target.value);
+                break;
+
+            case "mapHeight":
+                this.editor.hexMap.mapHeight = evt.target.value;
+                this.editor.hexMap.svg.setAttribute("height", evt.target.value);
+                break;
+
+            case "backgroundColour":
+                this.editor.hexMap.backgroundColour = evt.target.value;
+                this.editor.hexMap.svg.style.background = evt.target.value;
+                break;
+
+            // =============== Model attributes ===============
             case "cols":
                 if(+evt.target.value < hexes.length)
                     hexes.length = +evt.target.value;
@@ -84,12 +125,12 @@ class ModelControl extends SidePanel
                 this.editor.hexMap.borderColour = this.borderColour.value;
                 break;
 
-            case "defaultTerrainColour":
-                this.editor.hexMap.defaultHexFill = this.defaultTerrainColour.value;
+            case "defaultHexFill":
+                this.editor.hexMap.defaultHexFill = this.defaultHexFill.value;
                 break;
 
-            case "textColour":
-                this.editor.hexMap.textColour = this.textColour.value;
+            case "textColor":
+                this.editor.hexMap.textColor = this.textColor.value;
                 break;
 
             case "offsetOn":
@@ -102,7 +143,7 @@ class ModelControl extends SidePanel
                 break;
 
             default:
-                console.log(`Unknown Model attribute ${evt.target.name}`);
+                console.log(`Unknown Global attribute ${evt.target.name}`);
         }
 
         if(modelChange)
@@ -121,14 +162,20 @@ class ModelControl extends SidePanel
 
     handleMapLoad(evt)
     {
+        [
+            "viewBoxWidth", 
+            "viewBoxHeight", 
+            "mapWidth", 
+            "mapHeight",
+            "backgroundColour",
+            "borderColour",
+            "defaultHexFill",
+            "textColor",
+            "displayCursor"
+        ].forEach(field => this[field].value = evt.detail[field]);
+
         this.cols.value = evt.detail.hexes.length;
         this.rows.value = evt.detail.hexes[0].length;
-        this.jumpColour.value = evt.detail.jumpColour;
-        this.jumpWidth.value = evt.detail.jumpWidth;
-        this.borderColour.value = evt.detail.borderColour;
-        this.defaultTerrainColour = evt.detail.defaultHexFill;
-        this.textColour.value = evt.detail.textColour;
         this.offsetOn.value = evt.detail.offsetOn === 1;
-        this.displayCursor.value = evt.detail.displayCursor;
     }
 }

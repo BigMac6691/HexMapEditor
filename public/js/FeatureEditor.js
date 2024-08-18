@@ -2,6 +2,8 @@ class FeatureEditor extends EventTarget
 {
     constructor(map)
     {
+        super();
+
         this.help = "This is the editing interface for a feature.";
         this.hexMap = map;
         this.items = new Map();
@@ -14,7 +16,7 @@ class FeatureEditor extends EventTarget
         this.boundChange = this.handleListChange.bind(this);
         this.boundHelp = this.handleHelp.bind(this);
 
-        this.uiDiv = HTML.create("div", {style: "display: none;"}, ["featureCol"]);
+        this.uiDiv = HTML.create("div", null, ["featureCol"]);
         this.idList = HTML.create("select", {size: "6", style: "min-width: 10em; max-width: 50%"}, null, {change: this.boundChange});
         this.parts = HTML.create("div", null, ["featureCol"]);
         this.svg = HTML.create("textarea");

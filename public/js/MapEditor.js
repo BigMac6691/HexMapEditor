@@ -292,9 +292,9 @@ class MapEditor extends SidePanel
 		this.editor.initMap();
         
         // since all the following are in their own classes they need to listen for the load event
-        this.editor.defsEditor.init(this.editor.hexMap.defs.querySelectorAll("pattern"));
-        this.editor.terrainEditor.init(this.editor.hexMap.terrain);
-        this.editor.edgeEditor.init(this.editor.hexMap.edges);
+        // this.editor.defsEditor.init(this.editor.hexMap.defs.querySelectorAll("pattern"));
+        // this.editor.terrainEditor.init(this.editor.hexMap.terrain);
+        // this.editor.edgeEditor.init(this.editor.hexMap.edges);
 
 		this.jumpEditor.handleMapLoad(evt); // order is important 
 		this.metaEditor.handleMapLoad(evt);

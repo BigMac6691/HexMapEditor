@@ -138,8 +138,8 @@ class Hex
 
     drawId(x, y, w, h)
     {
-        this.hexId.setAttribute("stroke", this.hexMap.textColour);
-        this.hexId.setAttribute("fill", this.hexMap.textColour);
+        this.hexId.setAttribute("stroke", this.hexMap.textColor);
+        this.hexId.setAttribute("fill", this.hexMap.textColor);
         this.hexId.setAttribute("x", `${x + w / 2}`);
         this.hexId.setAttribute("y", `${y + h * 0.21}`);
     }
