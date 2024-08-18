@@ -22,8 +22,8 @@ class FeatureEditor extends EventTarget
         this.svg = HTML.create("textarea");
         this.svg.rows = 5;
 
-        this.id = HTML.create("input", {type: "text"});
-        this.parts.append(HTML.createLabel("ID: ", this.id));
+        this.id = HTML.create("input", {type: "text", style: "width:11em;"});
+        this.parts.append(HTML.createLabel("Type: ", this.id));
 
         let tempDiv1 = HTML.create("div", null, ["featureRow"]);
         tempDiv1.append(this.idList, this.parts);
@@ -55,6 +55,7 @@ class FeatureEditor extends EventTarget
 
     display(v)
     {
+        console.log("display called...");
         this.uiDiv.style.display = v ? "flex" : "none";
     }
 

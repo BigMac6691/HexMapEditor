@@ -20,6 +20,27 @@ class ConnectorEditor extends FeatureEditor
             HTML.createLabel("Variant: ", this.variant));
     }
 
+    init(list)
+    {
+        super.init(list);
+
+        list.forEach((v, k) => 
+        {
+            let key = JSON.parse(k);
+            let record =
+            {
+                id: key.type,
+                edge: key.edgeIndex,
+                variant: key.variant,
+                svg: v.innerHTML,
+                node: v
+            }
+
+            this.items.set(v.id, record);
+            this.idList.append(HTML.create("option", {text: v.id, value: v.id}));
+        });
+    }
+
     handleListChange(evt)
     {
         if(!this.items.has(evt.target.value))

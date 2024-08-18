@@ -2,6 +2,8 @@ class HexMap
 {
     constructor()
     {
+        this.switch = false;
+
         this.backgroundColour = "#0000ff";
         this.viewBoxWidth = "1000";
         this.viewBoxHeight = "866";
@@ -57,31 +59,77 @@ class HexMap
         this.edges = new KOMap();
         data.edges.forEach(v => 
         {
-            let n = SVG.create("symbol", {id: v[0], viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+            let key = null;
+
+            if(this.switch)
+            {
+                let parts = v[0].split("_");
+                key =
+                {
+                    type : parts[0],
+                    edgeIndex : parts[1].substring(1),
+                    variant : parts[2].substring(1)
+                }
+            }
+            else
+                key = JSON.parse(v[0]);
+
+            let n = SVG.create("symbol", {id: `${key.type}_e${key.edgeIndex}_v${key.variant}`, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
             n.innerHTML = v[1];
         
             this.svg.append(n);
-            this.edges.set(v[0], n);
+            this.edges.setKO(key, n);
         });
 
         this.corners = new KOMap();
         data.corners.forEach(v => 
         {
-            let n = SVG.create("symbol", {id: v[0], viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+            let key = null;
+
+            if(this.switch)
+            {
+                let parts = v[0].split("_");
+                key =
+                {
+                    type : parts[0],
+                    edgeIndex : parts[1].substring(1),
+                    cornerType : parts[2].substring(1),
+                    variant : parts[3].substring(1)
+                }
+            }
+            else
+                key = JSON.parse(v[0]);
+
+            let n = SVG.create("symbol", {id: `${key.type}_e${key.edgeIndex}_c${key.cornerType}_v${key.variant}`, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
             n.innerHTML = v[1];
         
             this.svg.append(n);
-            this.corners.set(v[0], n);
+            this.corners.setKO(key, n);
         });
 
         this.connectors = new KOMap();
         data.connectors.forEach(v => 
         {
-            let n = SVG.create("symbol", {id: v[0], viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+            let key = null;
+
+            if(this.switch)
+            {
+                let parts = v[0].split("_");
+                key =
+                {
+                    type : parts[0],
+                    edgeIndex : parts[1].substring(1),
+                    variant : parts[2].substring(1)
+                }
+            }
+            else
+                key = JSON.parse(v[0]);
+
+            let n = SVG.create("symbol", {id: `${key.type}_e${key.edgeIndex}_v${key.variant}`, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
             n.innerHTML = v[1];
         
             this.svg.append(n);
-            this.connectors.set(v[0], n);
+            this.connectors.setKO(key, n);
         });
 
         this.metadata = new Map(data.metadata.map((v, k) => [v[0], v[1]]));

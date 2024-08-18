@@ -22,29 +22,21 @@ class HexMapEditor
         this.fileControl = new FileEditor("File", this);
         let div0 = this.fileControl.div;
 
+        // Gloabl attributes panel
         this.globalPanel = new GlobalAttributePanel("Global Attribute Editor", this);
         this.fileControl.addEventListener("mapLoad", this.globalPanel.handleMapLoad.bind(this.globalPanel));
         let div1 = this.globalPanel.div;
 
-        // SVG attributes
-        // this.svgControl = new SVGEditor("SVG Attributes", this);
-        // this.fileControl.addEventListener("mapLoad", this.svgControl.handleMapLoad.bind(this.svgControl));
-        // let div1 = this.svgControl.div;
-
-        // Model atributes
-        // this.modelControl = new ModelControl("Model Attributes", this);
-        // this.fileControl.addEventListener("mapLoad", this.modelControl.handleMapLoad.bind(this.modelControl));
-        // let div2 = this.modelControl.div;
-
-        // Hex attributes
+        // Map content editor panel
         this.mapEditor = new MapEditor("Map Content Editor", this);
         this.fileControl.addEventListener("mapLoad", this.mapEditor.handleMapLoad.bind(this.mapEditor));
         let div3 = this.mapEditor.div;
 
-        // Feature editor 
-        this.SVGEditor = new SVGEditorControl("SVG Editors", this);
-        let div4 = this.SVGEditor.div; 
+        // SVG editor panel
+        this.svgEditorControl = new SVGEditorControl("SVG Editors", this);
+        let div4 = this.svgEditorControl.div; 
         
+        // Individual hex editor - for tweaking details
         let div5 = HTML.create("div", null, ["controlDiv"]);
         div5.append(HTML.create("h3", {textContent: "Hex Editor"}));
 

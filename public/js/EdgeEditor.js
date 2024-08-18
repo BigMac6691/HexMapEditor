@@ -32,21 +32,18 @@ class EdgeEditor extends FeatureEditor
 
         list.forEach((v, k) => 
         {
-            // console.log(`\n${k}`);
-            // console.log(v);
-            // v.forEach((svg, i) =>
-            // {
-            //     let key = `${k}_v${i}`;
-            //     let t =
-            //     {
-            //         id: k,
-            //         variant: i,
-            //         fill: svg.fill
-            //     }
+            let key = JSON.parse(k);
+            let record =
+            {
+                id: key.type,
+                edge: key.edgeIndex,
+                variant: key.variant,
+                svg: v.innerHTML,
+                node: v
+            }
 
-            //     this.items.set(key, t);
-            //     this.idList.append(HTML.create("option", {text: key, value: key}));
-            // });
+            this.items.set(v.id, record);
+            this.idList.append(HTML.create("option", {text: v.id, value: v.id}));
         });
     }
 

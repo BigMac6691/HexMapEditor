@@ -204,7 +204,7 @@ class MapEditor extends SidePanel
 			return;
 
         let curEdgeType = null;
-        let value = {"edge" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0};
+        let value = {"type" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0};
 
         if(value.edge === "None")
         {
@@ -234,7 +234,7 @@ class MapEditor extends SidePanel
 
 	addCorner(hex, adj, edgeType, cornerIndex)
     {
-        this.handleNone(hex, hex.corners, {"edge": edgeType, "edgeIndex": cornerIndex});
+        this.handleNone(hex, hex.corners, {"type": edgeType, "edgeIndex": cornerIndex});
 
         let edgeBefore = hex.edges ? hex.edges.partialHas({"edgeIndex": cornerIndex}) : false;
         let edgeAfter = hex.edges ? hex.edges.partialHas({"edgeIndex": (cornerIndex + 1) % 6}) : false;
@@ -252,7 +252,7 @@ class MapEditor extends SidePanel
             corner += edgeOpp1 ? 3 : 0;
 
         if(corner > 0) 
-            hex.addCorner({"edge" : edgeType, "edgeIndex" : cornerIndex, "cornerType": corner - 1, "variant" : 0});
+            hex.addCorner({"type" : edgeType, "edgeIndex" : cornerIndex, "cornerType": corner - 1, "variant" : 0});
     }
 
 	addConnector(hex, pt)
@@ -262,7 +262,7 @@ class MapEditor extends SidePanel
         if(edgeIndex < 0)
 			return;
 
-        let value = {"edge": this.connectorSelect.value, "edgeIndex": edgeIndex, "variant": 0};
+        let value = {"type": this.connectorSelect.value, "edgeIndex": edgeIndex, "variant": 0};
 
         if(value.edge === "None")
             this.handleNone(hex, hex.connectors, value);
@@ -291,11 +291,7 @@ class MapEditor extends SidePanel
 		this.editor.hexMap.loadFile(evt.detail);
 		this.editor.initMap();
         
-        // since all the following are in their own classes they need to listen for the load event
-        // this.editor.defsEditor.init(this.editor.hexMap.defs.querySelectorAll("pattern"));
-        // this.editor.terrainEditor.init(this.editor.hexMap.terrain);
-        // this.editor.edgeEditor.init(this.editor.hexMap.edges);
-
+		this.editor.svgEditorControl.handleMapLoad(evt);
 		this.jumpEditor.handleMapLoad(evt); // order is important 
 		this.metaEditor.handleMapLoad(evt);
 	}

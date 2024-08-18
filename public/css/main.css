@@ -68,6 +68,7 @@ input[type='number']
     display: flex;
     flex-direction: column;
     row-gap: 0.5em;
+    margin-top: 0.5em;
 }
 
 .featureRow
