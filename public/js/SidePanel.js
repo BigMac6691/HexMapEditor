@@ -1,4 +1,4 @@
-class Editor extends EventTarget
+class SidePanel extends EventTarget
 {
     constructor(title)
     {

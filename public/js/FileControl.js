@@ -3,7 +3,7 @@ If I wanted to reuse this code I would not put the hex map and editor varibles
 inside it.  What I want to do is have the code that deals with saving and 
 loading in one centralized place.
 */
-class FileEditor extends Editor
+class FileEditor extends SidePanel
 {
     constructor(title, editor)
     {

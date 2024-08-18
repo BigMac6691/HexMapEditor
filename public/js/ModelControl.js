@@ -1,4 +1,4 @@
-class ModelControl extends Editor
+class ModelControl extends SidePanel
 {
     constructor(title, editor)
     {

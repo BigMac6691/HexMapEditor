@@ -1,4 +1,4 @@
-class SVGEditor extends Editor
+class SVGEditor extends SidePanel
 {
     constructor(title, editor)
     {

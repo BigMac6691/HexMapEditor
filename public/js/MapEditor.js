@@ -1,4 +1,4 @@
-class MapEditor extends Editor
+class MapEditor extends SidePanel
 {
     constructor(title, editor)
     {
@@ -110,6 +110,24 @@ class MapEditor extends Editor
 
 		let hex = this.editor.hexMap.getHexFromId(evt.target.id);
 
+		this.updateHex(hex, pt);
+	}
+
+	handleMouseClick(evt)
+	{
+		if(!evt.target.id.includes(","))
+			return;
+
+		let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.editor.hexMap.svg.getScreenCTM().inverse());
+		this.mouseClick.innerHTML = `Click location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} with id ${evt.target.id}`;
+
+		let hex = this.editor.hexMap.getHexFromId(evt.target.id);
+		
+		this.updateHex(hex, pt);
+	}
+
+	updateHex(hex, pt)
+	{
 		switch(this.menu.getSelected())
 		{
 			case "None":
@@ -127,28 +145,17 @@ class MapEditor extends Editor
 				this.addConnector(hex, pt);
 				break;
 
-			case "Jumps": // handle inside separate class
+			case "Jumps":
+				// special case handled in separate class
 				break;
 
-			case "Meta": // handled in separate class?
-				// this.addMetadata(hex);
+			case "Meta":
+				this.metaEditor.addMetadata(hex);
 				break;
 
 			default:
 				throw new Error(`Unknown map menu [${this.menu.getSelected()}]`);
 		}
-	}
-
-	handleMouseClick(evt)
-	{
-		if(!evt.target.id.includes(","))
-			return;
-
-		let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.editor.hexMap.svg.getScreenCTM().inverse());
-		this.mouseClick.innerHTML = `Click location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} with id ${evt.target.id}`;
-
-		let hex = this.editor.hexMap.getHexFromId(evt.target.id);
-		// call update hex, essentially the switch statement in mouse move
 	}
 
 	handleNone(hex, map, value)

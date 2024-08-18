@@ -1,4 +1,4 @@
-class FeatureEditor
+class FeatureEditor extends EventTarget
 {
     constructor(map)
     {
@@ -26,15 +26,15 @@ class FeatureEditor
         let tempDiv1 = HTML.create("div", null, ["featureRow"]);
         tempDiv1.append(this.idList, this.parts);
 
-        let tempDiv2 = HTML.create("div", null, ["featureRow"]);
-        tempDiv2.append(HTML.create("button", {textContent: "Create"}, null, {click: this.boundCreate}), 
+        let buttonDiv = HTML.create("div", null, ["featureRow"]);
+        buttonDiv.append(HTML.create("button", {textContent: "Create"}, null, {click: this.boundCreate}), 
                         HTML.create("button", {textContent: "Update"}, null, {click: this.boundUpdate}), 
                         HTML.create("button", {textContent: "Delete"}, null, {click: this.boundDelete}),
                         HTML.create("button", {textContent: "Show"}, null, {click: this.boundShow}),
                         HTML.create("button", {textContent: "Clear"}, null, {click: this.boundClear}),
                         HTML.create("button", {innerHTML: "&#10067;"}, null, {click: this.boundHelp}));
 
-        this.uiDiv.append(tempDiv1, this.svg, tempDiv2);
+        this.uiDiv.append(tempDiv1, this.svg, buttonDiv);
     }
 
     init(list)

@@ -38,6 +38,7 @@ class HexMapEditor
         let div3 = this.mapEditor.div;
 
         // Feature editor 
+        // let div4 = HTML.create("div", null, ["controlDiv"]);
         let div4 = this.makeFeatureDiv();
         
         let div5 = HTML.create("div", null, ["controlDiv"]);
@@ -122,75 +123,5 @@ class HexMapEditor
             this.menuList.get(evt.target).style.display = "block";
         else
             this.featureList.get(evt.target).style.display = "flex";
-    }
-
-    addMetadata(hex)
-    {
-        let mdList = new Map();
-        for(const [k, v] of this.metadata)
-            if(v[0].checked)
-                mdList.set(k, v[1].value);
-
-        let offset = this.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
-        let adj = 
-        [
-            this.hexMap.getHexFromId(`${hex.col},${hex.row - 1}`),
-            this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset}`),
-            this.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset + 1}`),
-            this.hexMap.getHexFromId(`${hex.col},${hex.row + 1}`),
-            this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset + 1}`),
-            this.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
-        ];
-
-        for(const [k, v] of mdList)
-        {
-            let valueChange = hex?.metadata?.get(k) !== v;
-
-            if(!valueChange) // if no change in property value skip to next incoming property
-                continue;
-
-            hex.addMetadata({key: k, value: v});
-
-            let md = this.hexMap.metadata.get(k);
-
-            if(md.renderRules[0].type === "border") // at this point you know that a property value has changed
-            {
-                if(valueChange) // if a value changes remove all borders for that value from selected hex only
-                {
-                    for(let side = 0; side < 6; side++)
-                    {
-                        let borderId = `${md.renderRules[0].symbol}_${side}`;
-                        let border = hex?.borders?.get(borderId);
-
-                        if(border)
-                        {
-                            hex.svg.removeChild(border);
-                            hex.borders.delete(borderId);
-                        }
-                    }
-                }
-
-                for(let side = 0; side < 6; side++)
-                {
-                    let borderId = `${md.renderRules[0].symbol}_${side}`;
-
-                    if(v === adj[side]?.metadata?.get(k)) // an adjacent hex has the same property value
-                    {
-                        let oppId = `${md.renderRules[0].symbol}_${(side + 3) % 6}`; // look for side opposite this side
-                        let oppBorder = adj[side].borders.get(oppId);
-
-                        if(oppBorder)
-                        {
-                            adj[side].svg.removeChild(oppBorder);
-                            adj[side].borders.delete(oppId);
-                        }
-                    }
-                    else // do we add matching border on other side?
-                        hex.addBorder({id: borderId});
-                } // for sides
-            }
-            else
-                throw new Error(`Unknown rendering rule ${md.renderRules[0].type} for metadata.`);
-        } // for passed meta
     }
 }
