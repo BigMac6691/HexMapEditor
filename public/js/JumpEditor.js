@@ -20,10 +20,10 @@ class JumpEditor
 		this.div = HTML.create("div", {style: "display:none"});
         let tempDiv = HTML.create("div", {style: "padding-bottom: 0.5em;"});
 
-        this.colour = HTML.create("input", {type: "color", name: "jumpColour", value: this.editor.hexMap.jumpColour}, null, {change: this.boundChange});
+        this.colour = HTML.create("input", {type: "color", name: "jumpColour", value: "#ff0000"}, null, {change: this.boundChange});
         tempDiv.append(HTML.createLabel("Jump colour: ", this.colour));
 
-        this.width = HTML.create("input", {type: "number", name: "jumpWidth", value: this.editor.hexMap.jumpWidth, min: 1}, null, {change: this.boundChange});
+        this.width = HTML.create("input", {type: "number", name: "jumpWidth", value: 6, min: 1}, null, {change: this.boundChange});
         tempDiv.append(HTML.createLabel(" Width: ", this.width));
         this.div.append(tempDiv);
 
@@ -179,6 +179,10 @@ class JumpEditor
             {
                 this.jumpLine.setAttribute("stroke", this.colour.value);
                 this.jumpLine.setAttribute("stroke-width", this.width.value);
+
+                let jump = this.editor.hexMap.jumps.get(+this.select.value);
+                jump.colour = this.colour.value;
+                jump.width = this.width.value;
             }
         }
         else
