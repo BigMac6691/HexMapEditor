@@ -28,9 +28,6 @@ class GlobalAttributePanel extends SidePanel
         svgDiv.append(HTML.createLabel(" Height: ", this.mapHeight, "px"));
         this.content.append(svgDiv);
 
-        this.backgroundColour = HTML.create("input", {type: "color", name: "backgroundColour", value: "#0000ff"}, null, {change: this.boundChange});
-        this.content.append(HTML.createLabel("Background: ", this.backgroundColour));
-
         // =============== Model attributes ===============
         let tempDiv = HTML.create("div");
         this.cols = HTML.create("input", {type: "number", name: "cols", value: this.editor.hexMap.hexes.length, min: 1}, null, {change: this.boundChange});
@@ -41,8 +38,11 @@ class GlobalAttributePanel extends SidePanel
         this.content.append(tempDiv);
 
         tempDiv = HTML.create("div");
+        this.backgroundColour = HTML.create("input", {type: "color", name: "backgroundColour", value: "#0000ff"}, null, {change: this.boundChange});
+        tempDiv.append(HTML.createLabel("Background: ", this.backgroundColour));
+
         this.borderColour = HTML.create("input", {type: "color", name: "borderColour", value: this.editor.hexMap.borderColour}, null, {change: this.boundChange});
-        tempDiv.append(HTML.createLabel("Border: ", this.borderColour));
+        tempDiv.append(HTML.createLabel(" Border: ", this.borderColour));
 
         this.defaultHexFill = HTML.create("input", {type: "color", name: "defaultTerrainColour", value: this.editor.hexMap.defaultHexFill}, null, {change: this.boundChange});
         tempDiv.append(HTML.createLabel(" Hex: ", this.defaultHexFill));

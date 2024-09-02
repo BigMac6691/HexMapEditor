@@ -1,7 +1,9 @@
-class ComboRadioSelect
+class ComboRadioSelect extends EventTarget
 {
 	constructor(list, name)
 	{
+		super();
+
 		this.boundChangeHandler = this.handleChange.bind(this);
 	
 		this.select = document.createElement("select");
@@ -10,6 +12,9 @@ class ComboRadioSelect
 		
         this.select.style = "display: none";
 		this.groupDiv.style = "display: none";
+
+		this.selectDisplay = "block";
+		this.groupDisplay = "flex";
 
 		this.select.addEventListener("change", this.boundChangeHandler);
 
@@ -56,16 +61,38 @@ class ComboRadioSelect
 	{
 		if(v)
 		{
-			this.select.style.display = "block";
+			this.select.style.display = this.selectDisplay;
 			this.groupDiv.style.display = "none";
 		}
 		else
 		{
 			this.select.style.display = "none";
-			this.groupDiv.style.display = "flex";
+			this.groupDiv.style.display = this.groupDisplay;
 		}
 	}
-	
+
+	// display(v)
+	// {
+	// 	if(v)
+	// 	{
+	// 		if(this.select.style.display === 'none')
+	// 		{
+	// 			this.select.style.display = this.selectDisplay;
+	// 			this.groupDiv.style.display = "none";
+	// 		}
+	// 		else
+	// 		{
+	// 			this.select.style.display = "none";
+	// 			this.groupDiv.style.display = this.groupDisplay;
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		this.select.style.display = "none";
+	// 		this.groupDiv.style.display = "none";
+	// 	}
+	// }
+
 	handleChange(evt)
 	{
 		if(evt.target === this.select)
@@ -74,6 +101,8 @@ class ComboRadioSelect
 			this.select.value = evt.target.value;
 		
 		this.value = this.select.value;
+
+		this.dispatchEvent(new CustomEvent("change", {detail: {value: this.value}}));
 	}
 	
 	updateGroup(v)

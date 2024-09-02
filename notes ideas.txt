@@ -1,0 +1,17 @@
+Meta editor is really complex:
+=====
+editor defines how the user would select the actual meta value to be applied to a map
+
+two basic types would select and input
+
+select could be further refined to droplist and radio and possibly checkbox
+    problem with checkbox is the "or" logic, which doubles with each option, and what to draw- what does/could it mean
+
+=====
+render rules define the SVG to render on map, borders are complex because of all the edges, corners and variants that are possible
+
+if the renderRules type is "border" then mybe there should be several "border" types
+    border_ECV where E is for edges, C is for corner and V is for variant, there for border_EV means just edges and variants
+
+there could also be a simple "icon" type of render rule that draws a single image in the hex
+    icon_V would be an icon that has variants

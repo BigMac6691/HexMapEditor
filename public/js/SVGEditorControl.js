@@ -8,7 +8,7 @@ class SVGEditorControl extends SidePanel
 
         this.menu = new Menu("flex");
         this.content.append(this.menu.div);
-        ["defs", "Terrain", "Edges", "Corners", "Connectors", "Meta"]
+        ["defs", "Terrain", "Edges", "Corners", "Connectors", "Meta"] // may need to add borders?  Meta may get REALLY complex...
         .forEach(m =>
         {
             let n = null;
@@ -40,8 +40,10 @@ class SVGEditorControl extends SidePanel
                     n = this.connectorEditor.uiDiv;
                     break;
 
-                // case "Meta":
-                //     break;
+                case "Meta":
+                    this.metaEditor = new MetaSVGEditor(this.editor.hexMap);
+                    n = this.metaEditor.uiDiv;
+                    break;
 
                 default:
                     n = HTML.create("div", {innerHTML: `DIV:${m}`});
