@@ -12,8 +12,6 @@ class MetaSVGEditor extends FeatureEditor
         "<p>The SVG you provided to render the connector is captured in a <code>symbol</code> with <code>viewBox</code> of 0 0 1000 866, <code>preserveAspectRatio</code> and <code>pointer-events</code> set to 'none'. The symbol id is composed as follows: ID_eEdge_vVariant, example: Road_e0_v0 is ID of Road to top edge variant 0.</p>" +
         "<p><b>NOTE</b> connectors are drawn immediatley after edges and corners.</p>";
 
-        // this.metaMap = new Map();
-
         this.inputType = new ComboRadioSelect(["Select", "Number", "String"], "metaInputType");
         this.inputType.selectDisplay = "inline-block";
         this.inputType.show(true);
@@ -44,6 +42,48 @@ class MetaSVGEditor extends FeatureEditor
     getKey()
     {
         return `${this.id.value}_e${this.edge.value}_v${this.variant.value}`;
+    }
+
+    init(list)
+    {
+        super.init(list);
+
+        console.log(list);
+
+        list.forEach((v, k) => 
+        {
+            console.log("\n");
+            console.log(v);
+            console.log(k);
+
+            let vMeta =
+            {
+                id: k, 
+                renderType: "Border",
+                inputType: k === "Country" ? "Select" : "Number",
+                selectList: v.editor.values,
+                renderData: new Map()
+            };
+
+            for(let i = 0; i < 6; i++)
+            {
+                let key = `${k}_e${i}_v0`;
+                let keySVG = `${v.label === "Country" ? v.label : "Provincial"}Border_${i}`;
+                let svgNode = document.getElementById(keySVG);
+                let vRender = 
+                {
+                    edge: i,
+                    variant: 0, 
+                    svg: svgNode.innerHTML,
+                    node: svgNode
+                };
+                
+                vMeta.renderData.set(key, vRender);
+
+                this.items.set(key, vMeta);
+                this.idList.append(HTML.create("option", {text: key, value: key}));
+            }
+        });
     }
 
     handleListChange(evt)
@@ -104,6 +144,49 @@ class MetaSVGEditor extends FeatureEditor
         this.idList.value = key;
         this.hexMap.defs.append(n);
 
-        console.log(this.items);
+        this.dispatchEvent(new CustomEvent("change", {detail: {cmd: "create.meta", key: key, value: vMeta}}));
+    }
+
+    handleUpdate(evt)
+    {
+        if(!super.handleUpdate(evt))
+            return;
+
+        let v = this.items.get(this.getKey());
+        let r = v.renderData.get(key);
+
+        r.svg = this.svg.value;
+        r.node.innerHTML = this.svg.value;
+    }
+
+    handleDelete(evt)
+    {
+        if(!super.handleDelete(evt))
+            return;
+
+        let key = this.getKey();
+
+        this.idList.removeChild(this.idList.options[this.idList.selectedIndex]);
+        this.hexMap.defs.removeChild(this.items.get(key).renderData.get(key).node);
+        this.items.delete(key);
+
+        this.id.value = "";
+        this.selectList.value = "";
+        this.edge.value = 0;
+        this.variant.value = 0;
+        this.svg.value = "";
+    }
+
+    handleShow()
+    {
+        let hex = this.hexMap.getHexFromId("0,0");
+        let key = this.getKey();        
+        let n = SVG.createUse(key);
+        n.setAttribute("x", 0);
+        n.setAttribute("y", 0);
+        n.setAttribute("width", 1000);
+        n.setAttribute("height", 866);
+
+        hex.svg.append(n);
     }
 }

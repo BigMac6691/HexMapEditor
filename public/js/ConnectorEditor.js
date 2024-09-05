@@ -76,6 +76,7 @@ class ConnectorEditor extends FeatureEditor
         this.idList.append(HTML.create("option", {text: key, value: key}));
         this.idList.value = key;
         this.hexMap.svg.append(n);
+        this.dispatchEvent(new CustomEvent("change", {detail: {cmd: "create.connector", key: key, value: v}}));
     }
 
     handleUpdate(evt)
@@ -94,6 +95,9 @@ class ConnectorEditor extends FeatureEditor
         if(!super.handleDelete(evt))
             return;
 
+        let key = this.getKey();
+        let v = this.items.get(key);
+
         this.idList.removeChild(this.idList.options[this.idList.selectedIndex]);
         this.hexMap.removeChild(this.items.get(this.getKey()).node);
         this.items.delete(this.getKey());
@@ -102,6 +106,8 @@ class ConnectorEditor extends FeatureEditor
         this.edge.value = 0;
         this.variant.value = 0;
         this.svg.value = "";
+
+        this.dispatchEvent(new CustomEvent("change", {detail: {cmd: "delete.connector", key: key, value: v}}));
     }
 
     handleShow()

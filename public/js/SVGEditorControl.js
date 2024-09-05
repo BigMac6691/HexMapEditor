@@ -22,11 +22,13 @@ class SVGEditorControl extends SidePanel
 
                 case "Terrain":
                     this.terrainEditor = new TerrainEditor(this.editor.hexMap);
+                    this.terrainEditor.addEventListener("change", this.handleChange.bind(this));
                     n = this.terrainEditor.uiDiv;
                     break;
 
                 case "Edges":
                     this.edgeEditor = new EdgeEditor(this.editor.hexMap);
+                    this.edgeEditor.addEventListener("change", this.handleChange.bind(this));
                     n = this.edgeEditor.uiDiv;
                     break;
 
@@ -37,11 +39,13 @@ class SVGEditorControl extends SidePanel
 
                 case "Connectors":
                     this.connectorEditor = new ConnectorEditor(this.editor.hexMap);
+                    this.connectorEditor.addEventListener("change", this.handleChange.bind(this));
                     n = this.connectorEditor.uiDiv;
                     break;
 
                 case "Meta":
                     this.metaEditor = new MetaSVGEditor(this.editor.hexMap);
+                    this.metaEditor.addEventListener("change", this.handleChange.bind(this));
                     n = this.metaEditor.uiDiv;
                     break;
 
@@ -56,12 +60,19 @@ class SVGEditorControl extends SidePanel
 
     handleMapLoad(evt)
     {
-        console.log("SVG editor control called...");
+        console.log("SVGEditorControl.handleMapLoad()...");
         console.log(this.editor.hexMap);
         this.defsEditor.init(this.editor.hexMap.defs.querySelectorAll("pattern"));
         this.terrainEditor.init(this.editor.hexMap.terrain);
         this.edgeEditor.init(this.editor.hexMap.edges);
         this.cornerEditor.init(this.editor.hexMap.corners);
         this.connectorEditor.init(this.editor.hexMap.connectors);
+        this.metaEditor.init(this.editor.hexMap.metadata);
+    }
+
+    handleChange(evt)
+    {
+        console.log(evt);
+        this.dispatchEvent(new CustomEvent("change", {detail: evt.detail}));
     }
 }

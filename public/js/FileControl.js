@@ -35,22 +35,22 @@ class FileEditor extends SidePanel
 
     save(fileName)
     {
+        this.dispatchEvent(new CustomEvent("mapSave"));
+
         console.log(this.editor.hexMap);
+
         let data = {};
         ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor"]
             .forEach(v => data[v] = this.editor.hexMap[v]);
 
         data.defs = [];
-        for(let e of this.editor.hexMap.defs.children)
-            data.defs.push(e.outerHTML);
+        this.editor.hexMap.defs.querySelectorAll("pattern").forEach(v => data.defs.push(v.outerHTML));
 
         ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => 
         {
             if(this.editor.hexMap[v])
                 data[v] = [...this.editor.hexMap[v]];
         });
-
-        console.log(this.editor.hexMap.terrain);
 
         data.terrain = [];
         if(this.editor.hexMap.terrain)

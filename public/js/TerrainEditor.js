@@ -68,6 +68,7 @@ class TerrainEditor extends FeatureEditor
         });
 
         this.hexMap.terrain.set(v.id, list);
+        this.dispatchEvent(new CustomEvent("change", {detail: {cmd: "create.terrain", key: key, value: v}}));
     }
 
     handleUpdate(evt)
@@ -88,10 +89,14 @@ class TerrainEditor extends FeatureEditor
         if(!super.handleDelete(evt))
             return;
 
+        let key = this.getKey();
+        let v = this.items.get(key);
+
         this.idList.removeChild(this.idList.options[this.idList.selectedIndex]);
-        this.items.delete(this.getKey());
+        this.items.delete(key);
 
         this.clear();
+        this.dispatchEvent(new CustomEvent("change", {detail: {cmd: "delete.terrain", key: key, value: v}}));
     }
 
     clear()

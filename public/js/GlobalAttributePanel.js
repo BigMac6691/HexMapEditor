@@ -162,6 +162,8 @@ class GlobalAttributePanel extends SidePanel
 
     handleMapLoad(evt)
     {
+        console.log("GobalAttributePanel.handleMapLoad()...");
+
         [
             "viewBoxWidth", 
             "viewBoxHeight", 

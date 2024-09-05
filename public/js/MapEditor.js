@@ -65,6 +65,7 @@ class MapEditor extends SidePanel
 
 				case "Meta":
 					this.metaEditor = new MetaEditor(this.editor);
+					this.addEventListener("change", this.metaEditor.handleChange.bind(this.metaEditor));
 					n = this.metaEditor.div;
 					break;
 
@@ -217,6 +218,7 @@ class MapEditor extends SidePanel
             hex.addEdge(value);
         }
         
+		// Get surrounding adjacent hexes
         let offset = this.editor.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
         let adj = 
         [
@@ -295,4 +297,30 @@ class MapEditor extends SidePanel
 		this.jumpEditor.handleMapLoad(evt); // order is important 
 		this.metaEditor.handleMapLoad(evt);
 	}
+
+	handleChange(evt)
+    {
+        console.log(evt.detail.cmd);
+
+		switch(evt.detail.cmd)
+		{
+			case "create.terrain":
+				this.terrainSelect.addItem(evt.detail.value.id);
+				break;
+			case "delete.terrain": // not done until all usages have been removed as well and map redrawn
+				this.terrainSelect.removeItem(evt.detail.value.id);
+				break;
+
+			case "create.edge":
+				this.edgeSelect.addItem(evt.detail.value.id);
+				break;
+
+			case "create.connector":
+				this.connectorSelect.addItem(evt.detail.value.id);
+				break;
+
+			default:
+				this.dispatchEvent(new CustomEvent("change", {detail: evt.detail}));
+		}
+    }
 }

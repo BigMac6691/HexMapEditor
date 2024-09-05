@@ -79,6 +79,7 @@ class MetaEditor
 
     handleMapLoad(evt)
     {
+        console.log("MetaEditor.handleMapLoad()...");
         console.log(evt);
         this.metadata.clear();
 
@@ -110,5 +111,10 @@ class MetaEditor
             else
                 throw new Error(`Unknown metadata type [${v.type}]`);
         }
+    }
+
+    handleChange(evt)
+    {
+        console.log(evt);
     }
 }

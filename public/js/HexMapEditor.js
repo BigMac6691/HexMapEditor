@@ -34,6 +34,7 @@ class HexMapEditor
 
         // SVG editor panel
         this.svgEditorControl = new SVGEditorControl("SVG Editors", this);
+        this.svgEditorControl.addEventListener("change", this.mapEditor.handleChange.bind(this.mapEditor));
         let div4 = this.svgEditorControl.div; 
         
         // Individual hex editor - for tweaking details

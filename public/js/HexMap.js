@@ -28,9 +28,12 @@ class HexMap
         this.svg.append(this.hexagonSymbol);
 
         this.terrainTypes = new Set();
+        this.terrain = new Map();
         this.edgeTypes = new Set();
+        this.edges = new KOMap();
         this.cornerTypes = new Set();
         this.connectorTypes = new Set();
+        this.connectors = new KOMap();
         this.jumps = new Map();
         this.metadata = new Map();
         this.hexes = [[new Hex(this, 0, 0)]];
@@ -131,6 +134,8 @@ class HexMap
         });
 
         this.metadata = new Map(data.metadata.map((v, k) => [v[0], v[1]]));
+        console.log("metadata");
+        console.log(this.metadata);
 
         this.borders = new KOMap();
         data.borders.forEach(v => 
@@ -181,6 +186,8 @@ class HexMap
         });
 
         mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
+
+        console.log("HexMap loadFile(data) complete...");
     }
 
     mouseMove(evt)
