@@ -302,21 +302,29 @@ class MapEditor extends SidePanel
     {
         console.log(evt.detail.cmd);
 
+		// The display value is not updateable so handle only create and delete
+		// The actual SVG is updateable but the update takes place with the SVG Editor class
 		switch(evt.detail.cmd)
 		{
 			case "create.terrain":
 				this.terrainSelect.addItem(evt.detail.value.id);
 				break;
-			case "delete.terrain": // not done until all usages have been removed as well and map redrawn
+			case "delete.terrain": // not done until all usages have been removed as well and map redrawn?
 				this.terrainSelect.removeItem(evt.detail.value.id);
 				break;
 
 			case "create.edge":
 				this.edgeSelect.addItem(evt.detail.value.id);
 				break;
+			case "delete.edge":
+				this.edgeSelect.removeItem(evt.detail.value.id);
+				break;
 
 			case "create.connector":
 				this.connectorSelect.addItem(evt.detail.value.id);
+				break;
+			case "delete.connector":
+				this.connectorSelect.removeItem(evt.detail.value.id);
 				break;
 
 			default:

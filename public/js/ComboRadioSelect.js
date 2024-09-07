@@ -71,11 +71,6 @@ class ComboRadioSelect extends EventTarget
 
 		this.group.filter(radioButton => radioButton.value !== value);
 	}
-
-	updateItem(valueOld, valueNew)
-	{
-
-	}
 	
 	show(v)
 	{
@@ -89,6 +84,15 @@ class ComboRadioSelect extends EventTarget
 			this.select.style.display = "none";
 			this.groupDiv.style.display = this.groupDisplay;
 		}
+	}
+
+	setValue(value)
+	{
+		this.select.value = value;
+		this.updateGroup(value);
+		this.value = value;
+
+		this.dispatchEvent(new CustomEvent("change", {detail: {value: this.value}}));
 	}
 
 	handleChange(evt)

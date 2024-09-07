@@ -52,7 +52,7 @@ class KOMap extends Map
     }
 
     // returns an array of all partial matches
-    // 'returnKey' controls what is returned 
+    // 'returnType' controls what is returned 
     //      0 = just return the value (DEFAULT), 
     //      1 = return the string key and value as array, 
     //      2 = return the object key and value as array

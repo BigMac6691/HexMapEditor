@@ -69,8 +69,22 @@ class FileEditor extends SidePanel
             this.editor.hexMap.connectors.forEach((v, k) => data.connectors.push([k, v.innerHTML]));
 
         data.metadata = [];
-        if(this.editor.hexMap.metadata)
-            this.editor.hexMap.metadata.forEach((v, k) => data.metadata.push([k, v]));
+        if(this.editor.hexMap.metaTypes)
+            this.editor.hexMap.metaTypes.forEach((v, k) => 
+            {
+                let out = 
+                {
+                    id: v.id,
+                    inputType: v.inputType,
+                    renderType: v.renderType,
+                    selectList: v.selectList,
+                    renderData: []
+                };
+
+                v.renderData.forEach((rv, rk) => out.renderData.push([rk, {edge: rv.edge, variant: rv.variant, svg: rv.svg}]));
+
+                data.metadata.push([k, out]);
+            });
 
         data.borders = [];
         if(this.editor.hexMap.borders)

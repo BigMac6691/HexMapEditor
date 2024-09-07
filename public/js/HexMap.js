@@ -35,6 +35,7 @@ class HexMap
         this.connectorTypes = new Set();
         this.connectors = new KOMap();
         this.jumps = new Map();
+        this.metaTypes = new Map();
         this.metadata = new Map();
         this.hexes = [[new Hex(this, 0, 0)]];
 

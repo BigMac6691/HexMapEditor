@@ -83,15 +83,15 @@ class MetaEditor
         console.log(evt);
         this.metadata.clear();
 
-        for(const[k, v] of this.editor.hexMap.metadata)
+        for(const[k, v] of evt.detail.metadata)
         {
             let tempDiv = HTML.create("div", {style: "padding-bottom: 0.3em;"});
             let cb = HTML.create("input", {type: "checkbox"});
 
-            if(v.editor.type === "select")
+            if(v.inputType === "Select")
             {
                 let n = HTML.create("select");
-                HTML.addOptions(n, v.editor.values.map(o =>
+                HTML.addOptions(n, v.selectList.map(o =>
                 {
                     return {text: o, value: o};
                 }));
@@ -100,21 +100,56 @@ class MetaEditor
                 tempDiv.append(cb, HTML.createLabel(k + ": ", n));
                 this.div.append(tempDiv);
             }
-            else if(v.editor.type === "input")
+            else if(v.inputType === "Number")
             {
-                let n = HTML.create("input", v.editor.opts);
+                let n = HTML.create("input", {type: "number"});
 
                 this.metadata.set(k, {check: cb, value: n});
                 tempDiv.append(cb, HTML.createLabel(k + ": ", n));
                 this.div.append(tempDiv);
             }
+            else if(v.inputType === "String")
+            {
+                let n = HTML.create("input", {type: "string"});
+    
+                this.metadata.set(k, {check: cb, value: n});
+                tempDiv.append(cb, HTML.createLabel(k + ": ", n));
+                this.div.append(tempDiv);
+            }
             else
-                throw new Error(`Unknown metadata type [${v.type}]`);
+                throw new Error(`Unknown metadata input type [${v.inputType}]`);
         }
     }
 
     handleChange(evt)
     {
         console.log(evt);
+
+        let tempDiv = HTML.create("div", {style: "padding-bottom: 0.3em;"});
+        let cb = HTML.create("input", {type: "checkbox"});
+
+        switch(evt.detail.value.inputType) // this works for create only...
+        {
+            case "Select":
+                let n = HTML.create("select");
+                HTML.addOptions(n, evt.detail.value.selectList.map(o =>
+                {
+                    return {text: o, value: o};
+                }));
+
+                this.metadata.set(evt.detail.value.id, {check: cb, value: n});
+                tempDiv.append(cb, HTML.createLabel(evt.detail.value.id + ": ", n));
+                this.div.append(tempDiv);
+                break;
+
+            case "Number":
+                break;
+
+            case "String":
+                break;
+
+            default:
+                throw new Error(`Unknown metadata input type [${evt.detail.value.inputType}]`);
+        }
     }
 }

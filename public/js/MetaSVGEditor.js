@@ -4,6 +4,9 @@ class MetaSVGEditor extends FeatureEditor
     {
         super(map);
 
+        console.log("MetaSVGEditor constructor");
+        console.log(map);
+
         this.help = 
         "<h1>Meta</h1>" + 
         "<p>A connector is one of the six paths from the center of the hexagon to the center of a side.  The connectors are numbered from 0 (the top) clockwise to 5; 1 is top right and so on.</p>" + 
@@ -44,7 +47,7 @@ class MetaSVGEditor extends FeatureEditor
         return `${this.id.value}_e${this.edge.value}_v${this.variant.value}`;
     }
 
-    init(list)
+    init(list) 
     {
         super.init(list);
 
@@ -53,37 +56,40 @@ class MetaSVGEditor extends FeatureEditor
         list.forEach((v, k) => 
         {
             console.log("\n");
-            console.log(v);
             console.log(k);
+            console.log(v);
 
             let vMeta =
             {
                 id: k, 
-                renderType: "Border",
-                inputType: k === "Country" ? "Select" : "Number",
-                selectList: v.editor.values,
+                renderType: v.renderType,
+                inputType: v.inputType,
+                selectList: v.selectList,
                 renderData: new Map()
             };
 
-            for(let i = 0; i < 6; i++)
+            this.hexMap.metaTypes.set(k, vMeta);
+
+            v.renderData.forEach(render =>
             {
-                let key = `${k}_e${i}_v0`;
-                let keySVG = `${v.label === "Country" ? v.label : "Provincial"}Border_${i}`;
-                let svgNode = document.getElementById(keySVG);
+                let key = render[0];
                 let vRender = 
                 {
-                    edge: i,
-                    variant: 0, 
-                    svg: svgNode.innerHTML,
-                    node: svgNode
+                    edge: render[1].edge,
+                    variant: render[1].variant,
+                    svg: render[1].svg,
+                    node: document.getElementById(key)
                 };
                 
                 vMeta.renderData.set(key, vRender);
 
                 this.items.set(key, vMeta);
                 this.idList.append(HTML.create("option", {text: key, value: key}));
-            }
+            });
         });
+
+        console.log(this.items);
+        console.log(this.hexMap.metaTypes);
     }
 
     handleListChange(evt)
@@ -92,11 +98,13 @@ class MetaSVGEditor extends FeatureEditor
             return;
 
         let v = this.items.get(evt.target.value);
+        console.log("handleListChange()...");
+        console.log(v);
 
         this.id.value = v.id;
-        this.inputType.value = v.inputType;
+        this.inputType.setValue(v.inputType);
         this.selectList.value = v.selectList;
-        this.renderType.value = v.renderType;
+        this.renderType.setValue(v.renderType);
 
         let r = v.renderData.get(evt.target.value);
 
