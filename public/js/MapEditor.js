@@ -28,7 +28,8 @@ class MapEditor extends SidePanel
 
 		this.mouseMove = HTML.create("p", {innerHTML: "Mouse location x, y"});
         this.mouseClick = HTML.create("p", {innerHTML: "Click location: x, y"});
-		this.content.append(this.mouseMove, this.mouseClick);
+		this.zoom = HTML.create("p", {innerHTML: "Zoom: start, size"});
+		this.content.append(this.mouseMove, this.mouseClick, this.zoom);
 
 		this.menu = new Menu("block");
 		this.content.append(this.menu.div);
@@ -81,6 +82,8 @@ class MapEditor extends SidePanel
 	handleKeyPress(evt)
 	{
 		console.log(evt);
+
+		this.zoom.innerHTML = `Zoom: ${this.editor.hexMap.vpTopLeft.x},${this.editor.hexMap.vpTopLeft.y} - ${this.editor.hexMap.vpWidthHeight.x},${this.editor.hexMap.vpWidthHeight.y}`;
 
 		// jumps are special as they cover more than one hex
 		if(this.jumpEditor.div.style.display !== "none")

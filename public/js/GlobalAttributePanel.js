@@ -173,7 +173,7 @@ class GlobalAttributePanel extends SidePanel
             this.editor.hexMap.initMap();
         }
         else
-            this.editor.hexMap.drawMap();
+            this.editor.hexMap.initMap();//.drawMap(); commenting out for now
     }
 
     handleMapLoad(evt)
@@ -192,7 +192,7 @@ class GlobalAttributePanel extends SidePanel
             "defaultHexFill",
             "textColour",
             "displayCursor"
-        ].forEach(field => {console.log(field);  this[field].value = evt.detail[field] ?? this.editor.hexMap[field];});
+        ].forEach(field => this[field].value = evt.detail[field] ?? this.editor.hexMap[field]);
 
         this.cols.value = evt.detail.hexes.length;
         this.rows.value = evt.detail.hexes[0].length;

@@ -40,7 +40,7 @@ class FileEditor extends SidePanel
         console.log(this.editor.hexMap);
 
         let data = {};
-        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "vpMin", "vpMax", "backgroundColour", "cursor"]
+        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "vpMin", "vpMax", "backgroundColour", "cursor", "vpTopLeft", "vpWidthHeight"]
             .forEach(v => data[v] = this.editor.hexMap[v]);
 
         data.defs = [];

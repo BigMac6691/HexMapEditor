@@ -47,6 +47,8 @@ class HexMap
 
         this.displayCursor = true;
         this.cursor = new DOMPoint(0, 0);
+        this.vpTopLeft = new DOMPoint(0, 0);
+        this.vpWidthHeight = new DOMPoint(4, 4);
         this.cursorHex = SVG.createUse("hexagon", {id: "cursor", stroke: "#ff0000", fill: "none", "pointer-events": "none"});
     }
 
@@ -55,7 +57,7 @@ class HexMap
         console.log("HexMap.loadFile");
         console.log(data);
 
-        ["offsetOn", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "vpMin", "vpMax", "backgroundColour", "cursor"]
+        ["offsetOn", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "vpMin", "vpMax", "backgroundColour", "cursor", "vpTopLeft", "vpWidthHeight"]
             .forEach(v => this[v] = data[v] ?? this[v]);
 
         ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v] ?? this[v]);
@@ -175,19 +177,53 @@ class HexMap
     mouseWheel(evt)
     {
         if(evt.deltaY < 0)
+        {
             console.log("wheel up...");
+            this.vpWidthHeight.x--;
+            this.vpWidthHeight.y--;
+        }
         else
+        {
             console.log("wheel down...");
+            this.vpWidthHeight.x++;
+            this.vpWidthHeight.y++;
+        }
 
-            console.log(evt);
+        console.log(evt);
+        this.initMap();
     }
 
     handleKeyPress(evt)
 	{
-		console.log(evt);
+        console.log(evt);
 
-		// if(evt.key === "Control")
-		// 	this.painting = !this.painting;
+        switch(evt.key)
+        {
+            case "ArrowUp":
+                this.vpTopLeft.y =  Math.min(this.hexes[0].length - 1, this.vpTopLeft.y + 1);
+                break;
+
+            case "ArrowDown":
+                this.vpTopLeft.y =  Math.max(0, this.vpTopLeft.y - 1);
+                break;
+
+            case "ArrowLeft":
+                this.vpTopLeft.x =  Math.max(0, this.vpTopLeft.x - 1);
+                break;
+
+            case "ArrowRight":
+                this.vpTopLeft.x =  Math.min(this.hexes.length - 1, this.vpTopLeft.x + 1);
+                break;
+
+            default:
+                return;
+        }
+
+        console.log(this.vpTopLeft);
+
+        this.initMap();
+
+        // this.svg.setAttribute("viewBox", `${this.vpTopLeft.x * w} ${this.vpTopLeft.y * h} 1000 866`);
 	}
 
     getHexFromId(id)
@@ -235,19 +271,25 @@ class HexMap
 
         this.svg.style = `background-color: ${this.backgroundColour}; cursor: default;`;
 
-        let vb = this.svg.getAttribute("viewBox").split(/\s+|,/);
-        let w = +vb[2] / (3 * this.hexes.length + 1);
-        let h = +vb[3] / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0));
+        let startCol = this.vpTopLeft.x > 0 ? this.vpTopLeft.x - 1 : this.vpTopLeft.x; 
+        let startRow = this.vpTopLeft.y > 0 ? this.vpTopLeft.y - 1 : this.vpTopLeft.y; 
+        let colLimit = Math.min(this.hexes.length, this.vpTopLeft.x + this.vpWidthHeight.x);
+        let rowLimit = Math.min(this.hexes[0].length, this.vpTopLeft.y + this.vpWidthHeight.y);
+        let w = +this.viewBoxWidth / (3 * this.vpWidthHeight.x + 1);
+        let h = +this.viewBoxHeight / (this.vpWidthHeight.y + (this.hexes.length > 1 ? 0.5 : 0));
         let width = 4 * w;
 
-        for(let col = 0; col < this.hexes.length; col++)
+        colLimit += colLimit < this.hexes.length ? 1 : 0;
+        rowLimit += rowLimit < this.hexes[0].length ? 1 : 0;
+
+        for(let col = startCol; col < colLimit; col++)
         {
-            let x = 3 * w * col;
+            let x = 3 * w * (col - this.vpTopLeft.x);
             let offset = this.hexes.length > 1 ? (col % 2 === this.offsetOn ? 0 : h / 2) : 0;
 
-            for(let row = 0; row < this.hexes[col].length; row++)
+            for(let row = startRow; row < rowLimit; row++)
             {
-                let y = h * row + offset;
+                let y = h * (row - this.vpTopLeft.y) + offset;
 
                 this.map.append(this.hexes[col][row].svg);
                 this.hexes[col][row].drawHex(x, y, width, h);
@@ -258,43 +300,48 @@ class HexMap
         this.drawCursor();
     }
 
-    drawMap()
-    {
-        let vb = this.svg.getAttribute("viewBox").split(/\s+|,/);
-        let w = +vb[2] / (3 * this.hexes.length + 1);
-        let h = +vb[3] / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0));
-        let width = 4 * w;
+    // drawMap() // GlobalAttributePanal around line 176 calls this!
+    // {
+    //     console.log("drawMap()...?");
+    //     let vb = this.svg.getAttribute("viewBox").split(/\s+|,/);
+    //     let w = +vb[2] / (3 * this.hexes.length + 1);
+    //     let h = +vb[3] / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0));
+    //     let width = 4 * w;
 
-        console.log(`drawMap w=${w}, h=${h}`);
+    //     console.log(`drawMap w=${w}, h=${h}`);
 
-        for(let col = 0; col < this.hexes.length; col++)
-        {
-            let x = 3 * w * col;
-            let offset = this.hexes.length > 1 ? (col % 2 === this.offsetOn ? 0 : h / 2) : 0;
+    //     for(let col = 0; col < this.hexes.length; col++)
+    //     {
+    //         let x = 3 * w * col;
+    //         let offset = this.hexes.length > 1 ? (col % 2 === this.offsetOn ? 0 : h / 2) : 0;
 
-            for(let row = 0; row < this.hexes[col].length; row++)
-            {
-                let y = h * row + offset;
+    //         for(let row = 0; row < this.hexes[col].length; row++)
+    //         {
+    //             let y = h * row + offset;
 
-                this.hexes[col][row].drawHex(x, y, width, h)
-            }
-        }
+    //             this.hexes[col][row].drawHex(x, y, width, h)
+    //         }
+    //     }
 
-        this.drawJumps();
-        this.drawCursor();
-    }
+    //     this.drawJumps();
+    //     this.drawCursor();
+    // }
 
     drawJumps()
     {
         console.log("drawing jumps...");
+
+        let tlHex = this.getHexFromId(`${this.vpTopLeft.x},${this.vpTopLeft.y}`);
+        let baseWidth = +tlHex.hexTerrain.width.baseVal.value;
+        let baseHeight = +tlHex.hexTerrain.height.baseVal.value;
 
         this.jumps.forEach(j =>
         {
             let coords = [];
             [this.getHexFromId(j.from), this.getHexFromId(j.to)].forEach(hex =>
             {
-                let x = +hex.hexTerrain.x.baseVal.value + hex.hexTerrain.width.baseVal.value / 2;
-                let y = +hex.hexTerrain.y.baseVal.value + hex.hexTerrain.height.baseVal.value / 2;
+                let x = (hex.col - this.vpTopLeft.x) * (baseWidth * 0.75) + baseWidth / 2;
+                let y = (hex.row - this.vpTopLeft.y + 0.5) * baseHeight + (hex.col % 2 === this.offsetOn ? 0 : baseHeight / 2);
                     
                 coords.push(x, y);
             });
