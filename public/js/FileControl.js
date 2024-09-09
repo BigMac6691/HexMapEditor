@@ -40,7 +40,7 @@ class FileEditor extends SidePanel
         console.log(this.editor.hexMap);
 
         let data = {};
-        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor"]
+        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "vpMin", "vpMax", "backgroundColour", "cursor"]
             .forEach(v => data[v] = this.editor.hexMap[v]);
 
         data.defs = [];
@@ -72,23 +72,14 @@ class FileEditor extends SidePanel
         if(this.editor.hexMap.metaTypes)
             this.editor.hexMap.metaTypes.forEach((v, k) => 
             {
-                let out = 
+                let out = {...v, renderData: Array.from(v.renderData).map(([key, value]) => 
                 {
-                    id: v.id,
-                    inputType: v.inputType,
-                    renderType: v.renderType,
-                    selectList: v.selectList,
-                    renderData: []
-                };
-
-                v.renderData.forEach((rv, rk) => out.renderData.push([rk, {edge: rv.edge, variant: rv.variant, svg: rv.svg}]));
+                    let {["node"]: _, ...newValue} = value;
+                    return [key, newValue];
+                })};
 
                 data.metadata.push([k, out]);
             });
-
-        data.borders = [];
-        if(this.editor.hexMap.borders)
-            this.editor.hexMap.borders.forEach((v, k) => data.borders.push([k, v]));
 
         data.jumps = [];
         this.editor.hexMap.jumps.forEach(v => data.jumps.push({"from": v.from, "to": v.to, "colour": v.colour, "width": v.width}));

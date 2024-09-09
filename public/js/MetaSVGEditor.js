@@ -51,14 +51,8 @@ class MetaSVGEditor extends FeatureEditor
     {
         super.init(list);
 
-        console.log(list);
-
         list.forEach((v, k) => 
         {
-            console.log("\n");
-            console.log(k);
-            console.log(v);
-
             let vMeta =
             {
                 id: k, 

@@ -2,13 +2,13 @@ class HexMap
 {
     constructor()
     {
-        this.switch = false;
-
         this.backgroundColour = "#0000ff";
         this.viewBoxWidth = "1000";
         this.viewBoxHeight = "866";
         this.mapWidth = 0; // default
         this.mapHeight = 0; // default
+        this.vpMin = 1; // default
+        this.vpMax = 1; // default
         this.svg = SVG.create("svg", {viewBox: `0 0 ${this.viewBoxWidth} ${this.viewBoxHeight}`, preserveAspectRatio: "none", style: `background-color:${this.backgroundColour}`});
         this.defs = SVG.create("defs");
         this.map = SVG.create("g");
@@ -18,10 +18,16 @@ class HexMap
         this.jumpNextIndex = 0;
         this.borderColour = "#000000";
         this.defaultHexFill = "#ffffff";
-        this.textColor = "#000000";
+        this.textColour = "#000000";
 
         this.svg.addEventListener("mousemove", evt => this.mouseMove(evt));
         this.svg.addEventListener("click", evt => this.mouseClick(evt));
+        this.svg.addEventListener("wheel", evt => this.mouseWheel(evt));
+
+        this.boundKeypress = this.handleKeyPress.bind(this);
+
+        this.svg.addEventListener("mouseenter", () => document.addEventListener("keydown", this.boundKeypress));
+        this.svg.addEventListener("mouseleave", () => document.removeEventListener("keydown", this.boundKeypress));
         
         this.hexagonSymbol = SVG.create("symbol", {id: "hexagon", viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
         this.hexagonSymbol.append(SVG.create("polygon", {points: "250,0 750,0 1000,433 750,866 250,866 0,433"}));
@@ -49,7 +55,7 @@ class HexMap
         console.log("HexMap.loadFile");
         console.log(data);
 
-        ["offsetOn", "borderColour", "defaultHexFill", "textColor", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "backgroundColour", "cursor"]
+        ["offsetOn", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "vpMin", "vpMax", "backgroundColour", "cursor"]
             .forEach(v => this[v] = data[v] ?? this[v]);
 
         ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v] ?? this[v]);
@@ -61,96 +67,52 @@ class HexMap
         this.edges = new KOMap();
         data.edges.forEach(v => 
         {
-            let key = null;
-
-            if(this.switch)
-            {
-                let parts = v[0].split("_");
-                key =
-                {
-                    type : parts[0],
-                    edgeIndex : parts[1].substring(1),
-                    variant : parts[2].substring(1)
-                }
-            }
-            else
-                key = JSON.parse(v[0]);
-
+            let key = JSON.parse(v[0]);
             let n = SVG.create("symbol", {id: `${key.type}_e${key.edgeIndex}_v${key.variant}`, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
             n.innerHTML = v[1];
         
-            this.svg.append(n);
+            this.defs.append(n);
             this.edges.setKO(key, n);
         });
 
         this.corners = new KOMap();
         data.corners.forEach(v => 
         {
-            let key = null;
-
-            if(this.switch)
-            {
-                let parts = v[0].split("_");
-                key =
-                {
-                    type : parts[0],
-                    edgeIndex : parts[1].substring(1),
-                    cornerType : parts[2].substring(1),
-                    variant : parts[3].substring(1)
-                }
-            }
-            else
-                key = JSON.parse(v[0]);
-
+            let key = JSON.parse(v[0]);
             let n = SVG.create("symbol", {id: `${key.type}_e${key.edgeIndex}_c${key.cornerType}_v${key.variant}`, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
             n.innerHTML = v[1];
         
-            this.svg.append(n);
+            this.defs.append(n);
             this.corners.setKO(key, n);
         });
 
         this.connectors = new KOMap();
         data.connectors.forEach(v => 
         {
-            let key = null;
-
-            if(this.switch)
-            {
-                let parts = v[0].split("_");
-                key =
-                {
-                    type : parts[0],
-                    edgeIndex : parts[1].substring(1),
-                    variant : parts[2].substring(1)
-                }
-            }
-            else
-                key = JSON.parse(v[0]);
-
+            let key = JSON.parse(v[0]);
             let n = SVG.create("symbol", {id: `${key.type}_e${key.edgeIndex}_v${key.variant}`, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
             n.innerHTML = v[1];
         
-            this.svg.append(n);
+            this.defs.append(n);
             this.connectors.setKO(key, n);
         });
 
-        this.metadata = new Map(data.metadata.map((v, k) => [v[0], v[1]]));
+        this.metadata = new Map();
+        data.metadata.forEach(v =>
+        {
+            this.metadata.set(v[0], v[1]);
+
+            v[1].renderData.forEach(rd => 
+            {
+                let n = SVG.create("symbol", {id: rd[0], viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
+                n.innerHTML = rd[1].svg;
+                rd[1].node = n;
+    
+                this.defs.append(n);
+            });
+        });
         console.log("metadata");
         console.log(this.metadata);
-
-        this.borders = new KOMap();
-        data.borders.forEach(v => 
-        {
-            this.borders.set(v[0], v[1]);
-
-            for(let i = 0; i < 6; i++)
-            {
-                let n = SVG.create("symbol", {id: `${v[0]}_${i}`, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
-                n.innerHTML = v[1].innerHtml[i];
-    
-                this.svg.append(n);
-            }
-        });
 
         this.jumps = new Map();
         data.jumps.forEach(v => this.jumps.set(this.jumpNextIndex++, v));
@@ -176,6 +138,7 @@ class HexMap
 
                 if(rowHex.borders)
                     rowHex.borders.forEach(v => hex.addBorder({id: v}));
+                // rowHex.borders.forEach(v => hex.addBorder({id: `${v.startsWith("C") ? "Country_e" : "Province_e"}${v.split("_")[1]}_v0`}));
 
                 if(rowHex.metadata)
                     rowHex.metadata.forEach(v => hex.addMetadata({key: v[0], value: v[1]}));
@@ -208,6 +171,24 @@ class HexMap
 
         this.drawCursor();
     }
+
+    mouseWheel(evt)
+    {
+        if(evt.deltaY < 0)
+            console.log("wheel up...");
+        else
+            console.log("wheel down...");
+
+            console.log(evt);
+    }
+
+    handleKeyPress(evt)
+	{
+		console.log(evt);
+
+		// if(evt.key === "Control")
+		// 	this.painting = !this.painting;
+	}
 
     getHexFromId(id)
     {

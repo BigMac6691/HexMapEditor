@@ -38,6 +38,14 @@ class GlobalAttributePanel extends SidePanel
         this.content.append(tempDiv);
 
         tempDiv = HTML.create("div");
+        this.vpMin = HTML.create("input", {type: "number", name: "vpMin", value: this.editor.hexMap.vpMin, min: 1}, null, {change: this.boundChange});
+        tempDiv.append(HTML.createLabel("Viewport Minimum: ", this.vpMin));
+
+        this.vpMax = HTML.create("input", {type: "number", name: "vpMax", value: this.editor.hexMap.vpMax, min: 1}, null, {change: this.boundChange});
+        tempDiv.append(HTML.createLabel(" Maximum: ", this.vpMax));
+        this.content.append(tempDiv);
+
+        tempDiv = HTML.create("div");
         this.backgroundColour = HTML.create("input", {type: "color", name: "backgroundColour", value: "#0000ff"}, null, {change: this.boundChange});
         tempDiv.append(HTML.createLabel("Background: ", this.backgroundColour));
 
@@ -47,8 +55,8 @@ class GlobalAttributePanel extends SidePanel
         this.defaultHexFill = HTML.create("input", {type: "color", name: "defaultTerrainColour", value: this.editor.hexMap.defaultHexFill}, null, {change: this.boundChange});
         tempDiv.append(HTML.createLabel(" Hex: ", this.defaultHexFill));
 
-        this.textColor = HTML.create("input", {type: "color", name: "textColor", value: this.editor.hexMap.textColor}, null, {change: this.boundChange});
-        tempDiv.append(HTML.createLabel(" Text: ", this.textColor));
+        this.textColour = HTML.create("input", {type: "color", name: "textColour", value: this.editor.hexMap.textColour}, null, {change: this.boundChange});
+        tempDiv.append(HTML.createLabel(" Text: ", this.textColour));
         this.content.append(tempDiv);
 
         tempDiv = HTML.create("div");
@@ -121,6 +129,14 @@ class GlobalAttributePanel extends SidePanel
                 modelChange = true;
                 break;
 
+            case "vpMin":
+                this.editor.hexMap.vpMin = this.vpMin.value;
+                break;
+
+            case "vpMax":
+                this.editor.hexMap.vpMax = this.vpMax.value;
+                break;
+
             case "borderColour":
                 this.editor.hexMap.borderColour = this.borderColour.value;
                 break;
@@ -129,8 +145,8 @@ class GlobalAttributePanel extends SidePanel
                 this.editor.hexMap.defaultHexFill = this.defaultHexFill.value;
                 break;
 
-            case "textColor":
-                this.editor.hexMap.textColor = this.textColor.value;
+            case "textColour":
+                this.editor.hexMap.textColour = this.textColour.value;
                 break;
 
             case "offsetOn":
@@ -169,12 +185,14 @@ class GlobalAttributePanel extends SidePanel
             "viewBoxHeight", 
             "mapWidth", 
             "mapHeight",
+            "vpMin",
+            "vpMax",
             "backgroundColour",
             "borderColour",
             "defaultHexFill",
-            "textColor",
+            "textColour",
             "displayCursor"
-        ].forEach(field => this[field].value = evt.detail[field]);
+        ].forEach(field => {console.log(field);  this[field].value = evt.detail[field] ?? this.editor.hexMap[field];});
 
         this.cols.value = evt.detail.hexes.length;
         this.rows.value = evt.detail.hexes[0].length;

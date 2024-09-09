@@ -12,7 +12,10 @@ class MetaEditor
         let mdList = new Map();
         for(const [k, v] of this.metadata)
             if(v.check.checked)
-                mdList.set(k, v.value);
+                mdList.set(k, v.value.value);
+
+        if(mdList.size === 0)
+            return;
 
         let offset = this.editor.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
         let adj = 
@@ -36,30 +39,29 @@ class MetaEditor
 
             let md = this.editor.hexMap.metadata.get(k);
 
-            if(md.renderRules[0].type === "border") // at this point you know that a property value has changed
+            if(md.renderType === "Border") // at this point you know that a property value has changed
             {
                 if(valueChange) // if a value changes remove all borders for that value from selected hex only
                 {
-                    for(let side = 0; side < 6; side++)
+                    md.renderData.forEach(b => 
                     {
-                        let borderId = `${md.renderRules[0].symbol}_${side}`;
-                        let border = hex?.borders?.get(borderId);
+                        let border = hex?.borders?.get(b[0]);
 
                         if(border)
                         {
                             hex.svg.removeChild(border);
-                            hex.borders.delete(borderId);
+                            hex.borders.delete(b[0]);
                         }
-                    }
+                    });
                 }
 
                 for(let side = 0; side < 6; side++)
                 {
-                    let borderId = `${md.renderRules[0].symbol}_${side}`;
+                    let borderId = md.renderData[side][0];
 
                     if(v === adj[side]?.metadata?.get(k)) // an adjacent hex has the same property value
                     {
-                        let oppId = `${md.renderRules[0].symbol}_${(side + 3) % 6}`; // look for side opposite this side
+                        let oppId = md.renderData[(side + 3) % 6][0]; // look for side opposite this side
                         let oppBorder = adj[side].borders.get(oppId);
 
                         if(oppBorder)
@@ -84,72 +86,45 @@ class MetaEditor
         this.metadata.clear();
 
         for(const[k, v] of evt.detail.metadata)
-        {
-            let tempDiv = HTML.create("div", {style: "padding-bottom: 0.3em;"});
-            let cb = HTML.create("input", {type: "checkbox"});
-
-            if(v.inputType === "Select")
-            {
-                let n = HTML.create("select");
-                HTML.addOptions(n, v.selectList.map(o =>
-                {
-                    return {text: o, value: o};
-                }));
-
-                this.metadata.set(k, {check: cb, value: n});
-                tempDiv.append(cb, HTML.createLabel(k + ": ", n));
-                this.div.append(tempDiv);
-            }
-            else if(v.inputType === "Number")
-            {
-                let n = HTML.create("input", {type: "number"});
-
-                this.metadata.set(k, {check: cb, value: n});
-                tempDiv.append(cb, HTML.createLabel(k + ": ", n));
-                this.div.append(tempDiv);
-            }
-            else if(v.inputType === "String")
-            {
-                let n = HTML.create("input", {type: "string"});
-    
-                this.metadata.set(k, {check: cb, value: n});
-                tempDiv.append(cb, HTML.createLabel(k + ": ", n));
-                this.div.append(tempDiv);
-            }
-            else
-                throw new Error(`Unknown metadata input type [${v.inputType}]`);
-        }
+            this.createMetaUI(v);
     }
 
     handleChange(evt)
     {
         console.log(evt);
+        this.createMetaUI(evt.detail.value);
+    }
 
+    createMetaUI(data)
+    {
         let tempDiv = HTML.create("div", {style: "padding-bottom: 0.3em;"});
         let cb = HTML.create("input", {type: "checkbox"});
+        let n = null;
 
-        switch(evt.detail.value.inputType) // this works for create only...
+        switch(data.inputType) // this works for create only...
         {
             case "Select":
-                let n = HTML.create("select");
-                HTML.addOptions(n, evt.detail.value.selectList.map(o =>
+                n = HTML.create("select");
+                HTML.addOptions(n, data.selectList.map(o =>
                 {
                     return {text: o, value: o};
                 }));
-
-                this.metadata.set(evt.detail.value.id, {check: cb, value: n});
-                tempDiv.append(cb, HTML.createLabel(evt.detail.value.id + ": ", n));
-                this.div.append(tempDiv);
                 break;
 
             case "Number":
+                n = HTML.create("input", {type: "number", min: 0, value: 0});
                 break;
 
             case "String":
+                n = HTML.create("input", {type: "string"});
                 break;
 
             default:
-                throw new Error(`Unknown metadata input type [${evt.detail.value.inputType}]`);
+                throw new Error(`Unknown metadata input type [${data.inputType}]`);
         }
+
+        this.metadata.set(data.id, {check: cb, value: n});
+        tempDiv.append(cb, HTML.createLabel(data.id + ": ", n));
+        this.div.append(tempDiv);
     }
 }
