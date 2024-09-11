@@ -22,9 +22,11 @@ class GlobalAttributePanel extends SidePanel
 
         let svgDiv = HTML.create("div");
         this.mapWidth = HTML.create("input", {type: "number", name: "mapWidth", value: mapPanel ? mapPanel.scrollWidth : 0}, null, {change: this.boundChange});
+        this.editor.hexMap.mapWidth = this.mapWidth.value;
         svgDiv.append(HTML.createLabel("SVG Width: ", this.mapWidth, "px"));
 
         this.mapHeight = HTML.create("input", {type: "number", name: "mapHeight", value: mapPanel ? mapPanel.scrollHeight : 0}, null, {change: this.boundChange});
+        this.editor.hexMap.mapHeight = this.mapHeight.value;
         svgDiv.append(HTML.createLabel(" Height: ", this.mapHeight, "px"));
         this.content.append(svgDiv);
 
@@ -52,7 +54,7 @@ class GlobalAttributePanel extends SidePanel
         this.borderColour = HTML.create("input", {type: "color", name: "borderColour", value: this.editor.hexMap.borderColour}, null, {change: this.boundChange});
         tempDiv.append(HTML.createLabel(" Border: ", this.borderColour));
 
-        this.defaultHexFill = HTML.create("input", {type: "color", name: "defaultTerrainColour", value: this.editor.hexMap.defaultHexFill}, null, {change: this.boundChange});
+        this.defaultHexFill = HTML.create("input", {type: "color", name: "defaultHexFill", value: this.editor.hexMap.defaultHexFill}, null, {change: this.boundChange});
         tempDiv.append(HTML.createLabel(" Hex: ", this.defaultHexFill));
 
         this.textColour = HTML.create("input", {type: "color", name: "textColour", value: this.editor.hexMap.textColour}, null, {change: this.boundChange});

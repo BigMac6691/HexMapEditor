@@ -58,10 +58,9 @@ class SVGEditorControl extends SidePanel
         });
     }
 
-    handleMapLoad(evt)
+    handleMapLoad(evt) // TODO I think when a map is loaded the reference to the old map is lost...
     {
         console.log("SVGEditorControl.handleMapLoad()...");
-        console.log(this.editor.hexMap);
         this.defsEditor.init(this.editor.hexMap.defs.querySelectorAll("pattern"));
         this.terrainEditor.init(this.editor.hexMap.terrain);
         this.edgeEditor.init(this.editor.hexMap.edges);

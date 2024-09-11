@@ -81,8 +81,6 @@ class MapEditor extends SidePanel
 
 	handleKeyPress(evt)
 	{
-		console.log(evt);
-
 		this.zoom.innerHTML = `Zoom: ${this.editor.hexMap.vpTopLeft.x},${this.editor.hexMap.vpTopLeft.y} - ${this.editor.hexMap.vpWidthHeight.x},${this.editor.hexMap.vpWidthHeight.y}`;
 
 		// jumps are special as they cover more than one hex

@@ -41,7 +41,6 @@ class HexMap
         this.connectorTypes = new Set();
         this.connectors = new KOMap();
         this.jumps = new Map();
-        this.metaTypes = new Map();
         this.metadata = new Map();
         this.hexes = [[new Hex(this, 0, 0)]];
 
@@ -140,7 +139,6 @@ class HexMap
 
                 if(rowHex.borders)
                     rowHex.borders.forEach(v => hex.addBorder({id: v}));
-                // rowHex.borders.forEach(v => hex.addBorder({id: `${v.startsWith("C") ? "Country_e" : "Province_e"}${v.split("_")[1]}_v0`}));
 
                 if(rowHex.metadata)
                     rowHex.metadata.forEach(v => hex.addMetadata({key: v[0], value: v[1]}));
@@ -151,7 +149,7 @@ class HexMap
             this.hexes.push(columnHexes);
         });
 
-        mapPanel.style.fontSize = `${100 / (this.hexes[0].length + (this.hexes.length > 1 ? 0.5 : 0))}px`;
+        document.getElementById("mapPanel").style.fontSize = `${100 / (this.vpWidthHeight.y + (this.hexes.length > 1 ? 0.5 : 0))}px`;
 
         console.log("HexMap loadFile(data) complete...");
     }
@@ -176,35 +174,21 @@ class HexMap
 
     mouseWheel(evt)
     {
-        if(evt.deltaY < 0)
-        {
-            console.log("wheel up...");
-            this.vpWidthHeight.x--;
-            this.vpWidthHeight.y--;
-        }
-        else
-        {
-            console.log("wheel down...");
-            this.vpWidthHeight.x++;
-            this.vpWidthHeight.y++;
-        }
+        this.resizeViewPort(evt.deltaY);
 
-        console.log(evt);
         this.initMap();
     }
 
     handleKeyPress(evt)
 	{
-        console.log(evt);
-
         switch(evt.key)
         {
             case "ArrowUp":
-                this.vpTopLeft.y =  Math.min(this.hexes[0].length - 1, this.vpTopLeft.y + 1);
+                this.vpTopLeft.y =  Math.max(0, this.vpTopLeft.y - 1);
                 break;
 
             case "ArrowDown":
-                this.vpTopLeft.y =  Math.max(0, this.vpTopLeft.y - 1);
+                this.vpTopLeft.y =  Math.min(this.hexes[0].length - 1, this.vpTopLeft.y + 1);
                 break;
 
             case "ArrowLeft":
@@ -215,16 +199,36 @@ class HexMap
                 this.vpTopLeft.x =  Math.min(this.hexes.length - 1, this.vpTopLeft.x + 1);
                 break;
 
+            case "+":
+                this.resizeViewPort(-1); // counterintuitive, "+" means zoom in, show more detail which means have fewer cols
+                break;
+
+            case "-":
+                this.resizeViewPort(+1); // counterintuitive, "-" means zoom out, show less detail which means have more cols
+                break;
+
             default:
                 return;
         }
 
-        console.log(this.vpTopLeft);
-
         this.initMap();
-
-        // this.svg.setAttribute("viewBox", `${this.vpTopLeft.x * w} ${this.vpTopLeft.y * h} 1000 866`);
 	}
+
+    resizeViewPort(zoom)
+    {
+        if(zoom > 0) // zoom out i.e. make view port have more columns
+        {
+            this.vpWidthHeight.x = Math.min(this.vpMax, this.vpWidthHeight.x + 1);
+            this.vpWidthHeight.y = Math.min(this.vpMax, this.vpWidthHeight.y + 1);
+        }
+        else // zoom in i.e. make view port have fewer columns
+        {
+            this.vpWidthHeight.x = Math.max(this.vpMin, this.vpWidthHeight.x - 1);
+            this.vpWidthHeight.y = Math.max(this.vpMin, this.vpWidthHeight.y - 1);
+        }
+
+        document.getElementById("mapPanel").style.fontSize = `${100 / (this.vpWidthHeight.y + (this.hexes.length > 1 ? 0.5 : 0))}px`;
+    }
 
     getHexFromId(id)
     {
@@ -247,6 +251,12 @@ class HexMap
 
         if(this.map.contains(this.cursorHex))
             this.map.removeChild(this.cursorHex); // the cursor has to be added last to be the topmost element or it won't appear.
+
+        if(this.cursor.x < this.vpTopLeft.x || this.cursor.x > this.vpTopLeft.x + this.vpWidthHeight.x)
+            return;
+
+        if(this.cursor.y < this.vpTopLeft.y || this.cursor.y > this.vpTopLeft.x + this.vpWidthHeight.y)
+            return;
 
         if(this.displayCursor)
         {

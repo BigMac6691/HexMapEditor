@@ -80,12 +80,32 @@ class Hex
         this.svg.append(this.connectors.getKO(value));
     }
 
-    addMetadata(value)
+    addMetadata(value) // look into ways to have complex - i.e. more than one value for a given key.  E.g. two stars...
     {  
         if(!this.metadata)
             this.metadata = new KOMap();
 
         this.metadata.set(value.key, value.value);
+
+        let md = this.hexMap.metadata.get(value.key);
+
+        if(md.renderType === "Icon") // so looking like I need a separate collection for each render type :(
+        // ya the draw hex method is where the dimensions are set, it only works here when editing
+        {
+            console.log("\n");
+            console.log(this);
+            console.log(value);
+            console.log(md);
+            let use = `${value.key}_v0`;
+            console.log(use);
+            let n = SVG.createUse(use);
+            n.setAttribute("x", this.hexTerrain.x.baseVal.value);
+            n.setAttribute("y", this.hexTerrain.y.baseVal.value);
+            n.setAttribute("width", this.hexTerrain.width.baseVal.value);
+            n.setAttribute("height", this.hexTerrain.height.baseVal.value);
+
+            this.svg.append(n);
+        }
     }
 
     addBorder(value)

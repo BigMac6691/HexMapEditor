@@ -74,8 +74,12 @@ class MetaEditor
                         hex.addBorder({id: borderId});
                 } // for sides
             }
+            else if(md.renderType === "Icon")
+            {
+                console.log("Adding Icon - doing nothing???");
+            }
             else
-                throw new Error(`Unknown rendering rule ${md.renderRules[0].type} for metadata.`);
+                throw new Error(`Unknown rendering rule ${md.renderType} for metadata.`);
         } // for passed meta
     }
 

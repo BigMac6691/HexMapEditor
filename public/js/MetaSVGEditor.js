@@ -44,7 +44,9 @@ class MetaSVGEditor extends FeatureEditor
 
     getKey()
     {
-        return `${this.id.value}_e${this.edge.value}_v${this.variant.value}`;
+        return this.edgeLabel.style.display === "none" 
+                ? `${this.id.value}_v${this.variant.value}`
+                : `${this.id.value}_e${this.edge.value}_v${this.variant.value}`;
     }
 
     init(list) 
@@ -62,7 +64,7 @@ class MetaSVGEditor extends FeatureEditor
                 renderData: new Map()
             };
 
-            this.hexMap.metaTypes.set(k, vMeta);
+            this.hexMap.metadata.set(k, vMeta);
 
             v.renderData.forEach(render =>
             {
@@ -83,7 +85,7 @@ class MetaSVGEditor extends FeatureEditor
         });
 
         console.log(this.items);
-        console.log(this.hexMap.metaTypes);
+        console.log(this.hexMap.metadata);
     }
 
     handleListChange(evt)
@@ -111,6 +113,8 @@ class MetaSVGEditor extends FeatureEditor
     {
         if(!super.handleCreate(evt))
             return;
+
+        console.log("Inside MetaSVGEditor handleCreate()...");
 
         let key = this.getKey();
         let n = SVG.create("symbol", {id: key, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
@@ -144,7 +148,11 @@ class MetaSVGEditor extends FeatureEditor
         this.items.set(key, vMeta);
         this.idList.append(HTML.create("option", {text: key, value: key}));
         this.idList.value = key;
+
+        this.hexMap.metadata.set(vMeta.id, vMeta);
         this.hexMap.defs.append(n);
+
+        console.log(this.hexMap);
 
         this.dispatchEvent(new CustomEvent("change", {detail: {cmd: "create.meta", key: key, value: vMeta}}));
     }
