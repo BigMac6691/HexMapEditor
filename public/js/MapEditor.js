@@ -281,11 +281,11 @@ class MapEditor extends SidePanel
 		while(this.editor.hexMap.defs.lastChild)
             this.editor.hexMap.defs.removeChild(this.editor.hexMap.defs.lastChild);
 
-        this.editor.hexMap.svg.querySelectorAll("symbol").forEach(n => 
-        {
-            if(n.id !== "hexagon")
-                this.editor.hexMap.svg.removeChild(n);
-        });
+        // this.editor.hexMap.svg.querySelectorAll("symbol").forEach(n => 
+        // {
+        //     if(n.id !== "hexagon")
+        //         this.editor.hexMap.svg.removeChild(n);
+        // });
 
 		this.terrainSelect.init(evt.detail.terrainTypes, "terrainTypes");
 		this.edgeSelect.init(evt.detail.edgeTypes, "edgeTypes");

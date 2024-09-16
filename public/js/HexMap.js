@@ -9,7 +9,7 @@ class HexMap
         this.mapHeight = 0; // default
         this.vpMin = 1; // default
         this.vpMax = 1; // default
-        this.svg = SVG.create("svg", {viewBox: `0 0 ${this.viewBoxWidth} ${this.viewBoxHeight}`, preserveAspectRatio: "none", style: `background-color:${this.backgroundColour}`});
+        this.svg = SVG.create("svg", {tabindex: "0", viewBox: `0 0 ${this.viewBoxWidth} ${this.viewBoxHeight}`, preserveAspectRatio: "none", style: `background-color:${this.backgroundColour}`});
         this.defs = SVG.create("defs");
         this.map = SVG.create("g");
         this.svg.append(this.defs, this.map);
@@ -56,7 +56,11 @@ class HexMap
         console.log("HexMap.loadFile");
         console.log(data);
 
-        ["offsetOn", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "vpMin", "vpMax", "backgroundColour", "cursor", "vpTopLeft", "vpWidthHeight"]
+        ["offsetOn", "borderColour", "defaultHexFill", 
+         "textColour", "viewBoxWidth", "viewBoxHeight", 
+         "mapWidth", "mapHeight", "vpMin", "vpMax", 
+         "backgroundColour", "cursor", "vpTopLeft", 
+         "vpWidthHeight"]
             .forEach(v => this[v] = data[v] ?? this[v]);
 
         ["terrainTypes", "edgeTypes", "cornerTypes", "connectorTypes"].forEach(v => this[v] = data[v] ?? this[v]);
@@ -149,8 +153,6 @@ class HexMap
             this.hexes.push(columnHexes);
         });
 
-        document.getElementById("mapPanel").style.fontSize = `${100 / (this.vpWidthHeight.y + (this.hexes.length > 1 ? 0.5 : 0))}px`;
-
         console.log("HexMap loadFile(data) complete...");
     }
 
@@ -175,12 +177,17 @@ class HexMap
     mouseWheel(evt)
     {
         this.resizeViewPort(evt.deltaY);
-
         this.initMap();
     }
 
     handleKeyPress(evt)
 	{
+        // so there is a wee issue with arrow key events working on the SVG and on any focused element that accepts key events
+        // this solves it but it forces the svg element to be focusable and have focus - typically by clicking on it which also sets the curosr...
+        // console.log(document.activeElement);
+        if(document.activeElement !== this.svg)
+            return;
+
         switch(evt.key)
         {
             case "ArrowUp":
@@ -226,8 +233,6 @@ class HexMap
             this.vpWidthHeight.x = Math.max(this.vpMin, this.vpWidthHeight.x - 1);
             this.vpWidthHeight.y = Math.max(this.vpMin, this.vpWidthHeight.y - 1);
         }
-
-        document.getElementById("mapPanel").style.fontSize = `${100 / (this.vpWidthHeight.y + (this.hexes.length > 1 ? 0.5 : 0))}px`;
     }
 
     getHexFromId(id)
@@ -292,6 +297,10 @@ class HexMap
         colLimit += colLimit < this.hexes.length ? 1 : 0;
         rowLimit += rowLimit < this.hexes[0].length ? 1 : 0;
 
+        let colLen = this.hexes ? `${this.hexes.length}`.length : 1;
+        let rowLen = this?.hexes?.[0] ? `${this.hexes[0].length}`.length : 1;
+        let labelOffset = 500 - (31 * (colLen + rowLen) - 6) / 2;
+
         for(let col = startCol; col < colLimit; col++)
         {
             let x = 3 * w * (col - this.vpTopLeft.x);
@@ -299,6 +308,8 @@ class HexMap
 
             for(let row = startRow; row < rowLimit; row++)
             {
+                this.hexes[col][row].buildIdPath(colLen, rowLen, labelOffset);
+
                 let y = h * (row - this.vpTopLeft.y) + offset;
 
                 this.map.append(this.hexes[col][row].svg);
@@ -339,8 +350,6 @@ class HexMap
 
     drawJumps()
     {
-        console.log("drawing jumps...");
-
         let tlHex = this.getHexFromId(`${this.vpTopLeft.x},${this.vpTopLeft.y}`);
         let baseWidth = +tlHex.hexTerrain.width.baseVal.value;
         let baseHeight = +tlHex.hexTerrain.height.baseVal.value;

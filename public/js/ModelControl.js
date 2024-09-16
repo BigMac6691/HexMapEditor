@@ -107,9 +107,6 @@ class ModelControl extends SidePanel
 
         if(modelChange)
         {
-            let mapPanel = document.getElementById("mapPanel");
-            mapPanel.style.fontSize = `${100 / (hexes[0].length + (hexes.length > 1 ? 0.5 : 0))}px`;
-
             this.editor.hexMap.cursor.x = Math.min(hexes.length - 1, this.editor.hexMap.cursor.x);
             this.editor.hexMap.cursor.y = Math.min(hexes[0].length - 1, this.editor.hexMap.cursor.y);
 
