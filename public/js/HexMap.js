@@ -141,11 +141,8 @@ class HexMap
                 if(rowHex.connectors)
                     rowHex.connectors.forEach(v => hex.addConnector(JSON.parse(v)));
 
-                if(rowHex.borders)
-                    rowHex.borders.forEach(v => hex.addBorder({id: v}));
-
                 if(rowHex.metadata)
-                    rowHex.metadata.forEach(v => hex.addMetadata({key: v[0], value: v[1]}));
+                    rowHex.metadata.forEach(v => hex.addMetadata(v));
 
                 columnHexes.push(hex);
             });

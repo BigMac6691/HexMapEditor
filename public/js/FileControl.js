@@ -40,7 +40,9 @@ class FileEditor extends SidePanel
         console.log(this.editor.hexMap);
 
         let data = {};
-        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColour", "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "vpMin", "vpMax", "backgroundColour", "cursor", "vpTopLeft", "vpWidthHeight"]
+        ["offsetOn", "displayCursor", "borderColour", "defaultHexFill", "textColour", 
+         "viewBoxWidth", "viewBoxHeight", "mapWidth", "mapHeight", "vpMin", "vpMax", 
+         "backgroundColour", "cursor", "vpTopLeft", "vpWidthHeight"]
             .forEach(v => data[v] = this.editor.hexMap[v]);
 
         data.defs = [];
@@ -93,8 +95,34 @@ class FileEditor extends SidePanel
                 let temp = {};
 
                 ["col", "row", "terrain"].forEach(v => temp[v] = hex[v]);
-                ["edges", "corners", "connectors", "borders", "content"].forEach(v => temp[v] = hex[v] ? [...hex[v].keys()] : null);
-                ["metadata"].forEach(v => temp[v] = hex[v] ? [...hex[v]] : null);
+                ["edges", "corners", "connectors", "content"].forEach(v => temp[v] = hex[v] ? [...hex[v].keys()] : null);
+
+                let md = [];
+                if(hex.metadata)
+                {
+                    hex.metadata.forEach((v, k) => 
+                    {
+                        console.log("\n");
+                        console.log(k);
+                        console.log(hex.borders);
+                        console.log(hex);
+
+                        let record =
+                        {
+                            key: k,
+                            value: v,
+                            symbolIds: hex.borders 
+                                ? Array.from(hex.borders)
+                                    .filter(([key, value]) => key.startsWith(k))
+                                    .map(([key, value]) => key)
+                                : []
+                        }
+
+                        md.push(record);
+                    });
+                }
+
+                temp.metadata = md;
 
                 rows.push(temp);
             });

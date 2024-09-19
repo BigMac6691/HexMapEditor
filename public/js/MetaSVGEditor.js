@@ -162,7 +162,8 @@ class MetaSVGEditor extends FeatureEditor
         if(!super.handleUpdate(evt))
             return;
 
-        let v = this.items.get(this.getKey());
+        let key = this.getKey();
+        let v = this.items.get(key);
         let r = v.renderData.get(key);
 
         r.svg = this.svg.value;

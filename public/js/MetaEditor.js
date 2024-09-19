@@ -30,49 +30,92 @@ class MetaEditor
 
         for(const [k, v] of mdList)
         {
-            let valueChange = hex?.metadata?.get(k) !== v;
+            console.log(k);
+            console.log(hex.metadata);
+            let key = {key: k, value: v};
+            console.log(key);
 
-            if(!valueChange) // if no change in property value skip to next incoming property
+            // if we are to allow more than one instance of a type of metadata we need to use the complex key.
+            // now the problem is how do we remove something?
+            let valueFound = hex?.metadata?.partialHas(key);
+
+            console.log(valueFound);
+
+            if(valueFound) // if no change in property value skip to next incoming property
                 continue;
 
-            hex.addMetadata({key: k, value: v});
+            // if a value changes remove all svg elements for that key from selected hex only
+            // so in cases where we have multiples this works but where it is singular it doesn't as the structure supports multiples and doesn't know it should be singular
+            //      what happened is that a hex was already Country = Canada, I then tried to set it to Country = Mexico the result is the Country = [Canada, Mexico]
+            let matches = hex.metadata ? hex.metadata.partialGetAll(key, 2): [];
+
+            console.log(matches);
+
+            if(matches.length > 0)
+            {
+                matches[0][1].forEach(n => hex.svg.removeChild(n));
+
+                hex.metadata.deleteKO(matches[0][0])
+            }
 
             let md = this.editor.hexMap.metadata.get(k);
 
+            console.log(md);
+
             if(md.renderType === "Border") // at this point you know that a property value has changed
             {
-                if(valueChange) // if a value changes remove all borders for that value from selected hex only
-                {
-                    md.renderData.forEach(b => 
-                    {
-                        let border = hex?.borders?.get(b[0]);
+                let borders = [];
+                let renderKeys = Array.from(md.renderData.keys());
 
-                        if(border)
-                        {
-                            hex.svg.removeChild(border);
-                            hex.borders.delete(b[0]);
-                        }
-                    });
-                }
+                console.log(renderKeys);
 
                 for(let side = 0; side < 6; side++)
                 {
-                    let borderId = md.renderData[side][0];
+                    let borderId = renderKeys[side];
 
-                    if(v === adj[side]?.metadata?.get(k)) // an adjacent hex has the same property value
+                    console.log(`\nside=${side}, borderId=${borderId}`);
+                    console.log(adj[side]);
+                    console.log(adj[side]?.metadata?.partialHas(key));
+
+                    // need to test this logic extensively ...
+                    if(adj[side]?.metadata?.partialHas(key)) // an adjacent hex has the same property value
                     {
-                        let oppId = md.renderData[(side + 3) % 6][0]; // look for side opposite this side
-                        let oppBorder = adj[side].borders.get(oppId);
+                        console.log("adjacent side has matching metadata!");
+                        let oppId = renderKeys[(side + 3) % 6]; // look for side opposite this side
+                        let borderSVGList = adj[side].metadata.partialGet(key);
+                        let oppBorder = borderSVGList.filter(b => b.href.baseVal === `#${oppId}`);
+
+                        console.log(oppBorder);
 
                         if(oppBorder)
                         {
-                            adj[side].svg.removeChild(oppBorder);
-                            adj[side].borders.delete(oppId);
+                            oppBorder.forEach(b => b.remove());
+                            console.log(adj[side].metadata);
+
+                            let target = adj[side].metadata.partialGet(key, 2);
+                            let keepSymbolId = target[0].symbolIds.filter(i => i !== oppId);
+                            let keepSVG = borderSVGList.filter(b => b.href.baseVal !== `#${oppId}`);
+
+                            console.log(target);
+                            console.log(keepSymbolId);
+                            console.log(keepSVG);
+                            
+                            adj[side].metadata.deleteKO(target[0]);
+                            adj[side].metadata.setKO({key: k, value: v, symbolIds: keepSymbolId}, keepSVG)
+
+                            console.log(adj[side].metadata);
                         }
                     }
-                    else // do we add matching border on other side?
-                        hex.addBorder({id: borderId});
+                    else // just add the border
+                    {
+                        console.log("add border -> " + borderId);
+                        borders.push(borderId);
+                        // hex.addBorder({id: borderId}); // we are dropping this method.
+                    }
                 } // for sides
+
+                console.log(borders);
+                hex.addMetadata({key: k, value: v, symbolIds: borders});
             }
             else if(md.renderType === "Icon")
             {
