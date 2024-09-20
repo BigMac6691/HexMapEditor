@@ -142,7 +142,7 @@ class HexMap
                     rowHex.connectors.forEach(v => hex.addConnector(JSON.parse(v)));
 
                 if(rowHex.metadata)
-                    rowHex.metadata.forEach(v => hex.addMetadata(v));
+                    rowHex.metadata.forEach(v => hex.addMetadata(JSON.parse(v)));
 
                 columnHexes.push(hex);
             });

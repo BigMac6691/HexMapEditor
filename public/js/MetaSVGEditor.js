@@ -15,6 +15,8 @@ class MetaSVGEditor extends FeatureEditor
         "<p>The SVG you provided to render the connector is captured in a <code>symbol</code> with <code>viewBox</code> of 0 0 1000 866, <code>preserveAspectRatio</code> and <code>pointer-events</code> set to 'none'. The symbol id is composed as follows: ID_eEdge_vVariant, example: Road_e0_v0 is ID of Road to top edge variant 0.</p>" +
         "<p><b>NOTE</b> connectors are drawn immediatley after edges and corners.</p>";
 
+        this.allowMuliples = HTML.create("input", {type: "checkbox"});
+
         this.inputType = new ComboRadioSelect(["Select", "Number", "String"], "metaInputType");
         this.inputType.selectDisplay = "inline-block";
         this.inputType.show(true);
@@ -35,6 +37,7 @@ class MetaSVGEditor extends FeatureEditor
         this.variant = HTML.create("input", {type: "number", value: 0, min: 0});
 
         this.parts.append(
+            HTML.createLabel("Allow Multiples: ", this.allowMuliples),
             HTML.createLabel("Input: ", this.inputType.select),
             this.selectListLabel,
             HTML.createLabel("Render: ", this.renderType.select),

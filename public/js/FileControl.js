@@ -74,7 +74,7 @@ class FileEditor extends SidePanel
         if(this.editor.hexMap.metadata)
             this.editor.hexMap.metadata.forEach((v, k) => 
             {
-                let out = {...v, renderData: Array.from(v.renderData).map(([key, value]) => 
+                let out = {...v, allowMultiples: false, renderData: Array.from(v.renderData).map(([key, value]) => 
                 {
                     let {["node"]: _, ...newValue} = value;
                     return [key, newValue];
@@ -95,34 +95,7 @@ class FileEditor extends SidePanel
                 let temp = {};
 
                 ["col", "row", "terrain"].forEach(v => temp[v] = hex[v]);
-                ["edges", "corners", "connectors", "content"].forEach(v => temp[v] = hex[v] ? [...hex[v].keys()] : null);
-
-                let md = [];
-                if(hex.metadata)
-                {
-                    hex.metadata.forEach((v, k) => 
-                    {
-                        console.log("\n");
-                        console.log(k);
-                        console.log(hex.borders);
-                        console.log(hex);
-
-                        let record =
-                        {
-                            key: k,
-                            value: v,
-                            symbolIds: hex.borders 
-                                ? Array.from(hex.borders)
-                                    .filter(([key, value]) => key.startsWith(k))
-                                    .map(([key, value]) => key)
-                                : []
-                        }
-
-                        md.push(record);
-                    });
-                }
-
-                temp.metadata = md;
+                ["edges", "corners", "connectors", "metadata", "content"].forEach(v => temp[v] = hex[v] ? [...hex[v].keys()] : null);
 
                 rows.push(temp);
             });
