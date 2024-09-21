@@ -15,7 +15,7 @@ class MetaSVGEditor extends FeatureEditor
         "<p>The SVG you provided to render the connector is captured in a <code>symbol</code> with <code>viewBox</code> of 0 0 1000 866, <code>preserveAspectRatio</code> and <code>pointer-events</code> set to 'none'. The symbol id is composed as follows: ID_eEdge_vVariant, example: Road_e0_v0 is ID of Road to top edge variant 0.</p>" +
         "<p><b>NOTE</b> connectors are drawn immediatley after edges and corners.</p>";
 
-        this.allowMuliples = HTML.create("input", {type: "checkbox"});
+        this.allowMultiples = HTML.create("input", {type: "checkbox"});
 
         this.inputType = new ComboRadioSelect(["Select", "Number", "String"], "metaInputType");
         this.inputType.selectDisplay = "inline-block";
@@ -37,7 +37,7 @@ class MetaSVGEditor extends FeatureEditor
         this.variant = HTML.create("input", {type: "number", value: 0, min: 0});
 
         this.parts.append(
-            HTML.createLabel("Allow Multiples: ", this.allowMuliples),
+            HTML.createLabel("Allow Multiples: ", this.allowMultiples),
             HTML.createLabel("Input: ", this.inputType.select),
             this.selectListLabel,
             HTML.createLabel("Render: ", this.renderType.select),
@@ -61,6 +61,7 @@ class MetaSVGEditor extends FeatureEditor
             let vMeta =
             {
                 id: k, 
+                allowMultiples: v.allowMultiples,
                 renderType: v.renderType,
                 inputType: v.inputType,
                 selectList: v.selectList,
@@ -101,6 +102,7 @@ class MetaSVGEditor extends FeatureEditor
         console.log(v);
 
         this.id.value = v.id;
+        this.allowMultiples.checked = v.allowMultiples;
         this.inputType.setValue(v.inputType);
         this.selectList.value = v.selectList;
         this.renderType.setValue(v.renderType);
@@ -139,6 +141,7 @@ class MetaSVGEditor extends FeatureEditor
             vMeta =
             {
                 id: this.id.value, 
+                allowMultiples: this.allowMultiples.checked,
                 renderType: this.renderType.value,
                 inputType: this.inputType.value,
                 selectList: this.selectList.value.split(","),
@@ -169,6 +172,7 @@ class MetaSVGEditor extends FeatureEditor
         let v = this.items.get(key);
         let r = v.renderData.get(key);
 
+        v.allowMultiples = this.allowMultiples.checked; // may need to trigger a review of all existing hexes if this goes to false
         r.svg = this.svg.value;
         r.node.innerHTML = this.svg.value;
     }
@@ -185,6 +189,7 @@ class MetaSVGEditor extends FeatureEditor
         this.items.delete(key);
 
         this.id.value = "";
+        this.allowMultiples.checked = false;
         this.selectList.value = "";
         this.edge.value = 0;
         this.variant.value = 0;

@@ -74,7 +74,7 @@ class FileEditor extends SidePanel
         if(this.editor.hexMap.metadata)
             this.editor.hexMap.metadata.forEach((v, k) => 
             {
-                let out = {...v, allowMultiples: false, renderData: Array.from(v.renderData).map(([key, value]) => 
+                let out = {...v, renderData: Array.from(v.renderData).map(([key, value]) => 
                 {
                     let {["node"]: _, ...newValue} = value;
                     return [key, newValue];
@@ -102,6 +102,9 @@ class FileEditor extends SidePanel
 
             data.hexes.push(rows);
         });
+
+        data.fileVersion = "v1";
+        data.fileSave = new Date().toISOString();
 
         localStorage.setItem(fileName, JSON.stringify(data));
         console.log(data);

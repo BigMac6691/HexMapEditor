@@ -17,16 +17,7 @@ class MetaEditor
         if(mdList.size === 0)
             return;
 
-        let offset = this.editor.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
-        let adj = 
-        [
-            this.editor.hexMap.getHexFromId(`${hex.col},${hex.row - 1}`),
-            this.editor.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset}`),
-            this.editor.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset + 1}`),
-            this.editor.hexMap.getHexFromId(`${hex.col},${hex.row + 1}`),
-            this.editor.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset + 1}`),
-            this.editor.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
-        ];
+        let adj = this.editor.hexMap.getAdjacent(hex);
 
         for(const [k, v] of mdList)
         {
@@ -38,18 +29,19 @@ class MetaEditor
             if(valueFound) // if no change in property value skip to next incoming property
                 continue;
 
+            let md = this.editor.hexMap.metadata.get(k);
+
             // if a value changes remove all svg elements for that key from selected hex only
             // so in cases where we have multiples this works but where it is singular it doesn't as the structure supports multiples and doesn't know it should be singular
             //      what happened is that a hex was already Country = Canada, I then tried to set it to Country = Mexico the result is the Country = [Canada, Mexico]
-            let matches = hex.metadata ? hex.metadata.partialGetAll(key, 2): []; // returns an array of arrays where the inner array is key-value pair
+            let matchKey = md.allowMultiples ? key : {key: k};
+            let matches = hex.metadata ? hex.metadata.partialGetAll(matchKey, 2): []; // returns an array of arrays where the inner array is key-value pair
 
             if(matches.length > 0)
             {
                 matches[0][1].forEach(n => n.remove()); // remove all visual elements in the current hex for this metadata
                 hex.metadata.deleteKO(matches[0][0]); // remove the metadata record itself
             }
-
-            let md = this.editor.hexMap.metadata.get(k);
 
             if(md.renderType === "Border") 
             {

@@ -366,4 +366,20 @@ class HexMap
             this.map.append(j.svg);
         });
     }
+
+    getAdjacent(hex)
+    {
+        let offset = this.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
+        let adj = 
+        [
+            this.getHexFromId(`${hex.col},${hex.row - 1}`),
+            this.getHexFromId(`${hex.col + 1},${hex.row + offset}`),
+            this.getHexFromId(`${hex.col + 1},${hex.row + offset + 1}`),
+            this.getHexFromId(`${hex.col},${hex.row + 1}`),
+            this.getHexFromId(`${hex.col - 1},${hex.row + offset + 1}`),
+            this.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
+        ];
+
+        return adj;
+    }
 }
