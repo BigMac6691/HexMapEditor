@@ -26,12 +26,24 @@ class HexMap
 
         this.boundKeypress = this.handleKeyPress.bind(this);
 
-        this.svg.addEventListener("mouseenter", () => document.addEventListener("keydown", this.boundKeypress));
-        this.svg.addEventListener("mouseleave", () => document.removeEventListener("keydown", this.boundKeypress));
+        this.svg.addEventListener("mouseenter", () => 
+        {
+            this.svg.append(this.pointer);
+            document.addEventListener("keydown", this.boundKeypress);
+        });
+        this.svg.addEventListener("mouseleave", () => 
+        {
+            this.pointer.remove();
+            document.removeEventListener("keydown", this.boundKeypress)
+        });
         
         this.hexagonSymbol = SVG.create("symbol", {id: "hexagon", viewBox: "0 0 1000 866", preserveAspectRatio: "none"});
         this.hexagonSymbol.append(SVG.create("polygon", {points: "250,0 750,0 1000,433 750,866 250,866 0,433"}));
         this.svg.append(this.hexagonSymbol);
+
+        this.pointerSymbol = SVG.create("symbol", {id: "pointerSymbol", viewBox: "0 0 32 32", preserveAspectRatio: "none"});
+        this.pointerSymbol.append(SVG.create("path", {d: "M 16 0 L 16 32 M 0 16 L 32 16"}));
+        this.svg.append(this.pointerSymbol);
 
         this.terrainTypes = new Set();
         this.terrain = new Map();
@@ -49,6 +61,7 @@ class HexMap
         this.vpTopLeft = new DOMPoint(0, 0);
         this.vpWidthHeight = new DOMPoint(4, 4);
         this.cursorHex = SVG.createUse("hexagon", {id: "cursor", stroke: "#ff0000", fill: "none", "pointer-events": "none"});
+        this.pointer = SVG.createUse("pointerSymbol", {id: "pointer", width: "32", height: "32", stroke: "#00ff00", "stroke-width": "2", "pointer-events": "none"});
     }
 
     loadFile(data)
@@ -155,8 +168,10 @@ class HexMap
 
     mouseMove(evt)
     {
-        if(!evt.target.id.includes(","))
-            return;
+        let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.svg.getScreenCTM().inverse());
+
+        this.pointer.setAttribute("x", pt.x - 16);
+        this.pointer.setAttribute("y", pt.y - 16);
     }
 
     mouseClick(evt)

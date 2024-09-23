@@ -38,9 +38,9 @@ class HexMapEditor
         let div4 = this.svgEditorControl.div; 
         
         // Individual hex editor - for tweaking details
-        let div5 = HTML.create("div", null, ["controlDiv"]);
-        div5.append(HTML.create("h3", {textContent: "Hex Editor"}));
-
+        this.hexEditor = new HexEditor("Hex Editor", this);
+        let div5 = this.hexEditor.div;
+        
         document.getElementById("controlPanel").append(div0, div1, div3, div4, div5);
     }
 }

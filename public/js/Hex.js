@@ -14,9 +14,6 @@ class Hex
         " m 6 0 l 25 0 l 0 -50 l -25 0 l 0 25 l 25 0 m 0 25" // 9
     ];
 
-    // NOTE a lot of logic here supports the editor - we don't want that!
-    // When adding something here it is coming from the load map process
-    // therefore it should just be straight up assignments not checking etc.
     constructor(m, col, row)
     {
         this.hexMap = m;
@@ -68,12 +65,12 @@ class Hex
         this.hexTerrain.setAttribute("fill", this.hexMap.terrain.get(value.type)[value.variant].fill);
     }
 
-    addEdge(value) // {edge (none, river), index, variant}
+    addEdge(value) // {type (beach, river), index, variant}
     {
         if(!this.edges)
             this.edges = new KOMap();
 
-        let n = SVG.createUse(`${value.edge}_e${value.edgeIndex}_v${value.variant}`);
+        let n = SVG.createUse(`${value.type}_e${value.edgeIndex}_v${value.variant}`);
         n.setAttribute("x", this.hexTerrain.x.baseVal.value);
         n.setAttribute("y", this.hexTerrain.y.baseVal.value);
         n.setAttribute("width", this.hexTerrain.width.baseVal.value);
@@ -83,12 +80,12 @@ class Hex
         this.svg.append(this.edges.getKO(value));
     }
 
-    addCorner(value)
+    addCorner(value) // type, index corner type, variant
     {
         if(!this.corners)
             this.corners = new KOMap();
 
-        let n = SVG.createUse(`${value.edge}_e${value.edgeIndex}_c${value.cornerType}_v${value.variant}`);
+        let n = SVG.createUse(`${value.type}_e${value.edgeIndex}_c${value.cornerType}_v${value.variant}`);
         n.setAttribute("x", this.hexTerrain.x.baseVal.value);
         n.setAttribute("y", this.hexTerrain.y.baseVal.value);
         n.setAttribute("width", this.hexTerrain.width.baseVal.value);
@@ -98,12 +95,12 @@ class Hex
         this.svg.append(this.corners.getKO(value));
     }
 
-    addConnector(value) // {edge (none, rail), index, variant}
+    addConnector(value) // {type (road, rail), index, variant}
     {
         if(!this.connectors)
             this.connectors = new KOMap();
 
-        let n = SVG.createUse(`${value.edge}_e${value.edgeIndex}_v${value.variant}`);
+        let n = SVG.createUse(`${value.type}_e${value.edgeIndex}_v${value.variant}`);
         n.setAttribute("x", this.hexTerrain.x.baseVal.value);
         n.setAttribute("y", this.hexTerrain.y.baseVal.value);
         n.setAttribute("width", this.hexTerrain.width.baseVal.value);

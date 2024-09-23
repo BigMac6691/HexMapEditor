@@ -17,23 +17,15 @@ class MetaEditor
         if(mdList.size === 0)
             return;
 
-        let adj = this.editor.hexMap.getAdjacent(hex);
-
         for(const [k, v] of mdList)
         {
             let key = {key: k, value: v};
-
-            // now the problem is how do we remove something?
             let valueFound = hex?.metadata?.partialHas(key);
 
             if(valueFound) // if no change in property value skip to next incoming property
                 continue;
 
             let md = this.editor.hexMap.metadata.get(k);
-
-            // if a value changes remove all svg elements for that key from selected hex only
-            // so in cases where we have multiples this works but where it is singular it doesn't as the structure supports multiples and doesn't know it should be singular
-            //      what happened is that a hex was already Country = Canada, I then tried to set it to Country = Mexico the result is the Country = [Canada, Mexico]
             let matchKey = md.allowMultiples ? key : {key: k};
             let matches = hex.metadata ? hex.metadata.partialGetAll(matchKey, 2): []; // returns an array of arrays where the inner array is key-value pair
 
@@ -47,6 +39,7 @@ class MetaEditor
             {
                 let borders = [];
                 let renderKeys = Array.from(md.renderData.keys());
+                let adj = this.editor.hexMap.getAdjacent(hex);
 
                 for(let side = 0; side < 6; side++)
                 {
@@ -81,6 +74,63 @@ class MetaEditor
             else if(md.renderType === "Icon")
             {
                 console.log("Adding Icon - doing nothing???");
+            }
+            else
+                throw new Error(`Unknown rendering rule ${md.renderType} for metadata.`);
+        } // for passed meta
+    }
+    
+    deleteMetadata(hex)
+    {
+        let mdList = new Map();
+        for(const [k, v] of this.metadata)
+            if(v.check.checked)
+                mdList.set(k, v.value.value);
+
+        if(mdList.size === 0)
+            return;
+
+        for(const [k, v] of mdList)
+        {
+            let key = {key: k, value: v};
+            let valueFound = hex?.metadata?.partialHas(key);
+
+            if(!valueFound) // only delete if the value is found
+                continue;
+
+            let md = this.editor.hexMap.metadata.get(k);
+            let matches = hex.metadata ? hex.metadata.partialGetAll(key, 2): []; // returns an array of arrays where the inner array is key-value pair
+
+            if(matches.length > 0)
+            {
+                matches[0][1].forEach(n => n.remove()); // remove all visual elements in the current hex for this metadata
+                hex.metadata.deleteKO(matches[0][0]); // remove the metadata record itself
+            }
+
+            if(md.renderType === "Border") 
+            {
+                let borders = [];
+                let renderKeys = Array.from(md.renderData.keys());
+                let adj = this.editor.hexMap.getAdjacent(hex);
+
+                for(let side = 0; side < 6; side++)
+                {
+                    if(adj[side]?.metadata?.partialHas(key)) // an adjacent hex has the same property value
+                    {
+                        let oppId = renderKeys[(side + 3) % 6]; // look for side opposite this side
+                        let oppMeta = adj[side].metadata.partialGet(key, 2);
+
+                        borders = [...oppMeta[0].symbolIds, oppId];
+                        oppMeta[1].forEach(n => n.remove());
+                        adj[side].metadata.deleteKO(oppMesta[0]);
+
+                        adj[side].addMetadata({key: k, value: v, symbolIds: borders});
+                    }
+                } // for sides
+            }
+            else if(md.renderType === "Icon")
+            {
+                console.log("Deleting Icon - doing nothing???");
             }
             else
                 throw new Error(`Unknown rendering rule ${md.renderType} for metadata.`);

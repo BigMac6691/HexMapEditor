@@ -7,7 +7,18 @@ class MapEditor extends SidePanel
         this.editor = editor;
         this.display = "flex";
 		this.painting = false;
+		this.deleting = false;
         this.content.classList.add("featureCol");
+
+		this.cursorSVG =
+		[
+			"<path d='M 16 0 L 16 32 M 0 16 L 32 16' stroke='#000000' stroke-width='5' />",
+			"<path d='M 16 0 L 16 32 M 0 16 L 32 16' stroke='#00ff00' stroke-width='2' />",
+			"<path d='M 16 0 L 16 32 M 0 16 L 32 16' stroke='#ff0000' stroke-width='2' />",
+			"<circle cx='16' cy='16' r='13' fill='none' stroke='#000000' stroke-width='5' />",
+			"<circle cx='16' cy='16' r='13' fill='none' stroke='#00ff00' stroke-width='2' />",
+			"<circle cx='16' cy='16' r='13' fill='none' stroke='#ff0000' stroke-width='2' />"
+		];
 
 		this.boundKeypress = this.handleKeyPress.bind(this);
 
@@ -15,8 +26,9 @@ class MapEditor extends SidePanel
 		this.editor.hexMap.svg.addEventListener("click", this.handleMouseClick.bind(this));
 		this.editor.hexMap.svg.addEventListener("mouseenter", () => 
 		{
-			this.editor.hexMap.svg.style.cursor = "crosshair";
+			this.editor.hexMap.svg.style.cursor = "none";
 			document.addEventListener("keydown", this.boundKeypress);
+			this.updatePointer();
 		});
 
 		this.editor.hexMap.svg.addEventListener("mouseleave", () => 
@@ -81,6 +93,7 @@ class MapEditor extends SidePanel
 
 	handleKeyPress(evt)
 	{
+		evt.preventDefault();
 		this.zoom.innerHTML = `Zoom: ${this.editor.hexMap.vpTopLeft.x},${this.editor.hexMap.vpTopLeft.y} - ${this.editor.hexMap.vpWidthHeight.x},${this.editor.hexMap.vpWidthHeight.y}`;
 
 		// jumps are special as they cover more than one hex
@@ -90,13 +103,16 @@ class MapEditor extends SidePanel
 			return;
 		}
 		
-		if(evt.key === "Control")
+		if(evt.key === "p" || evt.key === "P")
 			this.painting = !this.painting;
 
-		if(this.painting)
-            this.editor.hexMap.svg.style.cursor = "cell";
-        else
-            this.editor.hexMap.svg.style.cursor = "crosshair";
+		if(evt.key === "d" || evt.key === "D")
+			this.deleting = !this.deleting;
+
+		this.updatePointer();
+
+		let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.editor.hexMap.svg.getScreenCTM().inverse());
+        this.mouseMove.innerHTML = `Mouse location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} in hex ${evt.target.id} mode: ${this.painting}, ${this.deleting}`;
 	}
 
 	handleMouseMove(evt)
@@ -105,7 +121,7 @@ class MapEditor extends SidePanel
             return;
 
         let pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(this.editor.hexMap.svg.getScreenCTM().inverse());
-        this.mouseMove.innerHTML = `Mouse location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} in hex ${evt.target.id} isPainting ${this.painting}`;
+        this.mouseMove.innerHTML = `Mouse location: ${Math.trunc(pt.x * 100) / 100}, ${Math.trunc(pt.y * 100) / 100} in hex ${evt.target.id} mode: ${this.painting}, ${this.deleting}`;
 
 		if(!this.painting)
 			return;
@@ -130,13 +146,16 @@ class MapEditor extends SidePanel
 
 	updateHex(hex, pt)
 	{
+		console.log(this.menu.getSelected());
+
 		switch(this.menu.getSelected())
 		{
 			case "None":
 				break;
 
 			case "Terrain":
-				hex.setTerrain({type: this.terrainSelect.value, variant: 0});
+				if(!this.deleting)
+					hex.setTerrain({type: this.terrainSelect.value, variant: 0});
 				break;
 
 			case "Edges":
@@ -152,12 +171,25 @@ class MapEditor extends SidePanel
 				break;
 
 			case "Meta":
-				this.metaEditor.addMetadata(hex);
+				if(this.deleting)
+					this.metaEditor.deleteMetadata(hex);
+				else
+					this.metaEditor.addMetadata(hex);
 				break;
 
 			default:
 				throw new Error(`Unknown map menu [${this.menu.getSelected()}]`);
 		}
+	}
+
+	updatePointer()
+	{
+		let html = this.cursorSVG[0] + (this.deleting ? this.cursorSVG[2] : this.cursorSVG[1]);
+
+		if(this.painting)
+			html += this.cursorSVG[3] + (this.deleting ? this.cursorSVG[5] : this.cursorSVG[4]);
+
+		this.editor.hexMap.pointerSymbol.innerHTML = html;
 	}
 
 	handleNone(hex, map, value)
@@ -208,7 +240,7 @@ class MapEditor extends SidePanel
         let curEdgeType = null;
         let value = {"type" : this.edgeSelect.value, "edgeIndex" : edgeIndex, "variant" : 0};
 
-        if(value.edge === "None")
+        if(this.deleting) // bug with corners when there is another edge, currently completely removes the corner
         {
             curEdgeType = hex?.edges?.partialHas({"edgeIndex": edgeIndex}) ? hex.edges.partialGet({"edgeIndex": edgeIndex}, 2)[0].edge : null;
             this.handleNone(hex, hex.edges, value);
@@ -219,17 +251,7 @@ class MapEditor extends SidePanel
             hex.addEdge(value);
         }
         
-		// Get surrounding adjacent hexes
-        let offset = this.editor.hexMap.offsetOn ? (hex.col % 2 ? -1 : 0) : (hex.col % 2 ? 0 : -1);
-        let adj = 
-        [
-            this.editor.hexMap.getHexFromId(`${hex.col},${hex.row - 1}`),
-            this.editor.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset}`),
-            this.editor.hexMap.getHexFromId(`${hex.col + 1},${hex.row + offset + 1}`),
-            this.editor.hexMap.getHexFromId(`${hex.col},${hex.row + 1}`),
-            this.editor.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset + 1}`),
-            this.editor.hexMap.getHexFromId(`${hex.col - 1},${hex.row + offset}`)
-        ];
+		let adj = this.editor.hexMap.getAdjacent(hex); // Get surrounding adjacent hexes
 
         this.addCorner(hex, adj, curEdgeType, (edgeIndex + 5) % 6); // corner before edge
         this.addCorner(hex, adj, curEdgeType, edgeIndex); // corner after edge
@@ -267,7 +289,7 @@ class MapEditor extends SidePanel
 
         let value = {"type": this.connectorSelect.value, "edgeIndex": edgeIndex, "variant": 0};
 
-        if(value.edge === "None")
+        if(this.deleting)
             this.handleNone(hex, hex.connectors, value);
         else if(!hex.connectors || !hex.connectors.partialHas(value))
             hex.addConnector(value);
