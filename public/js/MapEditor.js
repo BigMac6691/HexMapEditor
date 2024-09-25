@@ -146,8 +146,6 @@ class MapEditor extends SidePanel
 
 	updateHex(hex, pt)
 	{
-		console.log(this.menu.getSelected());
-
 		switch(this.menu.getSelected())
 		{
 			case "None":

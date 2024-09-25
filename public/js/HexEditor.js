@@ -7,7 +7,7 @@ class HexEditor extends SidePanel
         this.editor = editor;
         this.display = "flex";
         this.content.classList.add("featureCol");
-        this.inputMap = new Map(); // key input, value original value.  Need more work, need to know what aspect is being altered: edge, corner, connector, etc.
+        this.inputMap = new Map(); // key input, value what type it is, edge corner, etc.
         this.boundTextListener = this.handleTextChange.bind(this);
 
         this.editor.hexMap.svg.addEventListener("click", this.handleMouseClick.bind(this));
@@ -21,11 +21,13 @@ class HexEditor extends SidePanel
     {
         this.inputMap.clear();
         this.content.innerHTML = "";
+
+        this.hex = hex;
         this.hexId.innerHTML = `Hex Id: ${hex.col}, ${hex.row}`;
 
         this.content.append(this.hexId, HTML.create("p", {innerHTML: "<b>Terrain</b>"}));
         let n = HTML.create("input", {type: "text", value: JSON.stringify(hex.terrain), "flex-grow": "1"}, null, {change: this.boundTextListener});
-        this.inputMap.set(n, hex.terrain);
+        this.inputMap.set(n, {type: "terrain", original: JSON.stringify(hex.terrain)});
         this.content.append(n);
 
         ["edges", "corners", "connectors", "metadata", "content"].forEach(f => 
@@ -37,7 +39,7 @@ class HexEditor extends SidePanel
                 hex[f].forEach((v, k) =>
                 {
                     n = HTML.create("input", {type: "text", value: k, "flex-grow": "1"}, null, {change: this.boundTextListener});
-                    this.inputMap.set(n, k);
+                    this.inputMap.set(n, {type: f, original: k});
                     this.content.append(n);
                 });
             }
@@ -46,7 +48,58 @@ class HexEditor extends SidePanel
 
     handleTextChange(evt)
     {
-        console.log(evt);
+        let newValue = ""
+        
+        try
+        {
+            newValue = JSON.parse(evt.target.value);
+        }
+        catch(error)
+        {
+            console.log(error);
+
+            alert("JSON parsing error!\nAction aborted, see console for details.");
+            return;
+        }
+        
+        let input = this.inputMap.get(evt.target);
+
+        switch(input.type)
+        {
+            case "terrain":
+                this.hex.setTerrain(newValue);
+                break;
+
+            case "edges":
+                this.hex.edges.get(input.original).remove();
+                this.hex.edges.delete(input.original);
+                this.hex.addEdge(newValue);
+                break;
+
+            case "corners":
+                this.hex.corners.get(input.original).remove();
+                this.hex.corners.delete(input.original);
+                this.hex.addCorner(newValue);
+                break;
+
+            case "connectors":
+                this.hex.connectors.get(input.original).remove();
+                this.hex.connectors.delete(input.original);
+                this.hex.addConnector(newValue);
+                break;
+            
+            case "metadata":
+                this.hex.metadata.get(input.original).forEach(n => n.remove());
+                this.hex.metadata.delete(input.original);
+                this.hex.addMetadata(newValue);
+                break;
+
+            case "content":
+                break;
+
+            default:
+                throw new Error(`Unknown hex edit type [${input.type}]`);
+        }
     }
 
     handleMouseClick(evt)

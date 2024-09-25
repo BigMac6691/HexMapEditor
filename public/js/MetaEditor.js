@@ -122,7 +122,7 @@ class MetaEditor
 
                         borders = [...oppMeta[0].symbolIds, oppId];
                         oppMeta[1].forEach(n => n.remove());
-                        adj[side].metadata.deleteKO(oppMesta[0]);
+                        adj[side].metadata.deleteKO(oppMeta[0]);
 
                         adj[side].addMetadata({key: k, value: v, symbolIds: borders});
                     }
