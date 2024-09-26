@@ -87,9 +87,6 @@ class MetaSVGEditor extends FeatureEditor
                 this.idList.append(HTML.create("option", {text: key, value: key}));
             });
         });
-
-        console.log(this.items);
-        console.log(this.hexMap.metadata);
     }
 
     handleListChange(evt)

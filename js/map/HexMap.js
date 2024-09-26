@@ -129,8 +129,6 @@ class HexMap
                 this.defs.append(n);
             });
         });
-        console.log("metadata");
-        console.log(this.metadata);
 
         this.jumps = new Map();
         data.jumps.forEach(v => this.jumps.set(this.jumpNextIndex++, v));
