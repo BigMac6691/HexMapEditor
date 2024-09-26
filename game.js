@@ -60,7 +60,7 @@ app.get('/js/editor.js', (req, res) =>
     }); // loop for files in each folder
   }); // loop for source folders
 
-  logger.info(`Stats: file count ${count}, total size ${merge.length}`);
+  logger.info(`Stats: file count ${count}, total size ${merge.length}, total lines ${totalLines}`);
 
   res.setHeader('Content-Type', 'application/javascript');
   res.send(merge);
