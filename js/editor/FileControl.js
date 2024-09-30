@@ -103,11 +103,33 @@ class FileEditor extends SidePanel
             data.hexes.push(rows);
         });
 
+        data.filename = fileName;
         data.fileVersion = "v1";
         data.fileSave = new Date().toISOString();
 
         localStorage.setItem(fileName, JSON.stringify(data));
         console.log(data);
+        this.saveToServer(data);
+    }
+
+    saveToServer(data)
+    {
+        console.log("saveToServer() called...");
+        fetch('/savemap', 
+        {
+            method: 'POST',
+            headers: 
+            {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data) // Convert your data to JSON
+        })
+        .then(response => response.json())
+        .then(data => 
+        {
+            console.log(data.message); // Handle the response
+        })
+        .catch(error => console.error('Error:', error));
     }
 
     handleLoad(evt)
@@ -121,6 +143,8 @@ class FileEditor extends SidePanel
         }
 
         let file = localStorage.getItem(fileName);
+
+        this.loadFromServer(fileName);
         
         if(!file)
         {
@@ -146,5 +170,25 @@ class FileEditor extends SidePanel
             console.log(e);
             alert(`Exception processing ${fileName}, see console for more details.`);
         }
+    }
+
+    loadFromServer(filename)
+    {
+        console.log("loadFromServer() called...");
+        fetch('/loadmap', 
+        {
+            method: 'POST',
+            headers: 
+            {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({"filename": filename}) // Convert your data to JSON
+        })
+        .then(response => response.json())
+        .then(data => 
+        {
+            console.log(data); // Handle the response
+        })
+        .catch(error => console.error('Error:', error));
     }
 }

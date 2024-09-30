@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const http = require('http');
 const path = require('path');
 const fs = require('fs');
@@ -10,6 +11,7 @@ const server = http.createServer(app);
 
 // Set up static
 app.use(express.static(path.join(__dirname, '/public/')));
+app.use(bodyParser.json());
 
 // Set up routes
 app.get('/', (req, res) => 
@@ -65,6 +67,47 @@ app.get('/js/editor.js', (req, res) =>
   res.setHeader('Content-Type', 'application/javascript');
   res.send(merge);
 });
+
+app.post('/savemap', (req, res) => 
+{
+  const body = req.body;
+
+  console.log(`Saving... ${body.filename}`);
+
+  try
+  {
+    fs.writeFileSync(path.join(__dirname, `/savedmaps/${body.filename}`), JSON.stringify(body));
+
+    res.json({message: `File ${body.filename} saved successfully!`});
+  }
+  catch(error)
+  {
+    console.log(error);
+
+    res.json({message: "Error saving file!"});
+  }
+});
+
+app.post('/loadmap', (req, res) => 
+  {
+    const body = req.body;
+  
+    console.log(`Loading... ${body.filename}`);
+  
+    try
+    {
+      const content = fs.readFileSync(path.join(__dirname, `/savedmaps/${body.filename}`), "utf-8");
+  
+      res.json(JSON.parse(content));
+    }
+    catch(error)
+    {
+      console.log(error);
+      
+      res.json({message: "Error saving file!"});
+    }
+  });
+  
 
 // Start the server
 const port = 3000;
