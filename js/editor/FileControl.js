@@ -163,7 +163,7 @@ class FileEditor extends SidePanel
 
             this.fileName.innerHTML = fileName;
 
-            this.dispatchEvent(new CustomEvent("mapLoad", {detail: data}));
+            // this.dispatchEvent(new CustomEvent("mapLoad", {detail: data}));
         }
         catch(e)
         {
@@ -182,12 +182,13 @@ class FileEditor extends SidePanel
             {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({"filename": filename}) // Convert your data to JSON
+            body: JSON.stringify({"filename": filename}) // Convert data to JSON
         })
         .then(response => response.json())
         .then(data => 
         {
-            console.log(data); // Handle the response
+            console.log(data); 
+            this.dispatchEvent(new CustomEvent("mapLoad", {detail: data}));
         })
         .catch(error => console.error('Error:', error));
     }

@@ -73,7 +73,11 @@ class MetaEditor
             }
             else if(md.renderType === "Icon")
             {
-                console.log("Adding Icon - doing nothing???");
+                let renderKeys = Array.from(md.renderData.keys());
+                let icons = [];
+                icons.push(renderKeys[0]);
+
+                hex.addMetadata({key: k, value: v, symbolIds: icons});
             }
             else
                 throw new Error(`Unknown rendering rule ${md.renderType} for metadata.`);

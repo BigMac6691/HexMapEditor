@@ -190,7 +190,7 @@ class MapEditor extends SidePanel
 		this.editor.hexMap.pointerSymbol.innerHTML = html;
 	}
 
-	handleNone(hex, map, value)
+	removeValues(hex, map, value)
     {
         if(!map)
             return;
@@ -240,8 +240,8 @@ class MapEditor extends SidePanel
 
         if(this.deleting) // bug with corners when there is another edge, currently completely removes the corner
         {
-            curEdgeType = hex?.edges?.partialHas({"edgeIndex": edgeIndex}) ? hex.edges.partialGet({"edgeIndex": edgeIndex}, 2)[0].edge : null;
-            this.handleNone(hex, hex.edges, value);
+            curEdgeType = hex?.edges?.partialHas({"edgeIndex": edgeIndex}) ? hex.edges.partialGet({"edgeIndex": edgeIndex}, 2)[0].type : null;
+            this.removeValues(hex, hex.edges, value);
         }
         else// if(!hex.edges || !hex.edges.partialHas(value))
         {
@@ -257,7 +257,7 @@ class MapEditor extends SidePanel
 
 	addCorner(hex, adj, edgeType, cornerIndex)
     {
-        this.handleNone(hex, hex.corners, {"type": edgeType, "edgeIndex": cornerIndex});
+        this.removeValues(hex, hex.corners, {"type": edgeType, "edgeIndex": cornerIndex});
 
         let edgeBefore = hex.edges ? hex.edges.partialHas({"edgeIndex": cornerIndex}) : false;
         let edgeAfter = hex.edges ? hex.edges.partialHas({"edgeIndex": (cornerIndex + 1) % 6}) : false;
@@ -288,7 +288,7 @@ class MapEditor extends SidePanel
         let value = {"type": this.connectorSelect.value, "edgeIndex": edgeIndex, "variant": 0};
 
         if(this.deleting)
-            this.handleNone(hex, hex.connectors, value);
+            this.removeValues(hex, hex.connectors, value);
         else if(!hex.connectors || !hex.connectors.partialHas(value))
             hex.addConnector(value);
     }

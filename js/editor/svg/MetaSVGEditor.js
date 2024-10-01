@@ -122,6 +122,8 @@ class MetaSVGEditor extends FeatureEditor
         let n = SVG.create("symbol", {id: key, viewBox: "0 0 1000 866", preserveAspectRatio: "none", "pointer-events": "none"});
         n.innerHTML = this.svg.value;
 
+        let itemKeys = Array.from(this.items.keys());
+        let metaFoundKey = itemKeys.find(i => i.startsWith(this.id.value + "_"));
         let vMeta = null;
         let vRender = 
         {
@@ -131,8 +133,8 @@ class MetaSVGEditor extends FeatureEditor
             node: n
         };
 
-        if(this.items.has(key))
-            vMeta = this.metaMap.get(key);
+        if(metaFoundKey)
+            vMeta = this.items.get(metaFoundKey);
         else
         {
             vMeta =
@@ -155,9 +157,8 @@ class MetaSVGEditor extends FeatureEditor
         this.hexMap.metadata.set(vMeta.id, vMeta);
         this.hexMap.defs.append(n);
 
-        console.log(this.hexMap);
-
-        this.dispatchEvent(new CustomEvent("change", {detail: {cmd: "create.meta", key: key, value: vMeta}}));
+        if(!metaFoundKey)
+            this.dispatchEvent(new CustomEvent("change", {detail: {cmd: "create.meta", key: key, value: vMeta}}));
     }
 
     handleUpdate(evt)
