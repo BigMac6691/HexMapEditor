@@ -25,7 +25,7 @@ class MetaSVGEditor extends FeatureEditor
         this.selectList = HTML.create("input", {type: "string"});
         this.selectListLabel = HTML.createLabel("Values: ", this.selectList); // display varies
 
-        this.renderType = new ComboRadioSelect(["Icon", "Border"], "metaRenderType");
+        this.renderType = new ComboRadioSelect(["Icon", "Border", "Label"], "metaRenderType");
         this.renderType.selectDisplay = "inline-block";
         this.renderType.show(true);
         this.renderType.addEventListener("change", (evt) => this.edgeLabel.style.display = evt.detail.value === "Border" ? "block" : "none");

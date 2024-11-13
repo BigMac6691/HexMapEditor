@@ -1,5 +1,35 @@
 class MetaEditor
 {
+    static SVG_LETTERS = 
+    [
+        " m 6 0 l 12.5 -50 l 12.5 50 m -18.75 -25 l 12.5 0 m 6.25 25", //A 
+        " m 6 0 l 0 -50 a 25 12.5 0 1 1 0 25 a 25 12.5 0 1 1 0 25 m 25 0", // B
+        " m 31 -40 a 12.5 25 0 1 0 0 30 m 0 10", // C
+        " m 6 -50 l 0 50 a 25 25 0 1 0 0 -50 m 25 50", // D
+        " m 31 -50 l -25 0 l 0 50 l 25 0 m -25 -25 l 15 0 m 10 25", // E
+        " m 31 -50 l -25 0 l 0 50 m 0 -25 l 15 0 m 10 25", // F
+        " m 31 -40 a 12.5 25 0 1 0 0 30 m -10 -10 l 10 0 l 0 20", // G
+        " m 6 0 l 0 -50 m 25 0 l 0 50 m -25 -25 l 25 0 m 0 25", // H
+        " m 18.5 0 l 0 -50 m -6.25 50 l 12.5 0 m -12.5 -50 l 12.5 0", // I
+        " m 31 -50 l 0 25 a 12.5 25 0 1 1 -25 0 m 25 25", // J
+        " m 6 0 l 0 -50 m 0 25 l 25 -25 m -25 25 l 25 25", // K
+        " m 6 -50 l 0 50 l 25 0", // L
+        " m 6 0 l 0 -50 l 12.5 25 l 12.5 -25 l 0 50", // M
+        " m 6 0 l 0 -50 l 25 50 l 0 -50 m 0 50", // N
+        " m 6 -25 a 12.5 25 0 1 1 25 0 a 12.5 25 0 0 1 -25 0 m 25 25", // O
+        " m 6 0 l 0 -50 a 25 12.5 0 1 1 0 25 m 25 25", // P
+        " m 6 -25 a 12.5 25 0 1 1 25 0 a 12.5 25 0 0 1 -25 0 m 12.5 0 l 12.5 25", // Q
+        " m 6 0 l 0 -50 a 25 12.5 0 1 1 0 25 l 25 25", // R
+        " m 31 -50 a 20 12.5 0 1 0 -12.5 25 a 20 12.5 0 1 1 -12.5 25 m 25 0", // S
+        " m 6 -50 l 25 0 m -12.5 0 l 0 50 m 12.5 0", // T
+        " m 6 -50 l 0 25 a 12.5 25 0 1 0 25 0 l 0 -25 m 0 50", // U
+        " m 6 -50 l 12.5 50 l 12.5 -50 m 0 50", // V
+        " m 6 -50 l 6.25 50 l 6.25 -25 l 6.25 25 l 6.25 -50 m 0 50", // W
+        " m 6 -50 l 25 50 m -25 0 l 25 -50 m 0 50", // X
+        " m 6 -50 l 12.5 25 l 12.5 -25 m -12.5 25 l 0 25 m 12.5 0", // Y
+        " m 6 -50 l 25 0 l -25 50 l 25 0", // Z
+    ];
+
     constructor(editor)
     {
         this.editor = editor;
@@ -79,6 +109,38 @@ class MetaEditor
 
                 hex.addMetadata({key: k, value: v, symbolIds: icons});
             }
+            else if(md.renderType === "Label")
+            {
+                console.log(`Adding labels... k=${k}, v=${v}`);
+                const offset = 500 - ((31 * v.length - 6) / 2);
+
+                let path = `M ${offset} 433`;
+
+                for(const c of v)
+                {
+                    let charCode = c.charCodeAt(0);
+
+                    if(charCode == 32)
+                        path += " m 31 0";
+                    else if(charCode > 64 && charCode < 91) // A to Z
+                        path += MetaEditor.SVG_LETTERS[charCode - 65];
+                    else if(charCode > 96 && charCode < 123) // a to z convert to upper case for now
+                        path += MetaEditor.SVG_LETTERS[charCode - 97]; // - 97 + 26
+                    else
+                        console.log("ignoring char code " + charCode);
+
+                    console.log(`${c} is ${c.charCodeAt(0)} path=${path}`);
+                }
+
+                let symbolId = `${k}_${v}-${hex.col},${hex.row}`;
+                let symbol = SVG.create("symbol", {id: symbolId, viewBox: `0 0 ${hex.hexMap.viewBoxWidth} ${hex.hexMap.viewBoxHeight}`, preserveAspectRatio: "none", "pointer-events": "none"});
+                let label = SVG.create("path", {d: path, stroke: "#ffffff", "stroke-width": "2.5", fill: "none"});
+
+                symbol.append(label);
+                hex.svg.append(symbol);
+
+                hex.addMetadata({key: k, value: v, symbolIds: [symbolId]});
+            }
             else
                 throw new Error(`Unknown rendering rule ${md.renderType} for metadata.`);
         } // for passed meta
@@ -134,7 +196,11 @@ class MetaEditor
             }
             else if(md.renderType === "Icon")
             {
-                console.log("Deleting Icon - doing nothing???");
+                console.log("Deleting Icon - doing nothing???"); // pretty much, when the matches were deleted that was all that was needed.
+            }
+            else if(md.renderType === "Label")
+            {
+                console.log("Deleting Label - doing nothing???"); // pretty much, when the matches were deleted that was all that was needed.
             }
             else
                 throw new Error(`Unknown rendering rule ${md.renderType} for metadata.`);

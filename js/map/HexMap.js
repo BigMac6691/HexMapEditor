@@ -363,6 +363,7 @@ class HexMap
         let tlHex = this.getHexFromId(`${this.vpTopLeft.x},${this.vpTopLeft.y}`);
         let baseWidth = +tlHex.hexTerrain.width.baseVal.value;
         let baseHeight = +tlHex.hexTerrain.height.baseVal.value;
+        let strokeWidth = 1 / this.vpWidthHeight.x;
 
         this.jumps.forEach(j =>
         {
@@ -375,7 +376,7 @@ class HexMap
                 coords.push(x, y);
             });
     
-            j.svg = SVG.create("line", {x1 : coords[0], y1 : coords[1], x2 : coords[2], y2 : coords[3], stroke : j.colour, "stroke-width" : j.width, class : "jumpLine"});
+            j.svg = SVG.create("line", {x1 : coords[0], y1 : coords[1], x2 : coords[2], y2 : coords[3], stroke : j.colour, "stroke-width" : j.width * strokeWidth, class : "jumpLine"});
             this.map.append(j.svg);
         });
     }
